@@ -1,0 +1,15 @@
+[submodule "deps/inspector_protocol"]
+	path = deps/inspector_protocol
+	url = https://chromium.googlesource.com/deps/inspector_protocol
+[submodule "deps/jinja"]
+	path = deps/jinja
+	url = https://github.com/pallets/jinja.git
+[submodule "deps/markupsafe"]
+	path = deps/markupsafe
+	url = https://github.com/pallets/markupsafe.git
+[submodule "deps/websocketpp"]
+	path = deps/websocketpp
+	url = https://github.com/zaphoyd/websocketpp.git
+[submodule "deps/asio"]
+	path = deps/asio
+	url = https://github.com/chriskohlhoff/asio.git

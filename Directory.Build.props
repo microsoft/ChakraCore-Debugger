@@ -1,0 +1,5 @@
+<Project>
+ <PropertyGroup>
+   <DepsDirectoryPath>$(MSBuildThisFileDirectory)deps\</DepsDirectoryPath>
+ </PropertyGroup>
+</Project>
