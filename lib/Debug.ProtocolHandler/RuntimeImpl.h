@@ -14,10 +14,12 @@ namespace JsDebug
     using protocol::Response;
     using String = String16;
 
+    class ProtocolHandler;
+
     class RuntimeImpl : public protocol::Runtime::Backend
     {
     public:
-        RuntimeImpl();
+        RuntimeImpl(ProtocolHandler* handler);
         ~RuntimeImpl() override;
 
         // protocol::Runtime::Backend implementation
@@ -79,5 +81,8 @@ namespace JsDebug
             Maybe<bool> in_generatePreview,
             Maybe<bool> in_awaitPromise,
             std::unique_ptr<RunScriptCallback> callback) override;
+
+    private:
+        ProtocolHandler* m_handler;
     };
 }

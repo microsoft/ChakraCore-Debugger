@@ -151,8 +151,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="DebugClient.h" />
     <ClInclude Include="ConsoleImpl.h" />
+    <ClInclude Include="Debugger.h" />
     <ClInclude Include="DebuggerImpl.h" />
     <ClInclude Include="ChakraDebugProtocolHandler.h" />
     <ClInclude Include="ProtocolHandler.h" />
@@ -162,8 +162,8 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DebugClient.cpp" />
     <ClCompile Include="ConsoleImpl.cpp" />
+    <ClCompile Include="Debugger.cpp" />
     <ClCompile Include="DebuggerImpl.cpp" />
     <ClCompile Include="ChakraDebugProtocolHandler.cpp" />
     <ClCompile Include="ProtocolHandler.cpp" />

@@ -7,8 +7,8 @@
 
 #include <ChakraCore.h>
 
-typedef struct JsDebugProtocolHandler__ *JsDebugProtocolHandler;
-typedef void(CHAKRA_CALLBACK *JsDebugProtocolHandlerSendResponseCallback)(const char *response);
+typedef struct JsDebugProtocolHandler__* JsDebugProtocolHandler;
+typedef void(CHAKRA_CALLBACK* JsDebugProtocolHandlerSendResponseCallback)(const char* response, void* callbackState);
 
 /// <summary>Creates a <seealso cref="JsDebugProtocolHandler" /> instance for a given runtime.</summary>
 /// <remarks>
@@ -36,13 +36,13 @@ CHAKRA_API JsDebugProtocolHandlerDestroy(JsDebugProtocolHandler protocolHandler)
 /// <param name="protocolHandler">The instance to connect to.</param>
 /// <param name="breakOnNextLine">Indicates whether to break on the next line of code.</param>
 /// <param name="callback">The response callback function pointer.</param>
-/// <param name="state">The state object to return on each invocation of the callback.</param>
+/// <param name="callbackState">The state object to return on each invocation of the callback.</param>
 /// <returns>The code <c>JsNoError</c> if the operation succeeded, a failure code otherwise.</returns>
 CHAKRA_API JsDebugProtocolHandlerConnect(
     JsDebugProtocolHandler protocolHandler,
     bool breakOnNextLine,
     JsDebugProtocolHandlerSendResponseCallback callback,
-    void* state);
+    void* callbackState);
 
 /// <summary>Disconnect from the protocol handler and clear any breakpoints.</summary>
 /// <param name="protocolHandler">The instance to disconnect from.</param>
@@ -57,3 +57,11 @@ CHAKRA_API JsDebugProtocolHandlerDisconnect(JsDebugProtocolHandler protocolHandl
 /// <param name="command">The JSON-formatted command to send.</param>
 /// <returns>The code <c>JsNoError</c> if the operation succeeded, a failure code otherwise.</returns>
 CHAKRA_API JsDebugProtocolHandlerSendCommand(JsDebugProtocolHandler protocolHandler, const char* command);
+
+/// <summary>Blocks the current thread until the debugger has connected.</summary>
+/// <remarks>
+///     This must be called from the script thread.
+/// </remarks>
+/// <param name="protocolHandler">The instance to wait on.</param>
+/// <returns>The code <c>JsNoError</c> if the operation succeeded, a failure code otherwise.</returns>
+CHAKRA_API JsDebugProtocolHandlerWaitForDebugger(JsDebugProtocolHandler protocolHandler);

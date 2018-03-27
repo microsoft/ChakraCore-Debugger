@@ -12,15 +12,20 @@ namespace JsDebug
 {
     using protocol::Response;
 
+    class ProtocolHandler;
+
     class ConsoleImpl : public protocol::Console::Backend
     {
     public:
-        ConsoleImpl();
+        ConsoleImpl(ProtocolHandler* handler);
         ~ConsoleImpl() override;
 
         // protocol::Console::Backend implementation
         Response enable() override;
         Response disable() override;
         Response clearMessages() override;
+
+    private:
+        ProtocolHandler* m_handler;
     };
 }

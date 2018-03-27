@@ -8,16 +8,20 @@
 #include <protocol\Forward.h>
 #include <protocol\Debugger.h>
 
+#include "Debugger.h"
+
 namespace JsDebug
 {
     using protocol::Maybe;
     using protocol::Response;
     using String = String16;
 
+    class ProtocolHandler;
+
     class DebuggerImpl : public protocol::Debugger::Backend
     {
     public:
-        DebuggerImpl();
+        DebuggerImpl(ProtocolHandler* handler, Debugger* debugger);
         ~DebuggerImpl() override;
 
         // protocol::Debugger::Backend implementation
@@ -85,5 +89,10 @@ namespace JsDebug
         Response setBlackboxedRanges(
             const String& in_scriptId,
             std::unique_ptr<protocol::Array<protocol::Debugger::ScriptPosition>> in_positions) override;
+
+    private:
+        ProtocolHandler* m_handler;
+        Debugger* m_debugger;
+        bool m_enabled;
     };
 }

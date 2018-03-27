@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Protocol">
+      <UniqueIdentifier>{09212b62-b0f4-4cae-bca9-74dbdfbadcca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Protocol">
+      <UniqueIdentifier>{889a2860-f405-4451-8d7d-8157d181eb75}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -24,23 +30,23 @@
     <ClInclude Include="ChakraDebugProtocolHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DebugClient.h">
+    <ClInclude Include="ProtocolHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Debugger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ConsoleImpl.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Protocol</Filter>
     </ClInclude>
     <ClInclude Include="DebuggerImpl.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Protocol</Filter>
     </ClInclude>
     <ClInclude Include="RuntimeImpl.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Protocol</Filter>
     </ClInclude>
     <ClInclude Include="SchemaImpl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ProtocolHandler.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Protocol</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -50,23 +56,23 @@
     <ClCompile Include="ChakraDebugProtocolHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DebugClient.cpp">
+    <ClCompile Include="ProtocolHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Debugger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ConsoleImpl.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Protocol</Filter>
     </ClCompile>
     <ClCompile Include="DebuggerImpl.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Protocol</Filter>
     </ClCompile>
     <ClCompile Include="RuntimeImpl.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Protocol</Filter>
     </ClCompile>
     <ClCompile Include="SchemaImpl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ProtocolHandler.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Protocol</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

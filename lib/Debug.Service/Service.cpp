@@ -13,14 +13,14 @@ namespace JsDebug
     typedef websocketpp::server<websocketpp::config::asio> server;
 
     using websocketpp::connection_hdl;
-    
+
     using websocketpp::lib::bind;
     using websocketpp::lib::mutex;
     using websocketpp::lib::placeholders::_1;
     using websocketpp::lib::placeholders::_2;
     using websocketpp::lib::thread;
     using websocketpp::lib::unique_lock;
-    
+
     using websocketpp::log::alevel;
     using websocketpp::log::elevel;
 
@@ -31,8 +31,6 @@ namespace JsDebug
 
         m_server.init_asio();
         m_server.set_validate_handler(bind(&Service::OnValidate, this, _1));
-        m_server.set_message_handler(bind(&Service::OnMessage, this, _1, _2));
-        m_server.set_fail_handler(bind(&Service::OnFail, this, _1));
         m_server.set_close_handler(bind(&Service::OnClose, this, _1));
     }
 
@@ -42,7 +40,7 @@ namespace JsDebug
         {
             m_server.stop();
         }
-        catch (websocketpp::exception const& e)
+        catch (const websocketpp::exception& e)
         {
             // Catch any exceptions thrown during destruction
             std::cerr << "Failed to stop server: " << e.what() << std::endl;
@@ -52,7 +50,7 @@ namespace JsDebug
     void Service::RegisterHandler(const char* id, JsDebugProtocolHandler protocolHandler, bool breakOnNextLine)
     {
         unique_lock<mutex> lock(m_lock);
-        m_handlers.emplace(id, protocolHandler);
+        m_handlers.emplace(id, std::make_unique<ServiceHandler>(&m_server, id, protocolHandler, breakOnNextLine));
     }
 
     void Service::UnregisterHandler(const char* id)
@@ -68,7 +66,7 @@ namespace JsDebug
             m_server.listen(9229);
             m_server.start_accept();
         }
-        catch (websocketpp::exception const& e)
+        catch (const websocketpp::exception& e)
         {
             std::cerr << "Failed to start server: " << e.what() << std::endl;
         }
@@ -86,7 +84,7 @@ namespace JsDebug
             {
                 unique_lock<mutex> lock(m_lock);
 
-                for (auto const& conHandle : m_connections)
+                for (const auto& conHandle : m_connections)
                 {
                     m_server.close(conHandle, websocketpp::close::status::normal, "Server shutting down...");
                 }
@@ -94,7 +92,7 @@ namespace JsDebug
                 m_connections.clear();
             }
         }
-        catch (websocketpp::exception const& e)
+        catch (const websocketpp::exception& e)
         {
             std::cerr << "Failed to stop server: " << e.what() << std::endl;
         }
@@ -105,54 +103,35 @@ namespace JsDebug
         }
     }
 
-    void Service::Run()
-    {
-        try
-        {
-            m_server.run();
-        }
-        catch (websocketpp::exception const& e)
-        {
-            std::cerr << "Failed to run message loop: " << e.what() << std::endl;
-        }
-    }
-
-    void Service::OnMessage(connection_hdl hdl, server::message_ptr msg)
-    {
-        m_server.send(hdl, msg->get_payload(), msg->get_opcode());
-    }
-
     bool Service::OnValidate(connection_hdl hdl)
     {
         auto connection = m_server.get_con_from_hdl(hdl);
-        if (connection == nullptr) {
-            return false;
-        }
+        if (connection != nullptr) {
+            auto resource = connection->get_uri()->get_resource();
+            resource.erase(0, 1);
 
-        auto resource = connection->get_uri()->get_resource();
-        resource.erase(0, 1);
+            {
+                unique_lock<mutex> lock(m_lock);
 
-        {
-            unique_lock<mutex> lock(m_lock);
+                auto handler = m_handlers.find(resource);
+                if (handler == m_handlers.end()) {
+                    return false;
+                }
 
-            auto handler = m_handlers.find(resource);
-            if (handler == m_handlers.end()) {
-                return false;
+                if (handler->second->RegisterConnection(hdl))
+                {
+                    m_connections.insert(hdl);
+                    return true;
+                }
             }
-
-            // TODO: Register the connection with the handler
-
-            m_connections.insert(connection->get_handle());
         }
 
-        return true;
-    }
-
-    void Service::OnFail(connection_hdl hdl)
-    {
+        return false;
     }
 
     void Service::OnClose(connection_hdl hdl)
     {
+        unique_lock<mutex> lock(m_lock);
+        m_connections.erase(hdl);
     }
 }

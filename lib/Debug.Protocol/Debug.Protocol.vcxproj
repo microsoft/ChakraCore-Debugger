@@ -167,6 +167,7 @@
     <ClInclude Include="$(IntermediateOutputPath)include\Runtime.h" />
     <ClInclude Include="$(IntermediateOutputPath)include\Schema.h" />
     <ClInclude Include="Common.h" />
+    <ClInclude Include="String16.h" />
     <ClInclude Include="StringUtil.h" />
   </ItemGroup>
   <ItemGroup>
@@ -175,6 +176,8 @@
     <ClCompile Include="$(IntermediateOutputPath)protocol\Protocol.cpp" />
     <ClCompile Include="$(IntermediateOutputPath)protocol\Runtime.cpp" />
     <ClCompile Include="$(IntermediateOutputPath)protocol\Schema.cpp" />
+    <ClCompile Include="Common.cpp" />
+    <ClCompile Include="String16.cpp" />
     <ClCompile Include="StringUtil.cpp" />
   </ItemGroup>
   <ItemGroup>

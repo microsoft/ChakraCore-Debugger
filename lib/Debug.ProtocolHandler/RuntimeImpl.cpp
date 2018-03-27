@@ -5,10 +5,12 @@
 
 #include "stdafx.h"
 #include "RuntimeImpl.h"
+#include "ProtocolHandler.h"
 
 namespace JsDebug
 {
-    RuntimeImpl::RuntimeImpl()
+    RuntimeImpl::RuntimeImpl(ProtocolHandler* handler)
+        : m_handler(handler)
     {
     }
 
@@ -75,6 +77,7 @@ namespace JsDebug
 
     Response RuntimeImpl::runIfWaitingForDebugger()
     {
+        m_handler->RunIfWaitingForDebugger();
         return Response();
     }
 

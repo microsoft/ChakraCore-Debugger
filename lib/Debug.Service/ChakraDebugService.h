@@ -8,8 +8,7 @@
 #include <ChakraCore.h>
 #include <ChakraDebugProtocolHandler.h>
 
-typedef struct JsDebugService__ *JsDebugService;
-typedef void(CHAKRA_CALLBACK *JsDebugServiceSendResponseCallback)(char *response);
+typedef struct JsDebugService__* JsDebugService;
 
 /// <summary>Creates a <seealso cref="JsDebugProtocolHandler" /> instance.</summary>
 /// <param name="service">The newly created instance.</param>

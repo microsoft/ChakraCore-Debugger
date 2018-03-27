@@ -7,6 +7,9 @@
 
 #include "Common.h"
 
+#include <cassert>
+#include <memory>
+
 //
 // This file contains interfaces required by the `inspector_protocol` generated code.
 //
@@ -24,75 +27,26 @@ namespace JsDebug
         {
         public:
             static const size_t kNotFound = String::kNotFound;
-            static String substring(const String& s, size_t pos, size_t len)
-            {
-                return String();
-            }
 
-            static String fromInteger(int number)
-            {
-                return String();
-            }
+            static String substring(const String& s, size_t pos, size_t len);
 
-            static String fromInteger(size_t number)
-            {
-                return String();
-            }
+            static String fromInteger(int number);
+            static String fromInteger(size_t number);
+            static String fromDouble(double number);
+            static double toDouble(const char* s, size_t len, bool* isOk);
 
-            static String fromDouble(double number)
-            {
-                return String();
-            }
+            static size_t find(const String& s, const char* needle);
+            static size_t find(const String& s, const String& needle);
 
-            static double toDouble(const char *s, size_t len, bool* isOk)
-            {
-                return 0;
-            }
+            static void builderAppend(StringBuilder& builder, const String& s);
+            static void builderAppend(StringBuilder& builder, UChar c);
+            static void builderAppend(StringBuilder& builder, const char* s, size_t len);
+            static void builderAppendQuotedString(StringBuilder& builder, const String& s);
+            static void builderReserve(StringBuilder& builder, size_t len);
+            static String builderToString(StringBuilder& builder);
 
-            static size_t find(const String& s, const char* needle)
-            {
-                return -1;
-            }
-
-            static size_t find(const String& s, const String& needle)
-            {
-                return -1;
-            }
-
-            static void builderAppend(StringBuilder& builder, const String& s)
-            {
-            }
-
-            static void builderAppend(StringBuilder& builder, UChar c)
-            {
-            }
-
-            static void builderAppend(StringBuilder& builder, const char *s, size_t len)
-            {
-            }
-
-            static void builderAppendQuotedString(StringBuilder& builder, const String& s)
-            {
-            }
-
-            static void builderReserve(StringBuilder& builder, size_t len)
-            {
-            }
-
-            static String builderToString(StringBuilder& builder)
-            {
-                return String();
-            }
-
-            static std::unique_ptr<protocol::Value> parseJSON(const String16& json)
-            {
-                return nullptr;
-            }
-
-            static std::unique_ptr<protocol::Value> parseJSON(const StringView& json)
-            {
-                return nullptr;
-            }
+            static std::unique_ptr<protocol::Value> parseJSON(const String16& json);
+            static std::unique_ptr<protocol::Value> parseJSON(const StringView& json);
         };
 
     }
@@ -102,12 +56,16 @@ namespace JsDebug
     public:
         static std::unique_ptr<StringBufferImpl> adopt(String16& s)
         {
+            // TODO: Implement this when it gets hit.
+            assert(false);
             return nullptr;
         }
 
     private:
         explicit StringBufferImpl(String16& s)
         {
+            // TODO: Implement this when it gets hit.
+            assert(false);
         }
     };
 }

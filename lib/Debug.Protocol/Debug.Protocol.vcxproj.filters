@@ -13,6 +13,15 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{62cca143-3a04-4e0e-91cc-c1244303556c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Generated Files\include">
+      <UniqueIdentifier>{8db701b8-81ee-4206-a006-39950e7dc46c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Generated Files\protocol">
+      <UniqueIdentifier>{892e669a-43cb-4e38-8821-4aecdbfaa7e9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="StringUtil.h">
@@ -21,52 +30,61 @@
     <ClInclude Include="Common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="$(IntermediateOutputPath)protocol\Console.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(IntermediateOutputPath)protocol\Debugger.h">
+    <ClInclude Include="String16.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="$(IntermediateOutputPath)include\Debugger.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(IntermediateOutputPath)protocol\Forward.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(IntermediateOutputPath)protocol\Protocol.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(IntermediateOutputPath)protocol\Runtime.h">
-      <Filter>Header Files</Filter>
+      <Filter>Generated Files\include</Filter>
     </ClInclude>
     <ClInclude Include="$(IntermediateOutputPath)include\Runtime.h">
-      <Filter>Header Files</Filter>
+      <Filter>Generated Files\include</Filter>
     </ClInclude>
     <ClInclude Include="$(IntermediateOutputPath)include\Schema.h">
-      <Filter>Header Files</Filter>
+      <Filter>Generated Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="$(IntermediateOutputPath)protocol\Console.h">
+      <Filter>Generated Files\protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="$(IntermediateOutputPath)protocol\Debugger.h">
+      <Filter>Generated Files\protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="$(IntermediateOutputPath)protocol\Forward.h">
+      <Filter>Generated Files\protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="$(IntermediateOutputPath)protocol\Protocol.h">
+      <Filter>Generated Files\protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="$(IntermediateOutputPath)protocol\Runtime.h">
+      <Filter>Generated Files\protocol</Filter>
     </ClInclude>
     <ClInclude Include="$(IntermediateOutputPath)protocol\Schema.h">
-      <Filter>Header Files</Filter>
+      <Filter>Generated Files\protocol</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="StringUtil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="$(IntermediateOutputPath)protocol\Console.cpp">
+    <ClCompile Include="String16.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Common.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(IntermediateOutputPath)protocol\Console.cpp">
+      <Filter>Generated Files\protocol</Filter>
     </ClCompile>
     <ClCompile Include="$(IntermediateOutputPath)protocol\Debugger.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Generated Files\protocol</Filter>
     </ClCompile>
     <ClCompile Include="$(IntermediateOutputPath)protocol\Protocol.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Generated Files\protocol</Filter>
     </ClCompile>
     <ClCompile Include="$(IntermediateOutputPath)protocol\Runtime.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Generated Files\protocol</Filter>
     </ClCompile>
     <ClCompile Include="$(IntermediateOutputPath)protocol\Schema.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Generated Files\protocol</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

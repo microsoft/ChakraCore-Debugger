@@ -6,9 +6,6 @@
 #include "stdafx.h"
 #include "ChakraDebugService.h"
 #include "Service.h"
-#include <ProtocolHandler.h>
-
-#include <memory>
 
 CHAKRA_API JsDebugServiceCreate(JsDebugService* service)
 {

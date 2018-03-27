@@ -8,7 +8,8 @@
 
 namespace JsDebug
 {
-    ConsoleImpl::ConsoleImpl()
+    ConsoleImpl::ConsoleImpl(ProtocolHandler* handler)
+        : m_handler(handler)
     {
     }
 

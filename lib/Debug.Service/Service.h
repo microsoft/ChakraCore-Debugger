@@ -13,10 +13,11 @@
 #include <websocketpp/server.hpp>
 #pragma warning( pop )
 
-#include <ChakraDebugProtocolHandler.h>
-
 #include <map>
 #include <set>
+
+#include <ChakraDebugProtocolHandler.h>
+#include "ServiceHandler.h"
 
 namespace JsDebug
 {
@@ -33,16 +34,11 @@ namespace JsDebug
         void Close();
 
     private:
-        void Run();
-        void OnMessage(
-            websocketpp::connection_hdl hdl,
-            websocketpp::server<websocketpp::config::asio>::message_ptr msg);
         bool OnValidate(websocketpp::connection_hdl hdl);
-        void OnFail(websocketpp::connection_hdl hdl);
         void OnClose(websocketpp::connection_hdl hdl);
 
         typedef std::set<websocketpp::connection_hdl, std::owner_less<websocketpp::connection_hdl>> con_list;
-        typedef std::map<std::string, JsDebugProtocolHandler> handler_map;
+        typedef std::map<std::string, std::unique_ptr<ServiceHandler>> handler_map;
 
         // Although access to the server object is thread-safe, access to all other objects is not. The lock must be
         // taken before accessing any class members from either thread.

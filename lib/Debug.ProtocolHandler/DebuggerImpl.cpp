@@ -6,9 +6,15 @@
 #include "stdafx.h"
 #include "DebuggerImpl.h"
 
+#include "ProtocolHandler.h"
+#include "Debugger.h"
+
 namespace JsDebug
 {
-    DebuggerImpl::DebuggerImpl()
+    DebuggerImpl::DebuggerImpl(ProtocolHandler* handler, Debugger* debugger)
+        : m_handler(handler)
+        , m_debugger(debugger)
+        , m_enabled(false)
     {
     }
 
@@ -18,7 +24,17 @@ namespace JsDebug
 
     Response DebuggerImpl::enable()
     {
-        return Response();
+        if (m_enabled)
+        {
+            return Response::OK();
+        }
+
+        m_enabled = true;
+        m_debugger->Enable();
+
+        // Raise events for all loaded scripts
+
+        return Response::OK();
     }
 
     Response DebuggerImpl::disable()
@@ -42,7 +58,7 @@ namespace JsDebug
         Maybe<String> in_urlRegex,
         Maybe<int> in_columnNumber,
         Maybe<String> in_condition,
-        String * out_breakpointId,
+        String  *out_breakpointId,
         std::unique_ptr<protocol::Array<protocol::Debugger::Location>>* out_locations)
     {
         return Response();
@@ -51,7 +67,7 @@ namespace JsDebug
     Response DebuggerImpl::setBreakpoint(
         std::unique_ptr<protocol::Debugger::Location> in_location,
         Maybe<String> in_condition,
-        String * out_breakpointId,
+        String  *out_breakpointId,
         std::unique_ptr<protocol::Debugger::Location>* out_actualLocation)
     {
         return Response();
@@ -121,7 +137,7 @@ namespace JsDebug
         return Response();
     }
 
-    Response DebuggerImpl::getScriptSource(const String & in_scriptId, String * out_scriptSource)
+    Response DebuggerImpl::getScriptSource(const String & in_scriptId, String  *out_scriptSource)
     {
         return Response();
     }

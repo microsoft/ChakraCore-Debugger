@@ -5,9 +5,6 @@
 
 #pragma once
 
-#include <map>
-#include <memory>
-
 //
 // This file contains interfaces required by the `inspector_protocol` generated code.
 //
@@ -17,70 +14,32 @@
 #define DCHECK_LT(lhs, rhs)
 #define LIB_EXPORT
 
+#include "String16.h"
+
 namespace JsDebug
 {
-    using UChar = uint16_t;
-
-    class String16
+    class StringView
     {
     public:
-        static const size_t kNotFound = static_cast<size_t>(-1);
+        StringView();
+        StringView(const uint8_t* characters, size_t length);
+        StringView(const uint16_t* characters, size_t length);
 
-        String16()
-        {
-        }
+        bool is8Bit() const;
+        size_t length() const;
+        const uint8_t* characters8() const;
+        const uint16_t* characters16() const;
 
-        String16(const char *str)
-        {
-        }
-
-        String16 operator+(const String16& other) const
-        {
-            return String16();
-        }
-
-        bool operator==(const String16& other) const
-        {
-            return false;
-        }
-
-        size_t length()
-        {
-            return 0;
-        }
-
-        std::size_t hash() const
-        {
-            return 0;
-        }
-    };
-
-    inline String16 operator+(const char* a, const String16& b)
-    {
-        return String16(a) + b;
-    }
-
-    class String16Builder
-    {
+    private:
+        bool m_is8Bit;
+        size_t m_length;
+        union {
+            const uint8_t* m_characters8;
+            const uint16_t* m_characters16;
+        };
     };
 
     class StringBuffer
     {
-    };
-
-    class StringView
-    {
-    };
-}
-
-namespace std
-{
-    template <>
-    struct hash<JsDebug::String16>
-    {
-        std::size_t operator()(const JsDebug::String16& string) const
-        {
-            return string.hash();
-        }
     };
 }
