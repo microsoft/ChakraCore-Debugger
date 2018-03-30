@@ -177,6 +177,7 @@
   <ItemGroup>
     <None Include="test.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="packages.config">
       <SubType>Designer</SubType>

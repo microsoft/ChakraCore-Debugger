@@ -17,8 +17,10 @@ namespace JsDebug
     class ConsoleImpl : public protocol::Console::Backend
     {
     public:
-        ConsoleImpl(ProtocolHandler* handler);
+        ConsoleImpl(ProtocolHandler* handler, protocol::FrontendChannel* frontendChannel);
         ~ConsoleImpl() override;
+        ConsoleImpl(const ConsoleImpl&) = delete;
+        ConsoleImpl& operator=(const ConsoleImpl&) = delete;
 
         // protocol::Console::Backend implementation
         Response enable() override;
@@ -27,5 +29,6 @@ namespace JsDebug
 
     private:
         ProtocolHandler* m_handler;
+        protocol::Console::Frontend m_frontend;
     };
 }

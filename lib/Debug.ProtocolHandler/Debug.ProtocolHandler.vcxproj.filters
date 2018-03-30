@@ -19,6 +19,18 @@
     <Filter Include="Source Files\Protocol">
       <UniqueIdentifier>{889a2860-f405-4451-8d7d-8157d181eb75}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Helpers">
+      <UniqueIdentifier>{6d94007d-dc64-451b-8c50-e13adfe9b91c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Helpers">
+      <UniqueIdentifier>{c61a2456-4639-4f00-aff0-ad347fea4c7b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Debugger">
+      <UniqueIdentifier>{070fc079-3f79-42d3-8bb5-4fbb516f2be5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Debugger">
+      <UniqueIdentifier>{e6e18869-57d3-4e25-916c-3817b740018d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -33,9 +45,6 @@
     <ClInclude Include="ProtocolHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Debugger.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ConsoleImpl.h">
       <Filter>Header Files\Protocol</Filter>
     </ClInclude>
@@ -48,6 +57,30 @@
     <ClInclude Include="SchemaImpl.h">
       <Filter>Header Files\Protocol</Filter>
     </ClInclude>
+    <ClInclude Include="PropertyHelpers.h">
+      <Filter>Header Files\Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ErrorHelpers.h">
+      <Filter>Header Files\Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="Debugger.h">
+      <Filter>Header Files\Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="DebuggerScript.h">
+      <Filter>Header Files\Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="DebuggerCallFrame.h">
+      <Filter>Header Files\Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="JsPersistent.h">
+      <Filter>Header Files\Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ProtocolHelpers.h">
+      <Filter>Header Files\Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="DebuggerBreak.h">
+      <Filter>Header Files\Debugger</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -57,9 +90,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ProtocolHandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Debugger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ConsoleImpl.cpp">
@@ -73,6 +103,27 @@
     </ClCompile>
     <ClCompile Include="SchemaImpl.cpp">
       <Filter>Source Files\Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertyHelpers.cpp">
+      <Filter>Source Files\Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="Debugger.cpp">
+      <Filter>Source Files\Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="DebuggerScript.cpp">
+      <Filter>Source Files\Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="DebuggerCallFrame.cpp">
+      <Filter>Source Files\Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="ProtocolHelpers.cpp">
+      <Filter>Source Files\Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="DebuggerBreak.cpp">
+      <Filter>Source Files\Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="ErrorHelpers.cpp">
+      <Filter>Source Files\Helpers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

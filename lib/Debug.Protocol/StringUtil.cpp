@@ -23,23 +23,17 @@ namespace JsDebug
 
         String StringUtil::fromInteger(int number)
         {
-            std::ostringstream o;
-            o << number;
-            return String(o.str().c_str());
+            return String::fromInteger(number);
         }
 
         String StringUtil::fromInteger(size_t number)
         {
-            std::ostringstream o;
-            o << number;
-            return String(o.str().c_str());
+            return String::fromInteger(number);
         }
 
         String StringUtil::fromDouble(double number)
         {
-            std::ostringstream o;
-            o << number;
-            return String(o.str().c_str());
+            return String::fromDouble(number);
         }
 
         double StringUtil::toDouble(const char* s, size_t len, bool* isOk)

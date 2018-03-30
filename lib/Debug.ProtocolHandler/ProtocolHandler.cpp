@@ -14,19 +14,18 @@ namespace JsDebug
         , m_waitingForDebugger(false)
         , m_dispatcher(this)
     {
-        m_debugger = std::make_unique<Debugger>(runtime);
-        m_debugger->SetMessageHandler(&ProtocolHandler::DebuggerMessageHandler, this);
+        m_debugger = std::make_unique<Debugger>(this, runtime);
 
-        m_consoleAgent = std::make_unique<ConsoleImpl>(this);
+        m_consoleAgent = std::make_unique<ConsoleImpl>(this, this);
         protocol::Console::Dispatcher::wire(&m_dispatcher, m_consoleAgent.get());
 
-        m_debuggerAgent = std::make_unique<DebuggerImpl>(this, m_debugger.get());
+        m_debuggerAgent = std::make_unique<DebuggerImpl>(this, this, m_debugger.get());
         protocol::Debugger::Dispatcher::wire(&m_dispatcher, m_debuggerAgent.get());
 
-        m_runtimeAgent = std::make_unique<RuntimeImpl>(this);
+        m_runtimeAgent = std::make_unique<RuntimeImpl>(this, this);
         protocol::Runtime::Dispatcher::wire(&m_dispatcher, m_runtimeAgent.get());
 
-        m_schemaAgent = std::make_unique<SchemaImpl>(this);
+        m_schemaAgent = std::make_unique<SchemaImpl>(this, this);
         protocol::Schema::Dispatcher::wire(&m_dispatcher, m_schemaAgent.get());
     }
 
@@ -77,7 +76,7 @@ namespace JsDebug
 
         while (m_waitingForDebugger)
         {
-            ProcessQueue(true);
+            ProcessCommandQueue(true);
         }
     }
 
@@ -127,13 +126,7 @@ namespace JsDebug
     {
     }
 
-    void ProtocolHandler::DebuggerMessageHandler(void* callbackState)
-    {
-        auto handler = static_cast<ProtocolHandler*>(callbackState);
-        handler->ProcessQueue(false);
-    }
-
-    void ProtocolHandler::ProcessQueue(bool waitForCommands)
+    void ProtocolHandler::ProcessCommandQueue(bool waitForCommands)
     {
         std::vector<std::string> current;
 

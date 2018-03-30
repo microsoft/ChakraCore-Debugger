@@ -8,8 +8,9 @@
 
 namespace JsDebug
 {
-    ConsoleImpl::ConsoleImpl(ProtocolHandler* handler)
+    ConsoleImpl::ConsoleImpl(ProtocolHandler* handler, protocol::FrontendChannel* frontendChannel)
         : m_handler(handler)
+        , m_frontend(frontendChannel)
     {
     }
 

@@ -15,11 +15,3 @@
 #include <memory>
 
 #include <ChakraCore.h>
-
-inline void IfJsErrorThrow(JsErrorCode error, const char* message)
-{
-    if (error != JsNoError)
-    {
-        throw std::runtime_error(message);
-    }
-}

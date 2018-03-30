@@ -17,13 +17,16 @@ namespace JsDebug
     class SchemaImpl : public protocol::Schema::Backend
     {
     public:
-        SchemaImpl(ProtocolHandler* handler);
+        SchemaImpl(ProtocolHandler* handler, protocol::FrontendChannel* frontendChannel);
         ~SchemaImpl() override;
+        SchemaImpl(const SchemaImpl&) = delete;
+        SchemaImpl& operator=(const SchemaImpl&) = delete;
 
         // protocol::Schema::Backend implementation
         Response getDomains(std::unique_ptr<protocol::Array<protocol::Schema::Domain>>* out_domains) override;
 
     private:
         ProtocolHandler* m_handler;
+        protocol::Schema::Frontend m_frontend;
     };
 }

@@ -19,8 +19,10 @@ namespace JsDebug
     class RuntimeImpl : public protocol::Runtime::Backend
     {
     public:
-        RuntimeImpl(ProtocolHandler* handler);
+        RuntimeImpl(ProtocolHandler* handler, protocol::FrontendChannel* frontendChannel);
         ~RuntimeImpl() override;
+        RuntimeImpl(const RuntimeImpl&) = delete;
+        RuntimeImpl& operator=(const RuntimeImpl&) = delete;
 
         // protocol::Runtime::Backend implementation
         void evaluate(
@@ -82,7 +84,8 @@ namespace JsDebug
             Maybe<bool> in_awaitPromise,
             std::unique_ptr<RunScriptCallback> callback) override;
 
-    private:
+    private:        
         ProtocolHandler* m_handler;
+        protocol::Runtime::Frontend m_frontend;
     };
 }

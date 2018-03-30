@@ -32,11 +32,14 @@ namespace JsDebug
     public:
         ProtocolHandler(JsRuntimeHandle runtime);
         ~ProtocolHandler() override;
+        ProtocolHandler(const ProtocolHandler&) = delete;
+        ProtocolHandler& operator=(const ProtocolHandler&) = delete;
 
         void Connect(bool breakOnNextLine, ProtocolHandlerSendResponseCallback callback, void* callbackState);
         void Disconnect();
 
         void SendCommand(const char* command);
+        void ProcessCommandQueue(bool waitForCommands);
         void WaitForDebugger();
         void RunIfWaitingForDebugger();
 
@@ -46,8 +49,6 @@ namespace JsDebug
         void flushProtocolNotifications() override;
 
     private:
-        static void DebuggerMessageHandler(void* callbackState);
-        void ProcessQueue(bool waitForCommands);
         void SendResponse(const char* response);
 
         std::unique_ptr<Debugger> m_debugger;

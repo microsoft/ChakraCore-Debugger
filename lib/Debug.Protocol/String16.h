@@ -30,6 +30,10 @@ namespace JsDebug
         String16 operator+(const String16& other) const;
         bool operator==(const String16& other) const;
 
+        static String16 fromInteger(int);
+        static String16 fromInteger(size_t);
+        static String16 fromDouble(double);
+
         const UChar* characters16() const;
         size_t length() const;
         bool empty() const;

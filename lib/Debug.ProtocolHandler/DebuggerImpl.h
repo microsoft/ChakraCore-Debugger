@@ -9,6 +9,10 @@
 #include <protocol\Debugger.h>
 
 #include "Debugger.h"
+#include "DebuggerScript.h"
+#include "DebuggerCallFrame.h"
+
+#include <ChakraCore.h>
 
 namespace JsDebug
 {
@@ -21,8 +25,10 @@ namespace JsDebug
     class DebuggerImpl : public protocol::Debugger::Backend
     {
     public:
-        DebuggerImpl(ProtocolHandler* handler, Debugger* debugger);
+        DebuggerImpl(ProtocolHandler* handler, protocol::FrontendChannel* frontendChannel, Debugger* debugger);
         ~DebuggerImpl() override;
+        DebuggerImpl(const DebuggerImpl&) = delete;
+        DebuggerImpl& operator=(const DebuggerImpl&) = delete;
 
         // protocol::Debugger::Backend implementation
         Response enable() override;
@@ -91,8 +97,20 @@ namespace JsDebug
             std::unique_ptr<protocol::Array<protocol::Debugger::ScriptPosition>> in_positions) override;
 
     private:
+        static void SourceEventHandler(const DebuggerScript& script, bool success, void* callbackState);
+        static SkipPauseRequest BreakEventHandler(const DebuggerBreak& breakInfo, void* callbackState);
+        void HandleSourceEvent(const DebuggerScript& script, bool success);
+        SkipPauseRequest HandleBreakEvent(const DebuggerBreak& breakInfo);
+
+
         ProtocolHandler* m_handler;
+        protocol::Debugger::Frontend m_frontend;
         Debugger* m_debugger;
-        bool m_enabled;
+        
+        bool m_isEnabled;
+        bool m_shouldSkipAllPauses;
+        
+        protocol::HashMap<String16, DebuggerScript> m_scriptMap;
+        std::vector<DebuggerCallFrame> m_callFrames;
     };
 }

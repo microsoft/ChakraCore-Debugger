@@ -153,9 +153,16 @@
   <ItemGroup>
     <ClInclude Include="ConsoleImpl.h" />
     <ClInclude Include="Debugger.h" />
+    <ClInclude Include="DebuggerBreak.h" />
+    <ClInclude Include="DebuggerCallFrame.h" />
     <ClInclude Include="DebuggerImpl.h" />
     <ClInclude Include="ChakraDebugProtocolHandler.h" />
+    <ClInclude Include="DebuggerScript.h" />
+    <ClInclude Include="ErrorHelpers.h" />
+    <ClInclude Include="JsPersistent.h" />
+    <ClInclude Include="PropertyHelpers.h" />
     <ClInclude Include="ProtocolHandler.h" />
+    <ClInclude Include="ProtocolHelpers.h" />
     <ClInclude Include="RuntimeImpl.h" />
     <ClInclude Include="SchemaImpl.h" />
     <ClInclude Include="stdafx.h" />
@@ -164,9 +171,15 @@
   <ItemGroup>
     <ClCompile Include="ConsoleImpl.cpp" />
     <ClCompile Include="Debugger.cpp" />
+    <ClCompile Include="DebuggerBreak.cpp" />
+    <ClCompile Include="DebuggerCallFrame.cpp" />
     <ClCompile Include="DebuggerImpl.cpp" />
     <ClCompile Include="ChakraDebugProtocolHandler.cpp" />
+    <ClCompile Include="DebuggerScript.cpp" />
+    <ClCompile Include="ErrorHelpers.cpp" />
+    <ClCompile Include="PropertyHelpers.cpp" />
     <ClCompile Include="ProtocolHandler.cpp" />
+    <ClCompile Include="ProtocolHelpers.cpp" />
     <ClCompile Include="RuntimeImpl.cpp" />
     <ClCompile Include="SchemaImpl.cpp" />
     <ClCompile Include="stdafx.cpp">

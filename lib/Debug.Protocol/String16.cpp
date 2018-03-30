@@ -5,6 +5,8 @@
 
 #include "String16.h"
 
+#include <sstream>
+
 //
 // This file contains interfaces required by the `inspector_protocol` generated code.
 //
@@ -47,6 +49,27 @@ namespace JsDebug
     bool String16::operator==(const String16& other) const
     {
         return m_impl == other.m_impl;
+    }
+
+    String16 String16::fromInteger(int number)
+    {
+        std::ostringstream o;
+        o << number;
+        return String16(o.str().c_str());
+    }
+
+    String16 String16::fromInteger(size_t number)
+    {
+        std::ostringstream o;
+        o << number;
+        return String16(o.str().c_str());
+    }
+
+    String16 String16::fromDouble(double number)
+    {
+        std::ostringstream o;
+        o << number;
+        return String16(o.str().c_str());
     }
 
     const UChar* String16::characters16() const

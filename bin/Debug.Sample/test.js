@@ -10,6 +10,8 @@ function doStuff() {
   return i;
 }
 
+throw 3;
+
 var result = doStuff();
 host.echo(result);
 

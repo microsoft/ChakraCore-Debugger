@@ -5,24 +5,47 @@
 
 #pragma once
 
+#include "DebuggerCallFrame.h"
+#include "DebuggerBreak.h"
+#include "DebuggerScript.h"
+
 #include <ChakraCore.h>
+#include <vector>
 
 namespace JsDebug
 {
-    typedef void (*DebuggerMessageHandler)(void* callbackState);
+    class ProtocolHandler;
+
+    enum SkipPauseRequest {
+        RequestNoSkip,
+        RequestContinue,
+        RequestStepInto,
+        RequestStepOut,
+        RequestStepFrame
+    };
+
+    typedef void(*DebuggerSourceEventHandler)(const DebuggerScript& scriptInfo, bool success, void* callbackState);
+    typedef SkipPauseRequest(*DebuggerBreakEventHandler)(const DebuggerBreak& breakInfo, void* callbackState);
 
     class Debugger
     {
     public:
-        Debugger(JsRuntimeHandle runtime);
+        Debugger(ProtocolHandler* handler, JsRuntimeHandle runtime);
         ~Debugger();
+        Debugger(const Debugger&) = delete;
+        Debugger& operator=(const Debugger&) = delete;
 
         void Enable();
         void Disable();
 
+        void SetSourceEventHandler(DebuggerSourceEventHandler callback, void* callbackState);
+        void SetBreakEventHandler(DebuggerBreakEventHandler callback, void* callbackState);
+
+        void Continue();
+        bool IsPaused();
         void RequestAsyncBreak();
-        void SetMessageHandler(DebuggerMessageHandler callback, void* callbackState);
-        void SetDebugEventHandler(JsDiagDebugEventCallback callback, void* callbackState);
+        std::vector<DebuggerScript> GetScripts();
+        std::vector<DebuggerCallFrame> GetCallFrames(int limit = 0);
 
     private:
         static void CHAKRA_CALLBACK DebugEventCallback(
@@ -36,12 +59,18 @@ namespace JsDebug
 
         void ClearBreakpoints();
 
+        ProtocolHandler* m_handler;
         JsRuntimeHandle m_runtime;
-        DebuggerMessageHandler m_messageCallback;
-        void* m_messageCallbackState;
-        JsDiagDebugEventCallback m_debugCallback;
-        void* m_debugCallbackState;
-        bool m_enabled;
-        bool m_pauseOnNextStatement;
+
+        bool m_isEnabled;
+        bool m_isPaused;
+        bool m_isRunningNestedMessageLoop;
+        bool m_shouldPauseOnNextStatement;
+
+        DebuggerSourceEventHandler m_sourceEventCallback;
+        void* m_sourceEventCallbackState;
+
+        DebuggerBreakEventHandler m_breakEventCallback;
+        void* m_breakEventCallbackState;
     };
 }
