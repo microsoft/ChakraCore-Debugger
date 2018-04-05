@@ -9,6 +9,10 @@
 
 namespace JsDebug
 {
+    using protocol::Maybe;
+    using protocol::Response;
+    using protocol::String;
+
     RuntimeImpl::RuntimeImpl(ProtocolHandler* handler, protocol::FrontendChannel* frontendChannel)
         : m_handler(handler)
         , m_frontend(frontendChannel)

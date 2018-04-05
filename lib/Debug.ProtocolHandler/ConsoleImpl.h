@@ -10,8 +10,6 @@
 
 namespace JsDebug
 {
-    using protocol::Response;
-
     class ProtocolHandler;
 
     class ConsoleImpl : public protocol::Console::Backend
@@ -23,9 +21,9 @@ namespace JsDebug
         ConsoleImpl& operator=(const ConsoleImpl&) = delete;
 
         // protocol::Console::Backend implementation
-        Response enable() override;
-        Response disable() override;
-        Response clearMessages() override;
+        protocol::Response enable() override;
+        protocol::Response disable() override;
+        protocol::Response clearMessages() override;
 
     private:
         ProtocolHandler* m_handler;

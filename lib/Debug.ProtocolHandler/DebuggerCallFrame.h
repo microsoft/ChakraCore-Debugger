@@ -35,5 +35,6 @@ namespace JsDebug
         std::unique_ptr<protocol::Runtime::RemoteObject> GetThis() const;
 
         JsPersistent m_callFrameInfo;
+        int m_callFrameIndex;
     };
 }

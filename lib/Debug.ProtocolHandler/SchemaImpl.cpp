@@ -8,6 +8,8 @@
 
 namespace JsDebug
 {
+    using protocol::Response;
+
     SchemaImpl::SchemaImpl(ProtocolHandler* handler, protocol::FrontendChannel* frontendChannel)
         : m_handler(handler)
         , m_frontend(frontendChannel)

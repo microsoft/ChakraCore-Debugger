@@ -10,8 +10,6 @@
 
 namespace JsDebug
 {
-    using protocol::Response;
-
     class ProtocolHandler;
 
     class SchemaImpl : public protocol::Schema::Backend
@@ -23,7 +21,7 @@ namespace JsDebug
         SchemaImpl& operator=(const SchemaImpl&) = delete;
 
         // protocol::Schema::Backend implementation
-        Response getDomains(std::unique_ptr<protocol::Array<protocol::Schema::Domain>>* out_domains) override;
+        protocol::Response getDomains(std::unique_ptr<protocol::Array<protocol::Schema::Domain>>* out_domains) override;
 
     private:
         ProtocolHandler* m_handler;

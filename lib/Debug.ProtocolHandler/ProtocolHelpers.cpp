@@ -30,11 +30,8 @@ namespace JsDebug
 
         std::unique_ptr<RemoteObject> CreateObject(JsValueRef object)
         {
-            protocol::String type;
-            PropertyHelpers::GetProperty(object, "type", &type);
-
             return RemoteObject::create()
-                .setType(type)
+                .setType(PropertyHelpers::GetPropertyString(object, "type"))
                 .build();
         }
     }
@@ -42,27 +39,27 @@ namespace JsDebug
     std::unique_ptr<RemoteObject> ProtocolHelpers::WrapObject(JsValueRef object)
     {
         auto remoteObject = CreateObject(object);
-        
-        protocol::String className;
+
+        String className;
         if (PropertyHelpers::TryGetProperty(object, "className", &className))
         {
             remoteObject->setClassName(className);
         }
-        
+
         JsValueRef value = JS_INVALID_REFERENCE;
         bool hasValue = PropertyHelpers::TryGetProperty(object, "value", &value);
         if (hasValue)
         {
             remoteObject->setValue(ToProtocolValue(value));
         }
-        
-        protocol::String display;
+
+        String display;
         bool hasDisplay = PropertyHelpers::TryGetProperty(object, "display", &display);
 
         // A description is required for values to be shown in the debugger.
         if (hasValue && !hasDisplay)
         {
-            PropertyHelpers::GetPropertyAsString(object, "value", &display);
+            display = PropertyHelpers::GetPropertyStringConvert(object, "value");
         }
 
         if (display.empty())
@@ -91,19 +88,10 @@ namespace JsDebug
 
     std::unique_ptr<Location> ProtocolHelpers::WrapLocation(JsValueRef location)
     {
-        String scriptId;
-        PropertyHelpers::GetPropertyAsString(location, "scriptId", &scriptId);
-
-        int line = 0;
-        PropertyHelpers::GetProperty(location, "line", &line);
-
-        int column = 0;
-        PropertyHelpers::GetProperty(location, "column", &column);
-
         return Location::create()
-            .setColumnNumber(column)
-            .setLineNumber(line)
-            .setScriptId(scriptId)
+            .setColumnNumber(PropertyHelpers::GetPropertyInt(location, "column"))
+            .setLineNumber(PropertyHelpers::GetPropertyInt(location, "line"))
+            .setScriptId(PropertyHelpers::GetPropertyStringConvert(location, "scriptId"))
             .build();
     }
 

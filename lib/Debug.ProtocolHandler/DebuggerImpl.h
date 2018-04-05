@@ -16,10 +16,6 @@
 
 namespace JsDebug
 {
-    using protocol::Maybe;
-    using protocol::Response;
-    using String = String16;
-
     class ProtocolHandler;
 
     class DebuggerImpl : public protocol::Debugger::Backend
@@ -31,69 +27,72 @@ namespace JsDebug
         DebuggerImpl& operator=(const DebuggerImpl&) = delete;
 
         // protocol::Debugger::Backend implementation
-        Response enable() override;
-        Response disable() override;
-        Response setBreakpointsActive(bool in_active) override;
-        Response setSkipAllPauses(bool in_skip) override;
-        Response setBreakpointByUrl(
+        protocol::Response enable() override;
+        protocol::Response disable() override;
+        protocol::Response setBreakpointsActive(bool in_active) override;
+        protocol::Response setSkipAllPauses(bool in_skip) override;
+        protocol::Response setBreakpointByUrl(
             int in_lineNumber,
-            Maybe<String> in_url,
-            Maybe<String> in_urlRegex,
-            Maybe<int> in_columnNumber,
-            Maybe<String> in_condition,
-            String* out_breakpointId,
+            protocol::Maybe<protocol::String> in_url,
+            protocol::Maybe<protocol::String> in_urlRegex,
+            protocol::Maybe<int> in_columnNumber,
+            protocol::Maybe<protocol::String> in_condition,
+            protocol::String* out_breakpointId,
             std::unique_ptr<protocol::Array<protocol::Debugger::Location>>* out_locations) override;
-        Response setBreakpoint(
+        protocol::Response setBreakpoint(
             std::unique_ptr<protocol::Debugger::Location> in_location,
-            Maybe<String> in_condition,
-            String* out_breakpointId,
+            protocol::Maybe<protocol::String> in_condition,
+            protocol::String* out_breakpointId,
             std::unique_ptr<protocol::Debugger::Location>* out_actualLocation) override;
-        Response removeBreakpoint(const String& in_breakpointId) override;
-        Response continueToLocation(std::unique_ptr<protocol::Debugger::Location> in_location) override;
-        Response stepOver() override;
-        Response stepInto() override;
-        Response stepOut() override;
-        Response pause() override;
-        Response resume() override;
-        Response searchInContent(
-            const String& in_scriptId,
-            const String& in_query,
-            Maybe<bool> in_caseSensitive,
-            Maybe<bool> in_isRegex,
+        protocol::Response removeBreakpoint(const protocol::String& in_breakpointId) override;
+        protocol::Response continueToLocation(std::unique_ptr<protocol::Debugger::Location> in_location) override;
+        protocol::Response stepOver() override;
+        protocol::Response stepInto() override;
+        protocol::Response stepOut() override;
+        protocol::Response pause() override;
+        protocol::Response resume() override;
+        protocol::Response searchInContent(
+            const protocol::String& in_scriptId,
+            const protocol::String& in_query,
+            protocol::Maybe<bool> in_caseSensitive,
+            protocol::Maybe<bool> in_isRegex,
             std::unique_ptr<protocol::Array<protocol::Debugger::SearchMatch>>* out_result) override;
-        Response setScriptSource(
-            const String& in_scriptId,
-            const String& in_scriptSource,
-            Maybe<bool> in_dryRun,
-            Maybe<protocol::Array<protocol::Debugger::CallFrame>>* out_callFrames,
-            Maybe<bool>* out_stackChanged,
-            Maybe<protocol::Runtime::StackTrace>* out_asyncStackTrace,
-            Maybe<protocol::Runtime::ExceptionDetails>* out_exceptionDetails) override;
-        Response restartFrame(
-            const String& in_callFrameId,
+        protocol::Response setScriptSource(
+            const protocol::String& in_scriptId,
+            const protocol::String& in_scriptSource,
+            protocol::Maybe<bool> in_dryRun,
+            protocol::Maybe<protocol::Array<protocol::Debugger::CallFrame>>* out_callFrames,
+            protocol::Maybe<bool>* out_stackChanged,
+            protocol::Maybe<protocol::Runtime::StackTrace>* out_asyncStackTrace,
+            protocol::Maybe<protocol::Runtime::ExceptionDetails>* out_exceptionDetails) override;
+        protocol::Response restartFrame(
+            const protocol::String& in_callFrameId,
             std::unique_ptr<protocol::Array<protocol::Debugger::CallFrame>>* out_callFrames,
-            Maybe<protocol::Runtime::StackTrace>* out_asyncStackTrace) override;
-        Response getScriptSource(const String& in_scriptId, String* out_scriptSource) override;
-        Response setPauseOnExceptions(const String& in_state) override;
-        Response evaluateOnCallFrame(
-            const String& in_callFrameId,
-            const String& in_expression,
-            Maybe<String> in_objectGroup,
-            Maybe<bool> in_includeCommandLineAPI,
-            Maybe<bool> in_silent,
-            Maybe<bool> in_returnByValue,
-            Maybe<bool> in_generatePreview,
+            protocol::Maybe<protocol::Runtime::StackTrace>* out_asyncStackTrace) override;
+        protocol::Response getScriptSource(
+            const protocol::String& in_scriptId,
+            protocol::String* out_scriptSource) override;
+        protocol::Response setPauseOnExceptions(const protocol::String& in_state) override;
+        protocol::Response evaluateOnCallFrame(
+            const protocol::String& in_callFrameId,
+            const protocol::String& in_expression,
+            protocol::Maybe<protocol::String> in_objectGroup,
+            protocol::Maybe<bool> in_includeCommandLineAPI,
+            protocol::Maybe<bool> in_silent,
+            protocol::Maybe<bool> in_returnByValue,
+            protocol::Maybe<bool> in_generatePreview,
             std::unique_ptr<protocol::Runtime::RemoteObject>* out_result,
-            Maybe<protocol::Runtime::ExceptionDetails>* out_exceptionDetails) override;
-        Response setVariableValue(
+            protocol::Maybe<protocol::Runtime::ExceptionDetails>* out_exceptionDetails) override;
+        protocol::Response setVariableValue(
             int in_scopeNumber,
-            const String& in_variableName,
+            const protocol::String& in_variableName,
             std::unique_ptr<protocol::Runtime::CallArgument> in_newValue,
-            const String& in_callFrameId) override;
-        Response setAsyncCallStackDepth(int in_maxDepth) override;
-        Response setBlackboxPatterns(std::unique_ptr<protocol::Array<String>> in_patterns) override;
-        Response setBlackboxedRanges(
-            const String& in_scriptId,
+            const protocol::String& in_callFrameId) override;
+        protocol::Response setAsyncCallStackDepth(int in_maxDepth) override;
+        protocol::Response setBlackboxPatterns(
+            std::unique_ptr<protocol::Array<protocol::String>> in_patterns) override;
+        protocol::Response setBlackboxedRanges(
+            const protocol::String& in_scriptId,
             std::unique_ptr<protocol::Array<protocol::Debugger::ScriptPosition>> in_positions) override;
 
     private:
@@ -106,11 +105,11 @@ namespace JsDebug
         ProtocolHandler* m_handler;
         protocol::Debugger::Frontend m_frontend;
         Debugger* m_debugger;
-        
+
         bool m_isEnabled;
         bool m_shouldSkipAllPauses;
-        
-        protocol::HashMap<String16, DebuggerScript> m_scriptMap;
+
+        protocol::HashMap<protocol::String, DebuggerScript> m_scriptMap;
         std::vector<DebuggerCallFrame> m_callFrames;
     };
 }

@@ -12,11 +12,15 @@ namespace JsDebug
 {
     namespace PropertyHelpers
     {
-        void GetProperty(JsValueRef object, const char* name, JsValueRef* value);
-        void GetProperty(JsValueRef object, const char* name, bool* value);
-        void GetProperty(JsValueRef object, const char* name, int* value);
-        void GetProperty(JsValueRef object, const char* name, String16* value);
-        void GetPropertyAsString(JsValueRef object, const char* name, String16* value);
+        JsValueRef GetProperty(JsValueRef object, const char* name);
+
+        bool GetPropertyBool(JsValueRef object, const char* name);
+        int GetPropertyInt(JsValueRef object, const char* name);
+        String16 GetPropertyString(JsValueRef object, const char* name);
+
+        bool GetPropertyBoolConvert(JsValueRef object, const char* name);
+        int GetPropertyIntConvert(JsValueRef object, const char* name);
+        String16 GetPropertyStringConvert(JsValueRef object, const char* name);
 
         JsValueRef GetIndexedProperty(JsValueRef object, int index);
 

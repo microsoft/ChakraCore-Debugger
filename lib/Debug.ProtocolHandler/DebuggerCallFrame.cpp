@@ -21,31 +21,23 @@ namespace JsDebug
 
     DebuggerCallFrame::DebuggerCallFrame(JsValueRef callFrameInfo)
         : m_callFrameInfo(callFrameInfo)
+        , m_callFrameIndex(PropertyHelpers::GetPropertyInt(m_callFrameInfo.Get(), "index"))
     {
     }
 
     int DebuggerCallFrame::SourceId() const
     {
-        int scriptId = 0;
-        PropertyHelpers::GetProperty(m_callFrameInfo.Get(), "scriptId", &scriptId);
-
-        return scriptId;
+        return PropertyHelpers::GetPropertyInt(m_callFrameInfo.Get(), "scriptId");
     }
 
     int DebuggerCallFrame::Line() const
     {
-        int line = 0;
-        PropertyHelpers::GetProperty(m_callFrameInfo.Get(), "line", &line);
-
-        return line;
+        return PropertyHelpers::GetPropertyInt(m_callFrameInfo.Get(), "line");
     }
 
     int DebuggerCallFrame::Column() const
     {
-        int column = 0;
-        PropertyHelpers::GetProperty(m_callFrameInfo.Get(), "column", &column);
-
-        return column;
+        return PropertyHelpers::GetPropertyInt(m_callFrameInfo.Get(), "column");
     }
 
     int DebuggerCallFrame::ContextId() const
@@ -55,11 +47,8 @@ namespace JsDebug
 
     bool DebuggerCallFrame::IsAtReturn() const
     {
-        int index = 0;
-        PropertyHelpers::GetProperty(m_callFrameInfo.Get(), "index", &index);
-
         JsValueRef properties = JS_INVALID_REFERENCE;
-        IfJsErrorThrow(JsDiagGetStackProperties(index, &properties));
+        IfJsErrorThrow(JsDiagGetStackProperties(m_callFrameIndex, &properties));
 
         JsValueRef propVal = JS_INVALID_REFERENCE;
         if (PropertyHelpers::TryGetProperty(m_callFrameInfo.Get(), "returnValue", &propVal))
@@ -85,16 +74,12 @@ namespace JsDebug
 
     String DebuggerCallFrame::GetCallFrameId() const
     {
-        int callFrameIndex = 0;
-        PropertyHelpers::GetProperty(m_callFrameInfo.Get(), "index", &callFrameIndex);
-
-        return "{\"ordinal\":" + String::fromInteger(callFrameIndex) + "}";
+        return "{\"ordinal\":" + String::fromInteger(m_callFrameIndex) + "}";
     }
 
     std::unique_ptr<Location> DebuggerCallFrame::GetFunctionLocation() const
     {
-        int functionHandle = 0;
-        PropertyHelpers::GetProperty(m_callFrameInfo.Get(), "functionHandle", &functionHandle);
+        int functionHandle = PropertyHelpers::GetPropertyInt(m_callFrameInfo.Get(), "functionHandle");
 
         JsValueRef funcObj = JS_INVALID_REFERENCE;
         IfJsErrorThrow(JsDiagGetObjectFromHandle(functionHandle, &funcObj));
@@ -104,16 +89,12 @@ namespace JsDebug
 
     String DebuggerCallFrame::GetFunctionName() const
     {
-        int functionHandle = 0;
-        PropertyHelpers::GetProperty(m_callFrameInfo.Get(), "functionHandle", &functionHandle);
+        int functionHandle = PropertyHelpers::GetPropertyInt(m_callFrameInfo.Get(), "functionHandle");
 
         JsValueRef funcObj = JS_INVALID_REFERENCE;
         IfJsErrorThrow(JsDiagGetObjectFromHandle(functionHandle, &funcObj));
 
-        String functionName;
-        PropertyHelpers::GetProperty(funcObj, "name", &functionName);
-
-        return functionName;
+        return PropertyHelpers::GetPropertyString(funcObj, "name");
     }
 
     std::unique_ptr<Location> DebuggerCallFrame::GetLocation() const
@@ -123,11 +104,8 @@ namespace JsDebug
 
     std::unique_ptr<RemoteObject> DebuggerCallFrame::GetReturnValue() const
     {
-        int callFrameIndex = 0;
-        PropertyHelpers::GetProperty(m_callFrameInfo.Get(), "index", &callFrameIndex);
-
         JsValueRef stackProperties = JS_INVALID_REFERENCE;
-        IfJsErrorThrow(JsDiagGetStackProperties(callFrameIndex, &stackProperties));
+        IfJsErrorThrow(JsDiagGetStackProperties(m_callFrameIndex, &stackProperties));
 
         JsValueRef returnObj = JS_INVALID_REFERENCE;
         if (PropertyHelpers::TryGetProperty(stackProperties, "returnValue", &returnObj))
@@ -146,11 +124,8 @@ namespace JsDebug
 
     std::unique_ptr<RemoteObject> DebuggerCallFrame::GetThis() const
     {
-        int callFrameIndex = 0;
-        PropertyHelpers::GetProperty(m_callFrameInfo.Get(), "index", &callFrameIndex);
-
         JsValueRef stackProperties = JS_INVALID_REFERENCE;
-        IfJsErrorThrow(JsDiagGetStackProperties(callFrameIndex, &stackProperties));
+        IfJsErrorThrow(JsDiagGetStackProperties(m_callFrameIndex, &stackProperties));
 
         JsValueRef thisObject = JS_INVALID_REFERENCE;
         if (PropertyHelpers::TryGetProperty(stackProperties, "thisObject", &thisObject))

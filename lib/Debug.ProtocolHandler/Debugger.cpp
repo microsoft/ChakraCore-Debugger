@@ -31,7 +31,9 @@ namespace JsDebug
     {
         try
         {
-            IfJsErrorThrow(JsDiagStopDebugging(m_runtime, nullptr));
+            // The API requires that a state param be provided, even though we don't use it.
+            void* state = nullptr;
+            IfJsErrorThrow(JsDiagStopDebugging(m_runtime, &state));
         }
         catch (const std::exception& e)
         {
@@ -96,8 +98,7 @@ namespace JsDebug
         JsValueRef scriptsArray = JS_INVALID_REFERENCE;
         IfJsErrorThrow(JsDiagGetScripts(&scriptsArray));
 
-        int length = 0;
-        PropertyHelpers::GetProperty(scriptsArray, "length", &length);
+        int length = PropertyHelpers::GetPropertyInt(scriptsArray, "length");
 
         for (int i = 0; i < length; i++)
         {
@@ -114,8 +115,7 @@ namespace JsDebug
         JsValueRef stackTrace = JS_INVALID_REFERENCE;
         IfJsErrorThrow(JsDiagGetStackTrace(&stackTrace));
 
-        int length = 0;
-        PropertyHelpers::GetProperty(stackTrace, "length", &length);
+        int length = PropertyHelpers::GetPropertyInt(stackTrace, "length");
 
         if (limit > 0 && limit < length) {
             length = limit;
@@ -202,7 +202,7 @@ namespace JsDebug
             }
 
             m_isPaused = false;
-            
+
             if (request == SkipPauseRequest::RequestStepFrame ||
                 request == SkipPauseRequest::RequestStepInto)
             {

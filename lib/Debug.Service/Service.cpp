@@ -63,8 +63,7 @@ namespace JsDebug
     {
         try
         {
-            // TODO: Bind to localhost only
-            m_server.listen(port);
+            m_server.listen("127.0.0.1", std::to_string(port));
             m_server.start_accept();
         }
         catch (const websocketpp::exception& e)

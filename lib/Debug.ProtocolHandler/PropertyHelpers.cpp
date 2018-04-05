@@ -11,11 +11,12 @@ namespace JsDebug
 {
     namespace
     {
-        String16 ValueAsString(JsValueRef object, bool doConversion = false)
+        template <bool CONVERT>
+        inline String16 ValueAsString(JsValueRef object)
         {
             JsValueRef stringValue = JS_INVALID_REFERENCE;
 
-            if (doConversion)
+            if (CONVERT)
             {
                 IfJsErrorThrow(JsConvertValueToString(object, &stringValue));
             }
@@ -37,44 +38,69 @@ namespace JsDebug
             return String16(buffer.data(), buffer.size());
         }
 
-        String16 GetPropertyAsStringInternal(JsValueRef object, const char* name, bool doConversion = false)
+        template <class T, bool CONVERT = false, class JsConvertToValueFunc, class JsValueToNativeFunc>
+        T ValueToNative(
+            const JsConvertToValueFunc& JsConvertToValue,
+            const JsValueToNativeFunc& JsValueToNative,
+            JsValueRef value)
         {
-            JsValueRef objValue = JS_INVALID_REFERENCE;
-            PropertyHelpers::GetProperty(object, name, &objValue);
+            if (CONVERT)
+            {
+                IfJsErrorThrow(JsConvertToValue(value, &value));
+            }
 
-            return ValueAsString(objValue, doConversion);
+            T nativeValue = {};
+            IfJsErrorThrow(JsValueToNative(value, &nativeValue));
+
+            return nativeValue;
         }
     }
 
-    void PropertyHelpers::GetProperty(JsValueRef object, const char* name, JsValueRef* value)
+    JsValueRef PropertyHelpers::GetProperty(JsValueRef object, const char* name)
     {
         JsPropertyIdRef propertyId = JS_INVALID_REFERENCE;
         IfJsErrorThrow(JsCreatePropertyId(name, std::strlen(name), &propertyId));
-        IfJsErrorThrow(JsGetProperty(object, propertyId, value));
+
+        JsValueRef value = JS_INVALID_REFERENCE;
+        IfJsErrorThrow(JsGetProperty(object, propertyId, &value));
+
+        return value;
     }
 
-    void PropertyHelpers::GetProperty(JsValueRef object, const char* name, bool* value)
+    bool PropertyHelpers::GetPropertyBool(JsValueRef object, const char* name)
     {
-        JsValueRef objValue = JS_INVALID_REFERENCE;
-        GetProperty(object, name, &objValue);
-        IfJsErrorThrow(JsBooleanToBool(objValue, value));
+        JsValueRef objValue = GetProperty(object, name);
+        return ValueToNative<bool>(JsConvertValueToBoolean, JsBooleanToBool, objValue);
     }
 
-    void PropertyHelpers::GetProperty(JsValueRef object, const char* name, int* value)
+    int PropertyHelpers::GetPropertyInt(JsValueRef object, const char* name)
     {
-        JsValueRef objValue = JS_INVALID_REFERENCE;
-        GetProperty(object, name, &objValue);
-        IfJsErrorThrow(JsNumberToInt(objValue, value));
+        JsValueRef objValue = GetProperty(object, name);
+        return ValueToNative<int>(JsConvertValueToNumber, JsNumberToInt, objValue);
     }
 
-    void PropertyHelpers::GetProperty(JsValueRef object, const char* name, String16* value)
+    String16 PropertyHelpers::GetPropertyString(JsValueRef object, const char* name)
     {
-        *value = GetPropertyAsStringInternal(object, name, false);
+        JsValueRef objValue = PropertyHelpers::GetProperty(object, name);
+        return ValueAsString</*CONVERT*/false>(objValue);
     }
 
-    void PropertyHelpers::GetPropertyAsString(JsValueRef object, const char* name, String16* value)
+    bool PropertyHelpers::GetPropertyBoolConvert(JsValueRef object, const char* name)
     {
-        *value = GetPropertyAsStringInternal(object, name, true);
+        JsValueRef objValue = GetProperty(object, name);
+        return ValueToNative<bool, /*CONVERT*/true>(JsConvertValueToBoolean, JsBooleanToBool, objValue);
+    }
+
+    int PropertyHelpers::GetPropertyIntConvert(JsValueRef object, const char* name)
+    {
+        JsValueRef objValue = GetProperty(object, name);
+        return ValueToNative<int, /*CONVERT*/true>(JsConvertValueToNumber, JsNumberToInt, objValue);
+    }
+
+    String16 PropertyHelpers::GetPropertyStringConvert(JsValueRef object, const char* name)
+    {
+        JsValueRef objValue = PropertyHelpers::GetProperty(object, name);
+        return ValueAsString</*CONVERT*/true>(objValue);
     }
 
     JsValueRef PropertyHelpers::GetIndexedProperty(JsValueRef object, int index)
@@ -145,7 +171,7 @@ namespace JsDebug
         JsValueRef propertyValue = JS_INVALID_REFERENCE;
         if (TryGetProperty(object, name, &propertyValue))
         {
-            *value = ValueAsString(propertyValue);
+            *value = ValueAsString</*CONVERT*/false>(propertyValue);
             return true;
         }
 

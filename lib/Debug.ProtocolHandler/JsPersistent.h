@@ -69,7 +69,7 @@ namespace JsDebug
 
             return *this;
         }
-        
+
         JsPersistent& operator=(const JsValueRef& other)
         {
             JsPersistent temp(other);

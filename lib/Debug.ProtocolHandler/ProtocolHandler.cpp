@@ -8,6 +8,8 @@
 
 namespace JsDebug
 {
+    using protocol::Serializable;
+
     ProtocolHandler::ProtocolHandler(JsRuntimeHandle runtime)
         : m_callback(nullptr)
         , m_callbackState(nullptr)

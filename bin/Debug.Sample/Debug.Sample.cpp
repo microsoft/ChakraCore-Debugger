@@ -17,7 +17,7 @@ public:
     int port;
     bool help;
 
-    std::vector<std::wstring> args;
+    std::vector<std::wstring> scriptArgs;
 
     CommandLineArguments()
         : breakOnNextLine(false)
@@ -67,11 +67,11 @@ public:
                 foundScript = true;
 
                 // Collect any non-flag arguments
-                args.emplace_back(std::move(arg));
+                this->scriptArgs.emplace_back(std::move(arg));
             }
         }
 
-        if (this->port <= 0 || this->port > 65535 || args.empty())
+        if (this->port <= 0 || this->port > 65535 || this->scriptArgs.empty())
         {
             this->help = true;
         }
@@ -106,8 +106,8 @@ unsigned currentSourceContext = 0;
 void ThrowJsError(std::wstring errorString)
 {
     // We ignore error since we're already in an error state.
-    JsValueRef errorValue;
-    JsValueRef errorObject;
+    JsValueRef errorValue = JS_INVALID_REFERENCE;
+    JsValueRef errorObject = JS_INVALID_REFERENCE;
     JsPointerToString(errorString.c_str(), errorString.length(), &errorValue);
     JsCreateError(errorValue, &errorObject);
     JsSetException(errorObject);
@@ -280,7 +280,7 @@ JsErrorCode DefineHostCallback(
 // Creates a host execution context and sets up the host object in it.
 //
 
-JsErrorCode CreateHostContext(JsRuntimeHandle runtime, std::vector<std::wstring>& args, JsContextRef* context)
+JsErrorCode CreateHostContext(JsRuntimeHandle runtime, std::vector<std::wstring>& scriptArgs, JsContextRef* context)
 {
     //
     // Create the context.
@@ -333,15 +333,15 @@ JsErrorCode CreateHostContext(JsRuntimeHandle runtime, std::vector<std::wstring>
     //
 
     JsValueRef arguments = JS_INVALID_REFERENCE;
-    IfFailRet(JsCreateArray(static_cast<unsigned int>(args.size()), &arguments));
+    IfFailRet(JsCreateArray(static_cast<unsigned int>(scriptArgs.size()), &arguments));
 
-    for (int index = 0; index < args.size(); index++)
+    for (int index = 0; index < scriptArgs.size(); index++)
     {
         //
         // Create the argument value.
         //
 
-        std::wstring& str = args[index];
+        std::wstring& str = scriptArgs[index];
 
         JsValueRef argument;
         IfFailRet(JsPointerToString(str.c_str(), str.length(), &argument));
@@ -480,7 +480,7 @@ int _cdecl wmain(int argc, wchar_t* argv[])
         // so it will stay alive through the entire run.
         //
 
-        IfFailError(CreateHostContext(runtime, arguments.args, &context), L"failed to create execution context.");
+        IfFailError(CreateHostContext(runtime, arguments.scriptArgs, &context), L"failed to create execution context.");
 
         //
         // Now set the execution context as being the current one on this thread.
@@ -491,7 +491,7 @@ int _cdecl wmain(int argc, wchar_t* argv[])
         //
         // Load the script from the disk.
         //
-        const std::wstring& scriptName = arguments.args[0];
+        const std::wstring& scriptName = arguments.scriptArgs[0];
         std::wstring script = LoadScript(scriptName);
         if (script.empty())
         {

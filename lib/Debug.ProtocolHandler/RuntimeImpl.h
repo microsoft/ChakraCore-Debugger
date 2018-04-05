@@ -10,10 +10,6 @@
 
 namespace JsDebug
 {
-    using protocol::Maybe;
-    using protocol::Response;
-    using String = String16;
-
     class ProtocolHandler;
 
     class RuntimeImpl : public protocol::Runtime::Backend
@@ -26,65 +22,65 @@ namespace JsDebug
 
         // protocol::Runtime::Backend implementation
         void evaluate(
-            const String& in_expression,
-            Maybe<String> in_objectGroup,
-            Maybe<bool> in_includeCommandLineAPI,
-            Maybe<bool> in_silent,
-            Maybe<int> in_contextId,
-            Maybe<bool> in_returnByValue,
-            Maybe<bool> in_generatePreview,
-            Maybe<bool> in_userGesture,
-            Maybe<bool> in_awaitPromise,
+            const protocol::String& in_expression,
+            protocol::Maybe<protocol::String> in_objectGroup,
+            protocol::Maybe<bool> in_includeCommandLineAPI,
+            protocol::Maybe<bool> in_silent,
+            protocol::Maybe<int> in_contextId,
+            protocol::Maybe<bool> in_returnByValue,
+            protocol::Maybe<bool> in_generatePreview,
+            protocol::Maybe<bool> in_userGesture,
+            protocol::Maybe<bool> in_awaitPromise,
             std::unique_ptr<EvaluateCallback> callback) override;
         void awaitPromise(
-            const String& in_promiseObjectId,
-            Maybe<bool> in_returnByValue,
-            Maybe<bool> in_generatePreview,
+            const protocol::String& in_promiseObjectId,
+            protocol::Maybe<bool> in_returnByValue,
+            protocol::Maybe<bool> in_generatePreview,
             std::unique_ptr<AwaitPromiseCallback> callback) override;
         void callFunctionOn(
-            const String& in_objectId,
-            const String& in_functionDeclaration,
-            Maybe<protocol::Array<protocol::Runtime::CallArgument>> in_arguments,
-            Maybe<bool> in_silent,
-            Maybe<bool> in_returnByValue,
-            Maybe<bool> in_generatePreview,
-            Maybe<bool> in_userGesture,
-            Maybe<bool> in_awaitPromise,
+            const protocol::String& in_objectId,
+            const protocol::String& in_functionDeclaration,
+            protocol::Maybe<protocol::Array<protocol::Runtime::CallArgument>> in_arguments,
+            protocol::Maybe<bool> in_silent,
+            protocol::Maybe<bool> in_returnByValue,
+            protocol::Maybe<bool> in_generatePreview,
+            protocol::Maybe<bool> in_userGesture,
+            protocol::Maybe<bool> in_awaitPromise,
             std::unique_ptr<CallFunctionOnCallback> callback) override;
-        Response getProperties(
-            const String& in_objectId,
-            Maybe<bool> in_ownProperties,
-            Maybe<bool> in_accessorPropertiesOnly,
-            Maybe<bool> in_generatePreview,
+        protocol::Response getProperties(
+            const protocol::String& in_objectId,
+            protocol::Maybe<bool> in_ownProperties,
+            protocol::Maybe<bool> in_accessorPropertiesOnly,
+            protocol::Maybe<bool> in_generatePreview,
             std::unique_ptr<protocol::Array<protocol::Runtime::PropertyDescriptor>>* out_result,
-            Maybe<protocol::Array<protocol::Runtime::InternalPropertyDescriptor>>* out_internalProperties,
-            Maybe<protocol::Runtime::ExceptionDetails>* out_exceptionDetails) override;
-        Response releaseObject(const String& in_objectId) override;
-        Response releaseObjectGroup(const String& in_objectGroup) override;
-        Response runIfWaitingForDebugger() override;
-        Response enable() override;
-        Response disable() override;
-        Response discardConsoleEntries() override;
-        Response setCustomObjectFormatterEnabled(bool in_enabled) override;
-        Response compileScript(
-            const String& in_expression,
-            const String& in_sourceURL,
+            protocol::Maybe<protocol::Array<protocol::Runtime::InternalPropertyDescriptor>>* out_internalProperties,
+            protocol::Maybe<protocol::Runtime::ExceptionDetails>* out_exceptionDetails) override;
+        protocol::Response releaseObject(const protocol::String& in_objectId) override;
+        protocol::Response releaseObjectGroup(const protocol::String& in_objectGroup) override;
+        protocol::Response runIfWaitingForDebugger() override;
+        protocol::Response enable() override;
+        protocol::Response disable() override;
+        protocol::Response discardConsoleEntries() override;
+        protocol::Response setCustomObjectFormatterEnabled(bool in_enabled) override;
+        protocol::Response compileScript(
+            const protocol::String& in_expression,
+            const protocol::String& in_sourceURL,
             bool in_persistScript,
-            Maybe<int> in_executionContextId,
-            Maybe<String>* out_scriptId,
-            Maybe<protocol::Runtime::ExceptionDetails>* out_exceptionDetails) override;
+            protocol::Maybe<int> in_executionContextId,
+            protocol::Maybe<protocol::String>* out_scriptId,
+            protocol::Maybe<protocol::Runtime::ExceptionDetails>* out_exceptionDetails) override;
         void runScript(
-            const String& in_scriptId,
-            Maybe<int> in_executionContextId,
-            Maybe<String> in_objectGroup,
-            Maybe<bool> in_silent,
-            Maybe<bool> in_includeCommandLineAPI,
-            Maybe<bool> in_returnByValue,
-            Maybe<bool> in_generatePreview,
-            Maybe<bool> in_awaitPromise,
+            const protocol::String& in_scriptId,
+            protocol::Maybe<int> in_executionContextId,
+            protocol::Maybe<protocol::String> in_objectGroup,
+            protocol::Maybe<bool> in_silent,
+            protocol::Maybe<bool> in_includeCommandLineAPI,
+            protocol::Maybe<bool> in_returnByValue,
+            protocol::Maybe<bool> in_generatePreview,
+            protocol::Maybe<bool> in_awaitPromise,
             std::unique_ptr<RunScriptCallback> callback) override;
 
-    private:        
+    private:
         ProtocolHandler* m_handler;
         protocol::Runtime::Frontend m_frontend;
     };

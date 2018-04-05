@@ -23,8 +23,6 @@
 
 namespace JsDebug
 {
-    using protocol::Serializable;
-
     typedef void(CHAKRA_CALLBACK* ProtocolHandlerSendResponseCallback)(const char* response, void* callbackState);
 
     class ProtocolHandler : public protocol::FrontendChannel
@@ -44,8 +42,8 @@ namespace JsDebug
         void RunIfWaitingForDebugger();
 
         // protocol::FrontendChannel implementation
-        void sendProtocolResponse(int callId, std::unique_ptr<Serializable> message) override;
-        void sendProtocolNotification(std::unique_ptr<Serializable> message) override;
+        void sendProtocolResponse(int callId, std::unique_ptr<protocol::Serializable> message) override;
+        void sendProtocolNotification(std::unique_ptr<protocol::Serializable> message) override;
         void flushProtocolNotifications() override;
 
     private:

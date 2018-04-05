@@ -34,7 +34,7 @@ namespace JsDebug
     private:
         JsPersistent m_scriptInfo;
         JsPersistent m_scriptSource;
-        
+
         int m_scriptId;
         String16 m_sourceUrl;
         String16 m_sourceMappingUrl;

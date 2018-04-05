@@ -70,7 +70,7 @@ namespace JsDebug
     {
         return Maybe<StackTrace>();
     }
-    
+
     std::unique_ptr<RemoteObject> DebuggerBreak::GetException() const
     {
         JsValueRef exceptionProperty = JS_INVALID_REFERENCE;

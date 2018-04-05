@@ -16,7 +16,7 @@ namespace JsDebug
     {
         if (!m_scriptInfo.IsEmpty())
         {
-            PropertyHelpers::GetProperty(m_scriptInfo.Get(), "scriptId", &m_scriptId);
+            m_scriptId = PropertyHelpers::GetPropertyInt(m_scriptInfo.Get(), "scriptId");
 
             JsValueRef scriptSource = JS_INVALID_REFERENCE;
             IfJsErrorThrow(JsDiagGetSource(m_scriptId, &scriptSource));
@@ -67,14 +67,12 @@ namespace JsDebug
 
     String16 DebuggerScript::Source() const
     {
-        String16 source;
-
         if (!m_scriptSource.IsEmpty())
         {
-            PropertyHelpers::GetProperty(m_scriptSource.Get(), "source", &source);
+            return PropertyHelpers::GetPropertyString(m_scriptSource.Get(), "source");
         }
 
-        return source;
+        return String16();
     }
 
     String16 DebuggerScript::Hash() const
@@ -94,14 +92,12 @@ namespace JsDebug
 
     int DebuggerScript::EndLine() const
     {
-        int lineCount = 0;
-
         if (!m_scriptInfo.IsEmpty())
         {
-            PropertyHelpers::GetProperty(m_scriptInfo.Get(), "lineCount", &lineCount);
+            return PropertyHelpers::GetPropertyInt(m_scriptInfo.Get(), "lineCount");
         }
 
-        return lineCount;
+        return 0;
     }
 
     int DebuggerScript::EndColumn() const
