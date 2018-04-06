@@ -154,6 +154,7 @@
     <ClInclude Include="ConsoleImpl.h" />
     <ClInclude Include="Debugger.h" />
     <ClInclude Include="DebuggerBreak.h" />
+    <ClInclude Include="DebuggerBreakpoint.h" />
     <ClInclude Include="DebuggerCallFrame.h" />
     <ClInclude Include="DebuggerImpl.h" />
     <ClInclude Include="ChakraDebugProtocolHandler.h" />
@@ -172,6 +173,7 @@
     <ClCompile Include="ConsoleImpl.cpp" />
     <ClCompile Include="Debugger.cpp" />
     <ClCompile Include="DebuggerBreak.cpp" />
+    <ClCompile Include="DebuggerBreakpoint.cpp" />
     <ClCompile Include="DebuggerCallFrame.cpp" />
     <ClCompile Include="DebuggerImpl.cpp" />
     <ClCompile Include="ChakraDebugProtocolHandler.cpp" />

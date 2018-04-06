@@ -81,7 +81,10 @@ namespace JsDebug
             std::unique_ptr<RunScriptCallback> callback) override;
 
     private:
+        bool IsEnabled();
+
         ProtocolHandler* m_handler;
         protocol::Runtime::Frontend m_frontend;
+        bool m_isEnabled;
     };
 }

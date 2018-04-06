@@ -47,6 +47,11 @@ namespace JsDebug
 
         m_callback = callback;
         m_callbackState = callbackState;
+
+        if (breakOnNextLine)
+        {
+            m_debugger->PauseOnNextStatement();
+        }
     }
 
     void ProtocolHandler::Disconnect()

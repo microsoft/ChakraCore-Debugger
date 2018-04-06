@@ -5,11 +5,14 @@
 
 #include "stdafx.h"
 #include "DebuggerScript.h"
-#include "PropertyHelpers.h"
+
 #include "ErrorHelpers.h"
+#include "PropertyHelpers.h"
 
 namespace JsDebug
 {
+    using protocol::String;
+
     DebuggerScript::DebuggerScript(JsValueRef scriptInfo)
         : m_scriptInfo(scriptInfo)
         , m_scriptId(0)
@@ -28,14 +31,14 @@ namespace JsDebug
         }
     }
 
-    String16 DebuggerScript::ScriptId() const
+    String DebuggerScript::ScriptId() const
     {
-        return String16::fromInteger(m_scriptId);
+        return String::fromInteger(m_scriptId);
     }
 
-    String16 DebuggerScript::Url() const
+    String DebuggerScript::Url() const
     {
-        String16 fileName;
+        String fileName;
 
         if (!m_scriptInfo.IsEmpty())
         {
@@ -55,27 +58,27 @@ namespace JsDebug
         return !m_sourceUrl.empty();
     }
 
-    String16 DebuggerScript::SourceUrl() const
+    String DebuggerScript::SourceUrl() const
     {
         return HasSourceUrl() ? m_sourceUrl : Url();
     }
 
-    String16 DebuggerScript::SourceMappingUrl() const
+    String DebuggerScript::SourceMappingUrl() const
     {
         return m_sourceMappingUrl;
     }
 
-    String16 DebuggerScript::Source() const
+    String DebuggerScript::Source() const
     {
         if (!m_scriptSource.IsEmpty())
         {
             return PropertyHelpers::GetPropertyString(m_scriptSource.Get(), "source");
         }
 
-        return String16();
+        return String();
     }
 
-    String16 DebuggerScript::Hash() const
+    String DebuggerScript::Hash() const
     {
         return m_hash;
     }
@@ -110,9 +113,9 @@ namespace JsDebug
         return 0;
     }
 
-    String16 DebuggerScript::ExecutionContextAuxData() const
+    String DebuggerScript::ExecutionContextAuxData() const
     {
-        return String16();
+        return String();
     }
 
     bool DebuggerScript::IsLiveEdit() const

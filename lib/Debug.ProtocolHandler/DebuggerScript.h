@@ -5,8 +5,9 @@
 
 #pragma once
 
-#include "String16.h"
 #include "JsPersistent.h"
+
+#include <StringUtil.h>
 #include <ChakraCore.h>
 
 namespace JsDebug
@@ -16,19 +17,19 @@ namespace JsDebug
     public:
         DebuggerScript(JsValueRef scriptInfo);
 
-        String16 ScriptId() const;
-        String16 Url() const;
+        protocol::String ScriptId() const;
+        protocol::String Url() const;
         bool HasSourceUrl() const;
-        String16 SourceUrl() const;
-        String16 SourceMappingUrl() const;
-        String16 Source() const;
-        String16 Hash() const;
+        protocol::String SourceUrl() const;
+        protocol::String SourceMappingUrl() const;
+        protocol::String Source() const;
+        protocol::String Hash() const;
         int StartLine() const;
         int StartColumn() const;
         int EndLine() const;
         int EndColumn() const;
         int ExecutionContextId() const;
-        String16 ExecutionContextAuxData() const;
+        protocol::String ExecutionContextAuxData() const;
         bool IsLiveEdit() const;
 
     private:
@@ -36,8 +37,8 @@ namespace JsDebug
         JsPersistent m_scriptSource;
 
         int m_scriptId;
-        String16 m_sourceUrl;
-        String16 m_sourceMappingUrl;
-        String16 m_hash;
+        protocol::String m_sourceUrl;
+        protocol::String m_sourceMappingUrl;
+        protocol::String m_hash;
     };
 }

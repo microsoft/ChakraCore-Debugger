@@ -13,9 +13,15 @@ namespace JsDebug
     using protocol::Response;
     using protocol::String;
 
+    namespace
+    {
+        const char c_RuntimeNotEnabledError[] = "Runtime is not enabled";
+    }
+
     RuntimeImpl::RuntimeImpl(ProtocolHandler* handler, protocol::FrontendChannel* frontendChannel)
         : m_handler(handler)
         , m_frontend(frontendChannel)
+        , m_isEnabled(false)
     {
     }
 
@@ -67,43 +73,64 @@ namespace JsDebug
         Maybe<protocol::Array<protocol::Runtime::InternalPropertyDescriptor>>* out_internalProperties,
         Maybe<protocol::Runtime::ExceptionDetails>* out_exceptionDetails)
     {
-        return Response();
+        return Response::Error("Not implemented");
     }
 
     Response RuntimeImpl::releaseObject(const String & in_objectId)
     {
-        return Response();
+        return Response::Error("Not implemented");
     }
 
     Response RuntimeImpl::releaseObjectGroup(const String & in_objectGroup)
     {
-        return Response();
+        return Response::Error("Not implemented");
     }
 
     Response RuntimeImpl::runIfWaitingForDebugger()
     {
+        if (!IsEnabled())
+        {
+            return Response::Error(c_RuntimeNotEnabledError);
+        }
+
         m_handler->RunIfWaitingForDebugger();
-        return Response();
+        return Response::OK();
     }
 
     Response RuntimeImpl::enable()
     {
-        return Response();
+        if (m_isEnabled)
+        {
+            return Response::OK();
+        }
+
+        m_isEnabled = true;
+        // TODO: Do other setup
+
+        return Response::OK();
     }
 
     Response RuntimeImpl::disable()
     {
-        return Response();
+        if (!m_isEnabled)
+        {
+            return Response::OK();
+        }
+
+        m_isEnabled = false;
+        // TODO: Do other cleanup
+
+        return Response::OK();
     }
 
     Response RuntimeImpl::discardConsoleEntries()
     {
-        return Response();
+        return Response::Error("Not implemented");
     }
 
     Response RuntimeImpl::setCustomObjectFormatterEnabled(bool in_enabled)
     {
-        return Response();
+        return Response::Error("Not implemented");
     }
 
     Response RuntimeImpl::compileScript(
@@ -114,7 +141,7 @@ namespace JsDebug
         Maybe<String>* out_scriptId,
         Maybe<protocol::Runtime::ExceptionDetails>* out_exceptionDetails)
     {
-        return Response();
+        return Response::Error("Not implemented");
     }
 
     void RuntimeImpl::runScript(
@@ -128,5 +155,10 @@ namespace JsDebug
         Maybe<bool> in_awaitPromise,
         std::unique_ptr<RunScriptCallback> callback)
     {
+    }
+
+    bool RuntimeImpl::IsEnabled()
+    {
+        return m_isEnabled;
     }
 }

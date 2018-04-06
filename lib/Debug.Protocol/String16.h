@@ -28,7 +28,9 @@ namespace JsDebug
         explicit String16(const std::basic_string<UChar>& impl);
 
         String16 operator+(const String16& other) const;
+        String16& operator+=(const String16& other);
         bool operator==(const String16& other) const;
+        bool operator!=(const String16& other) const;
 
         static String16 fromInteger(int);
         static String16 fromInteger(size_t);
@@ -41,6 +43,9 @@ namespace JsDebug
 
         size_t find(String16 str) const;
         String16 substring(size_t pos, size_t len) const;
+
+        std::string toAscii() const;
+        int toInteger() const;
 
     private:
         std::basic_string<UChar> m_impl;

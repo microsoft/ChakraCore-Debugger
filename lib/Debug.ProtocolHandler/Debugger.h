@@ -5,8 +5,9 @@
 
 #pragma once
 
-#include "DebuggerCallFrame.h"
 #include "DebuggerBreak.h"
+#include "DebuggerBreakpoint.h"
+#include "DebuggerCallFrame.h"
 #include "DebuggerScript.h"
 
 #include <ChakraCore.h>
@@ -41,11 +42,20 @@ namespace JsDebug
         void SetSourceEventHandler(DebuggerSourceEventHandler callback, void* callbackState);
         void SetBreakEventHandler(DebuggerBreakEventHandler callback, void* callbackState);
 
-        void Continue();
-        bool IsPaused();
         void RequestAsyncBreak();
+        void PauseOnNextStatement();
+
         std::vector<DebuggerScript> GetScripts();
         std::vector<DebuggerCallFrame> GetCallFrames(int limit = 0);
+
+        void SetBreakpoint(DebuggerBreakpoint& breakpoint);
+        void RemoveBreakpoint(DebuggerBreakpoint& breakpoint);
+
+        bool IsPaused();
+        void Continue();
+        void StepIn();
+        void StepOut();
+        void StepOver();
 
     private:
         static void CHAKRA_CALLBACK DebugEventCallback(

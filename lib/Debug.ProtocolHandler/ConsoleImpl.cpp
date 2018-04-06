@@ -22,16 +22,16 @@ namespace JsDebug
 
     Response ConsoleImpl::enable()
     {
-        return Response();
+        return Response::OK();
     }
 
     Response ConsoleImpl::disable()
     {
-        return Response();
+        return Response::OK();
     }
 
     Response ConsoleImpl::clearMessages()
     {
-        return Response();
+        return Response::Error("Not implemented");
     }
 }

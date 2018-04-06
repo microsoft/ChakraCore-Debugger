@@ -11,12 +11,12 @@ namespace JsDebug
 {
     namespace
     {
-        template <bool CONVERT>
+        template <bool doConversion = false>
         inline String16 ValueAsString(JsValueRef object)
         {
             JsValueRef stringValue = JS_INVALID_REFERENCE;
 
-            if (CONVERT)
+            if (doConversion)
             {
                 IfJsErrorThrow(JsConvertValueToString(object, &stringValue));
             }
@@ -30,7 +30,7 @@ namespace JsDebug
 
             std::vector<uint16_t> buffer;
 
-            // Resize the vector an initialize the elements to zero.
+            // Resize the vector and initialize the elements to zero.
             buffer.resize(stringLength, 0);
 
             IfJsErrorThrow(JsCopyStringUtf16(stringValue, 0, static_cast<int>(buffer.size()), buffer.data(), nullptr));
@@ -38,13 +38,13 @@ namespace JsDebug
             return String16(buffer.data(), buffer.size());
         }
 
-        template <class T, bool CONVERT = false, class JsConvertToValueFunc, class JsValueToNativeFunc>
+        template <class T, bool doConversion = false, class JsConvertToValueFunc, class JsValueToNativeFunc>
         T ValueToNative(
             const JsConvertToValueFunc& JsConvertToValue,
             const JsValueToNativeFunc& JsValueToNative,
             JsValueRef value)
         {
-            if (CONVERT)
+            if (doConversion)
             {
                 IfJsErrorThrow(JsConvertToValue(value, &value));
             }
@@ -82,25 +82,25 @@ namespace JsDebug
     String16 PropertyHelpers::GetPropertyString(JsValueRef object, const char* name)
     {
         JsValueRef objValue = PropertyHelpers::GetProperty(object, name);
-        return ValueAsString</*CONVERT*/false>(objValue);
+        return ValueAsString(objValue);
     }
 
     bool PropertyHelpers::GetPropertyBoolConvert(JsValueRef object, const char* name)
     {
         JsValueRef objValue = GetProperty(object, name);
-        return ValueToNative<bool, /*CONVERT*/true>(JsConvertValueToBoolean, JsBooleanToBool, objValue);
+        return ValueToNative<bool, /*doConversion*/true>(JsConvertValueToBoolean, JsBooleanToBool, objValue);
     }
 
     int PropertyHelpers::GetPropertyIntConvert(JsValueRef object, const char* name)
     {
         JsValueRef objValue = GetProperty(object, name);
-        return ValueToNative<int, /*CONVERT*/true>(JsConvertValueToNumber, JsNumberToInt, objValue);
+        return ValueToNative<int, /*doConversion*/true>(JsConvertValueToNumber, JsNumberToInt, objValue);
     }
 
     String16 PropertyHelpers::GetPropertyStringConvert(JsValueRef object, const char* name)
     {
         JsValueRef objValue = PropertyHelpers::GetProperty(object, name);
-        return ValueAsString</*CONVERT*/true>(objValue);
+        return ValueAsString</*doConversion*/true>(objValue);
     }
 
     JsValueRef PropertyHelpers::GetIndexedProperty(JsValueRef object, int index)
@@ -171,7 +171,7 @@ namespace JsDebug
         JsValueRef propertyValue = JS_INVALID_REFERENCE;
         if (TryGetProperty(object, name, &propertyValue))
         {
-            *value = ValueAsString</*CONVERT*/false>(propertyValue);
+            *value = ValueAsString(propertyValue);
             return true;
         }
 

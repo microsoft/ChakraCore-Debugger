@@ -76,19 +76,15 @@ namespace JsDebug
         m_breakEventCallbackState = callbackState;
     }
 
-    void Debugger::Continue()
-    {
-        m_handler->RunIfWaitingForDebugger();
-    }
-
-    bool Debugger::IsPaused()
-    {
-        return m_isPaused;
-    }
-
     void Debugger::RequestAsyncBreak()
     {
         IfJsErrorThrow(JsDiagRequestAsyncBreak(m_runtime));
+    }
+
+    void Debugger::PauseOnNextStatement()
+    {
+        m_shouldPauseOnNextStatement = true;
+        RequestAsyncBreak();
     }
 
     std::vector<DebuggerScript> Debugger::GetScripts()
@@ -130,6 +126,52 @@ namespace JsDebug
         }
 
         return callFrames;
+    }
+
+    void Debugger::SetBreakpoint(DebuggerBreakpoint& breakpoint)
+    {
+        int scriptId = breakpoint.GetScriptId().toInteger();
+
+        JsValueRef bp = JS_INVALID_REFERENCE;
+        IfJsErrorThrow(JsDiagSetBreakpoint(scriptId, breakpoint.GetLineNumber(), breakpoint.GetColumnNumber(), &bp));
+
+        breakpoint.OnBreakpointResolved(
+            PropertyHelpers::GetPropertyInt(bp, "breakpointId"),
+            PropertyHelpers::GetPropertyInt(bp, "line"),
+            PropertyHelpers::GetPropertyInt(bp, "column"));
+    }
+
+    void Debugger::RemoveBreakpoint(DebuggerBreakpoint& breakpoint)
+    {
+        IfJsErrorThrow(JsDiagRemoveBreakpoint(breakpoint.GetActualId()));
+    }
+
+    bool Debugger::IsPaused()
+    {
+        return m_isPaused;
+    }
+
+    void Debugger::Continue()
+    {
+        m_handler->RunIfWaitingForDebugger();
+    }
+
+    void Debugger::StepIn()
+    {
+        IfJsErrorThrow(JsDiagSetStepType(JsDiagStepTypeStepIn));
+        Continue();
+    }
+
+    void Debugger::StepOut()
+    {
+        IfJsErrorThrow(JsDiagSetStepType(JsDiagStepTypeStepOut));
+        Continue();
+    }
+
+    void Debugger::StepOver()
+    {
+        IfJsErrorThrow(JsDiagSetStepType(JsDiagStepTypeStepOver));
+        Continue();
     }
 
     void Debugger::DebugEventCallback(JsDiagDebugEvent debugEvent, JsValueRef eventData, void* callbackState)
@@ -199,6 +241,7 @@ namespace JsDebug
             {
                 m_isRunningNestedMessageLoop = true;
                 m_handler->WaitForDebugger();
+                m_isRunningNestedMessageLoop = false;
             }
 
             m_isPaused = false;

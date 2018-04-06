@@ -14,11 +14,28 @@
 
 namespace JsDebug
 {
+    using protocol::Array;
+    using protocol::Debugger::CallFrame;
+    using protocol::Debugger::Location;
+    using protocol::FrontendChannel;
     using protocol::Maybe;
     using protocol::Response;
+    using protocol::Runtime::StackTrace;
     using protocol::String;
+    using protocol::StringUtil;
 
-    DebuggerImpl::DebuggerImpl(ProtocolHandler* handler, protocol::FrontendChannel* frontendChannel, Debugger* debugger)
+    namespace
+    {
+        const char c_DebuggerBreakpointCouldNotResolveError[] = "Breakpoint could not be resolved";
+        const char c_DebuggerBreakpointExistsError[] = "Breakpoint at specified location already exists";
+        const char c_DebuggerBreakpointNotFound[] = "Breakpoint could not be found";
+        const char c_DebuggerInvalidColumnNumberError[] = "Invalid column number specified";
+        const char c_DebuggerNotEnabledError[] = "Debugger is not enabled";
+        const char c_DebuggerNotImplemented[] = "Debugger method not implemented";
+        const char c_DebuggerUrlRequiredError[] = "Either url or urlRegex must be specified";
+    }
+
+    DebuggerImpl::DebuggerImpl(ProtocolHandler* handler, FrontendChannel* frontendChannel, Debugger* debugger)
         : m_handler(handler)
         , m_frontend(frontendChannel)
         , m_debugger(debugger)
@@ -63,17 +80,17 @@ namespace JsDebug
         m_debugger->Disable();
         m_debugger->SetSourceEventHandler(nullptr, nullptr);
 
-        return Response();
+        return Response::OK();
     }
 
     Response DebuggerImpl::setBreakpointsActive(bool in_active)
     {
-        return Response();
+        return Response::Error(c_DebuggerNotImplemented);
     }
 
     Response DebuggerImpl::setSkipAllPauses(bool in_skip)
     {
-        return Response();
+        return Response::Error(c_DebuggerNotImplemented);
     }
 
     Response DebuggerImpl::setBreakpointByUrl(
@@ -83,52 +100,148 @@ namespace JsDebug
         Maybe<int> in_columnNumber,
         Maybe<String> in_condition,
         String  *out_breakpointId,
-        std::unique_ptr<protocol::Array<protocol::Debugger::Location>>* out_locations)
+        std::unique_ptr<Array<Location>>* out_locations)
     {
-        return Response();
+        if (!in_url.isJust() && !in_urlRegex.isJust())
+        {
+            return Response::Error(c_DebuggerUrlRequiredError);
+        }
+
+        if (!in_url.isJust())
+        {
+            return Response::Error(c_DebuggerNotImplemented);
+        }
+
+        String url = in_url.fromJust();
+
+        int columnNumber = in_columnNumber.fromMaybe(0);
+        if (columnNumber < 0)
+        {
+            return Response::Error(c_DebuggerInvalidColumnNumberError);
+        }
+
+        String condition = in_condition.fromMaybe("");
+
+        DebuggerBreakpoint breakpoint(
+            url,
+            DebuggerBreakpoint::QueryType::Url,
+            in_lineNumber,
+            columnNumber,
+            condition);
+
+        String breakpointId = breakpoint.GenerateKey();
+
+        auto result = m_breakpointMap.find(breakpointId);
+        if (result != m_breakpointMap.end())
+        {
+            return Response::Error(c_DebuggerBreakpointExistsError);
+        }
+
+        auto locations = Array<Location>::create();
+
+        try
+        {
+            for (const auto& script : m_scriptMap)
+            {
+                if (breakpoint.TryLoadScript(script.second))
+                {
+                    if (TryResolveBreakpoint(breakpoint))
+                    {
+                        locations->addItem(breakpoint.GetActualLocation());
+                    }
+                }
+            }
+        }
+        catch (const JsErrorException& e)
+        {
+            return Response::Error(e.what());
+        }
+
+        m_breakpointMap.emplace(breakpointId, breakpoint);
+
+        *out_breakpointId = breakpointId;
+        *out_locations = std::move(locations);
+        return Response::OK();
     }
 
     Response DebuggerImpl::setBreakpoint(
-        std::unique_ptr<protocol::Debugger::Location> in_location,
+        std::unique_ptr<Location> in_location,
         Maybe<String> in_condition,
         String  *out_breakpointId,
-        std::unique_ptr<protocol::Debugger::Location>* out_actualLocation)
+        std::unique_ptr<Location>* out_actualLocation)
     {
-        return Response();
+        DebuggerBreakpoint breakpoint = DebuggerBreakpoint::FromLocation(
+            in_location.get(),
+            in_condition.fromMaybe(""));
+
+        String breakpointId = breakpoint.GenerateKey();
+
+        auto result = m_breakpointMap.find(breakpointId);
+        if (result != m_breakpointMap.end())
+        {
+            return Response::Error(c_DebuggerBreakpointExistsError);
+        }
+
+        if (TryResolveBreakpoint(breakpoint))
+        {
+            *out_breakpointId = breakpointId;
+            *out_actualLocation = breakpoint.GetActualLocation();
+
+            m_breakpointMap.emplace(breakpointId, breakpoint);
+            return Response::OK();
+        }
+
+        return Response::Error(c_DebuggerBreakpointCouldNotResolveError);
     }
 
     Response DebuggerImpl::removeBreakpoint(const String & in_breakpointId)
     {
-        return Response();
+        auto result = m_breakpointMap.find(in_breakpointId);
+        if (result != m_breakpointMap.end())
+        {
+            m_debugger->RemoveBreakpoint(result->second);
+            m_breakpointMap.erase(in_breakpointId);
+            return Response::OK();
+        }
+
+        return Response::Error(c_DebuggerBreakpointNotFound);
     }
 
-    Response DebuggerImpl::continueToLocation(std::unique_ptr<protocol::Debugger::Location> in_location)
+    Response DebuggerImpl::continueToLocation(std::unique_ptr<Location> in_location)
     {
-        return Response();
+        return Response::Error(c_DebuggerNotImplemented);
     }
 
     Response DebuggerImpl::stepOver()
     {
-        return Response();
+        m_debugger->StepOver();
+        return Response::OK();
     }
 
     Response DebuggerImpl::stepInto()
     {
-        return Response();
+        m_debugger->StepIn();
+        return Response::OK();
     }
 
     Response DebuggerImpl::stepOut()
     {
-        return Response();
+        m_debugger->StepOut();
+        return Response::OK();
     }
 
     Response DebuggerImpl::pause()
     {
-        return Response();
+        return Response::Error(c_DebuggerNotImplemented);
     }
 
     Response DebuggerImpl::resume()
     {
+        if (!IsEnabled())
+        {
+            return Response::Error(c_DebuggerNotEnabledError);
+        }
+
         m_debugger->Continue();
         return Response::OK();
     }
@@ -138,38 +251,50 @@ namespace JsDebug
         const String & in_query,
         Maybe<bool> in_caseSensitive,
         Maybe<bool> in_isRegex,
-        std::unique_ptr<protocol::Array<protocol::Debugger::SearchMatch>>* out_result)
+        std::unique_ptr<Array<protocol::Debugger::SearchMatch>>* out_result)
     {
-        return Response();
+        return Response::Error(c_DebuggerNotImplemented);
     }
 
     Response DebuggerImpl::setScriptSource(
         const String & in_scriptId,
         const String & in_scriptSource, Maybe<bool> in_dryRun,
-        Maybe<protocol::Array<protocol::Debugger::CallFrame>>* out_callFrames,
+        Maybe<Array<CallFrame>>* out_callFrames,
         Maybe<bool>* out_stackChanged,
-        Maybe<protocol::Runtime::StackTrace>* out_asyncStackTrace,
+        Maybe<StackTrace>* out_asyncStackTrace,
         Maybe<protocol::Runtime::ExceptionDetails>* out_exceptionDetails)
     {
-        return Response();
+        return Response::Error(c_DebuggerNotImplemented);
     }
 
     Response DebuggerImpl::restartFrame(
         const String & in_callFrameId,
-        std::unique_ptr<protocol::Array<protocol::Debugger::CallFrame>>* out_callFrames,
-        Maybe<protocol::Runtime::StackTrace>* out_asyncStackTrace)
+        std::unique_ptr<Array<CallFrame>>* out_callFrames,
+        Maybe<StackTrace>* out_asyncStackTrace)
     {
-        return Response();
+        return Response::Error(c_DebuggerNotImplemented);
     }
 
     Response DebuggerImpl::getScriptSource(const String & in_scriptId, String  *out_scriptSource)
     {
-        return Response();
+        if (!IsEnabled())
+        {
+            return Response::Error(c_DebuggerNotEnabledError);
+        }
+
+        auto result = m_scriptMap.find(in_scriptId);
+        if (result == m_scriptMap.end())
+        {
+            return Response::Error("Script not found: " + in_scriptId);
+        }
+
+        *out_scriptSource = result->second.Source();
+        return Response::OK();
     }
 
     Response DebuggerImpl::setPauseOnExceptions(const String & in_state)
     {
-        return Response();
+        return Response::Error(c_DebuggerNotImplemented);
     }
 
     Response DebuggerImpl::evaluateOnCallFrame(
@@ -183,7 +308,7 @@ namespace JsDebug
         std::unique_ptr<protocol::Runtime::RemoteObject>* out_result,
         Maybe<protocol::Runtime::ExceptionDetails>* out_exceptionDetails)
     {
-        return Response();
+        return Response::Error(c_DebuggerNotImplemented);
     }
 
     Response DebuggerImpl::setVariableValue(
@@ -192,24 +317,24 @@ namespace JsDebug
         std::unique_ptr<protocol::Runtime::CallArgument> in_newValue,
         const String & in_callFrameId)
     {
-        return Response();
+        return Response::Error(c_DebuggerNotImplemented);
     }
 
     Response DebuggerImpl::setAsyncCallStackDepth(int in_maxDepth)
     {
-        return Response();
+        return Response::Error(c_DebuggerNotImplemented);
     }
 
-    Response DebuggerImpl::setBlackboxPatterns(std::unique_ptr<protocol::Array<String>> in_patterns)
+    Response DebuggerImpl::setBlackboxPatterns(std::unique_ptr<Array<String>> in_patterns)
     {
-        return Response();
+        return Response::Error(c_DebuggerNotImplemented);
     }
 
     Response DebuggerImpl::setBlackboxedRanges(
         const String & in_scriptId,
-        std::unique_ptr<protocol::Array<protocol::Debugger::ScriptPosition>> in_positions)
+        std::unique_ptr<Array<protocol::Debugger::ScriptPosition>> in_positions)
     {
-        return Response();
+        return Response::Error(c_DebuggerNotImplemented);
     }
 
     void DebuggerImpl::SourceEventHandler(const DebuggerScript& script, bool success, void* callbackState)
@@ -222,6 +347,11 @@ namespace JsDebug
     {
         const auto debuggerImpl = static_cast<DebuggerImpl*>(callbackState);
         return debuggerImpl->HandleBreakEvent(breakInfo);
+    }
+
+    bool DebuggerImpl::IsEnabled()
+    {
+        return m_isEnabled;
     }
 
     void DebuggerImpl::HandleSourceEvent(const DebuggerScript& script, bool success)
@@ -270,7 +400,18 @@ namespace JsDebug
 
         m_scriptMap.emplace(scriptId, script);
 
-        // TODO: Process pending breakpoints
+        for (auto& breakpoint : m_breakpointMap)
+        {
+            if (breakpoint.second.TryLoadScript(script))
+            {
+                if (TryResolveBreakpoint(breakpoint.second))
+                {
+                    m_frontend.breakpointResolved(
+                        breakpoint.first,
+                        breakpoint.second.GetActualLocation());
+                }
+            }
+        }
     }
 
     SkipPauseRequest DebuggerImpl::HandleBreakEvent(const DebuggerBreak& breakInfo)
@@ -287,7 +428,7 @@ namespace JsDebug
             return request;
         }
 
-        auto callFrames = protocol::Array<protocol::Debugger::CallFrame>::create();
+        auto callFrames = Array<CallFrame>::create();
 
         for (const DebuggerCallFrame& callFrame : m_debugger->GetCallFrames())
         {
@@ -302,5 +443,22 @@ namespace JsDebug
             breakInfo.GetAsyncStackTrace());
 
         return request;
+    }
+
+    bool DebuggerImpl::TryResolveBreakpoint(DebuggerBreakpoint& breakpoint)
+    {
+        if (!breakpoint.IsScriptLoaded())
+        {
+            throw std::runtime_error("Script must be loaded before resolving");
+        }
+
+        m_debugger->SetBreakpoint(breakpoint);
+
+        if (!breakpoint.IsResolved())
+        {
+            return false;
+        }
+
+        return true;
     }
 }

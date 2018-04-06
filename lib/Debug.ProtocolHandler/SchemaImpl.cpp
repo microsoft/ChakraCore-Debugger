@@ -22,6 +22,6 @@ namespace JsDebug
 
     Response SchemaImpl::getDomains(std::unique_ptr<protocol::Array<protocol::Schema::Domain>>* out_domains)
     {
-        return Response();
+        return Response::Error("Not implemented");
     }
 }
