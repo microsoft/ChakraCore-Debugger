@@ -4,6 +4,10 @@ if (typeof host === "undefined") {
   };
 }
 
+for (const arg of host.arguments) {
+    host.echo(`Found arg: ${arg}`);
+}
+
 function doStuff() {
   let i = 0;
   i += 4584;

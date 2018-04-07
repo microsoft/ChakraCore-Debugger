@@ -63,7 +63,8 @@ namespace JsDebug
     {
         try
         {
-            m_server.listen(9229);
+            // TODO: Bind to localhost only
+            m_server.listen(port);
             m_server.start_accept();
         }
         catch (const websocketpp::exception& e)

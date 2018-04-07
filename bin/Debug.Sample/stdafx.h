@@ -13,6 +13,7 @@
 #include <cstdint>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include <ChakraCore.h>
 #include <ChakraDebugProtocolHandler.h>
