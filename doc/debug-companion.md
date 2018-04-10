@@ -233,34 +233,36 @@ a basic code sample which loads JS and executes it.
 
 ### Debugger Protocol Handler
 
-* Establish project structure and basic build (including cross platform)
-* Stub out API interface
-* Build processor/dispatcher logic
-* Request parsing/response building
-* Build command handler logic
-  * Runtime
-  * Debugger
-  * Schema
-  * Console
-* Write test cases
+- [x] Establish project structure and basic build
+- [ ] Cross-platform build support
+- [x] Stub out API interface
+- [x] Build processor/dispatcher logic
+- [x] Request parsing/response building
+- [ ] Build command handler logic
+  - [ ] Runtime
+  - [ ] Debugger
+  - [ ] Schema
+  - [ ] Console
+- [ ] Write test cases
 
 ### Platform Implementation
 
-* Establish project structure and basic build (including cross platform)
-* Build the HTTP/WebSockets endpoint
-* Build the HTTP request handler code
-* Build the protocol handler interface code
-* Write test cases
+- [x] Establish project structure and basic build
+- [ ] Cross-platform build support
+- [x] Build the HTTP/WebSockets endpoint
+- [ ] Build the HTTP request handler code
+- [x] Build the protocol handler interface code
+- [ ] Write test cases
 
 ### Documentation
 
-* Add documentation for the JsDebugProtocolHandler* methods to the ChakraCore wiki
-* Add documentation for building the DebuggerPlatform code
-* Add documentation for using the DebuggerPlatform code
+- [ ] Add documentation for the JsDebugProtocolHandler* methods to the wiki
+- [ ] Add documentation for building the DebuggerPlatform code
+- [ ] Add documentation for using the DebuggerPlatform code
 
 ### Sample Code
 
-* Create project which consumes the dependencies
-* Use other samples to create a basic script loader with some rudimentary host functions
-* Write test cases for the sample?
-* Document the process of building and running the sample
+- [x] Create project which consumes the dependencies
+- [x] Use other samples to create a basic script loader with some rudimentary host functions
+- [ ] Write test cases for the sample?
+- [ ] Document the process of building and running the sample
