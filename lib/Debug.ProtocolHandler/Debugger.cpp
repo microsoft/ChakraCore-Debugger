@@ -12,6 +12,11 @@
 
 namespace JsDebug
 {
+    namespace
+    {
+        const char c_ErrorInvalidOrdinal[] = "Invalid ordinal value";
+    }
+
     Debugger::Debugger(ProtocolHandler* handler, JsRuntimeHandle runtime)
         : m_handler(handler)
         , m_runtime(runtime)
@@ -94,7 +99,7 @@ namespace JsDebug
         JsValueRef scriptsArray = JS_INVALID_REFERENCE;
         IfJsErrorThrow(JsDiagGetScripts(&scriptsArray));
 
-        int length = PropertyHelpers::GetPropertyInt(scriptsArray, "length");
+        int length = PropertyHelpers::GetPropertyInt(scriptsArray, PropertyHelpers::Names::Length);
 
         for (int i = 0; i < length; i++)
         {
@@ -106,12 +111,27 @@ namespace JsDebug
         return scripts;
     }
 
+    DebuggerCallFrame Debugger::GetCallFrame(int ordinal)
+    {
+        JsValueRef stackTrace = JS_INVALID_REFERENCE;
+        IfJsErrorThrow(JsDiagGetStackTrace(&stackTrace));
+
+        int length = PropertyHelpers::GetPropertyInt(stackTrace, PropertyHelpers::Names::Length);
+
+        if (ordinal >= length)
+        {
+            throw std::runtime_error(c_ErrorInvalidOrdinal);
+        }
+
+        return DebuggerCallFrame(PropertyHelpers::GetIndexedProperty(stackTrace, ordinal));
+    }
+
     std::vector<DebuggerCallFrame> Debugger::GetCallFrames(int limit)
     {
         JsValueRef stackTrace = JS_INVALID_REFERENCE;
         IfJsErrorThrow(JsDiagGetStackTrace(&stackTrace));
 
-        int length = PropertyHelpers::GetPropertyInt(stackTrace, "length");
+        int length = PropertyHelpers::GetPropertyInt(stackTrace, PropertyHelpers::Names::Length);
 
         if (limit > 0 && limit < length) {
             length = limit;
@@ -128,6 +148,14 @@ namespace JsDebug
         return callFrames;
     }
 
+    DebuggerObject Debugger::GetObjectFromHandle(int handle)
+    {
+        JsValueRef obj;
+        IfJsErrorThrow(JsDiagGetObjectFromHandle(handle, &obj));
+
+        return DebuggerObject(obj);
+    }
+
     void Debugger::SetBreakpoint(DebuggerBreakpoint& breakpoint)
     {
         int scriptId = breakpoint.GetScriptId().toInteger();
@@ -136,14 +164,27 @@ namespace JsDebug
         IfJsErrorThrow(JsDiagSetBreakpoint(scriptId, breakpoint.GetLineNumber(), breakpoint.GetColumnNumber(), &bp));
 
         breakpoint.OnBreakpointResolved(
-            PropertyHelpers::GetPropertyInt(bp, "breakpointId"),
-            PropertyHelpers::GetPropertyInt(bp, "line"),
-            PropertyHelpers::GetPropertyInt(bp, "column"));
+            PropertyHelpers::GetPropertyInt(bp, PropertyHelpers::Names::BreakpointId),
+            PropertyHelpers::GetPropertyInt(bp, PropertyHelpers::Names::Line),
+            PropertyHelpers::GetPropertyInt(bp, PropertyHelpers::Names::Column));
     }
 
     void Debugger::RemoveBreakpoint(DebuggerBreakpoint& breakpoint)
     {
         IfJsErrorThrow(JsDiagRemoveBreakpoint(breakpoint.GetActualId()));
+    }
+
+    JsDiagBreakOnExceptionAttributes Debugger::GetBreakOnException()
+    {
+        JsDiagBreakOnExceptionAttributes attributes = JsDiagBreakOnExceptionAttributeNone;
+        IfJsErrorThrow(JsDiagGetBreakOnException(m_runtime, &attributes));
+
+        return attributes;
+    }
+
+    void Debugger::SetBreakOnException(JsDiagBreakOnExceptionAttributes attributes)
+    {
+        IfJsErrorThrow(JsDiagSetBreakOnException(m_runtime, attributes));
     }
 
     bool Debugger::IsPaused()
@@ -249,11 +290,11 @@ namespace JsDebug
             if (request == SkipPauseRequest::RequestStepFrame ||
                 request == SkipPauseRequest::RequestStepInto)
             {
-                JsDiagSetStepType(JsDiagStepTypeStepIn);
+                IfJsErrorThrow(JsDiagSetStepType(JsDiagStepTypeStepIn));
             }
             else if (request == SkipPauseRequest::RequestStepOut)
             {
-                JsDiagSetStepType(JsDiagStepTypeStepOut);
+                IfJsErrorThrow(JsDiagSetStepType(JsDiagStepTypeStepOut));
             }
         }
     }

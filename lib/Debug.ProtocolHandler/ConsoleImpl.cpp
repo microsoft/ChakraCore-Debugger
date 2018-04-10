@@ -10,6 +10,11 @@ namespace JsDebug
 {
     using protocol::Response;
 
+    namespace
+    {
+        const char c_ErrorNotImplemented[] = "Not implemented";
+    }
+
     ConsoleImpl::ConsoleImpl(ProtocolHandler* handler, protocol::FrontendChannel* frontendChannel)
         : m_handler(handler)
         , m_frontend(frontendChannel)
@@ -32,6 +37,6 @@ namespace JsDebug
 
     Response ConsoleImpl::clearMessages()
     {
-        return Response::Error("Not implemented");
+        return Response::Error(c_ErrorNotImplemented);
     }
 }

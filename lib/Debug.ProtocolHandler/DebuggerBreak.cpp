@@ -28,7 +28,7 @@ namespace JsDebug
     String DebuggerBreak::GetReason() const
     {
         JsValueRef exception = JS_INVALID_REFERENCE;
-        if (PropertyHelpers::TryGetProperty(m_breakInfo.Get(), "exception", &exception))
+        if (PropertyHelpers::TryGetProperty(m_breakInfo.Get(), PropertyHelpers::Names::Exception, &exception))
         {
             return protocol::Debugger::Paused::ReasonEnum::Exception;
         }
@@ -44,8 +44,8 @@ namespace JsDebug
             std::unique_ptr<DictionaryValue> data = exception->toValue();
 
             bool isUncaught = false;
-            PropertyHelpers::TryGetProperty(m_breakInfo.Get(), "uncaught", &isUncaught);
-            data->setBoolean("uncaught", isUncaught);
+            PropertyHelpers::TryGetProperty(m_breakInfo.Get(), PropertyHelpers::Names::Uncaught, &isUncaught);
+            data->setBoolean(PropertyHelpers::Names::Uncaught, isUncaught);
 
             return std::move(data);
         }
@@ -58,7 +58,7 @@ namespace JsDebug
         auto breakpointIds = Array<String>::create();
 
         int breakpointId = 0;
-        if (PropertyHelpers::TryGetProperty(m_breakInfo.Get(), "breakpointId", &breakpointId))
+        if (PropertyHelpers::TryGetProperty(m_breakInfo.Get(), PropertyHelpers::Names::BreakpointId, &breakpointId))
         {
             breakpointIds->addItem(String16::fromInteger(breakpointId));
         }
@@ -74,7 +74,7 @@ namespace JsDebug
     std::unique_ptr<RemoteObject> DebuggerBreak::GetException() const
     {
         JsValueRef exceptionProperty = JS_INVALID_REFERENCE;
-        if (PropertyHelpers::TryGetProperty(m_breakInfo.Get(), "exception", &exceptionProperty))
+        if (PropertyHelpers::TryGetProperty(m_breakInfo.Get(), PropertyHelpers::Names::Exception, &exceptionProperty))
         {
             return ProtocolHelpers::WrapException(exceptionProperty);
         }

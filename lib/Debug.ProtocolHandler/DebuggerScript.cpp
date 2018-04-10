@@ -19,7 +19,7 @@ namespace JsDebug
     {
         if (!m_scriptInfo.IsEmpty())
         {
-            m_scriptId = PropertyHelpers::GetPropertyInt(m_scriptInfo.Get(), "scriptId");
+            m_scriptId = PropertyHelpers::GetPropertyInt(m_scriptInfo.Get(), PropertyHelpers::Names::ScriptId);
 
             JsValueRef scriptSource = JS_INVALID_REFERENCE;
             IfJsErrorThrow(JsDiagGetSource(m_scriptId, &scriptSource));
@@ -43,10 +43,10 @@ namespace JsDebug
         if (!m_scriptInfo.IsEmpty())
         {
             // Check the fileName property first
-            if (!PropertyHelpers::TryGetProperty(m_scriptInfo.Get(), "fileName", &fileName))
+            if (!PropertyHelpers::TryGetProperty(m_scriptInfo.Get(), PropertyHelpers::Names::FileName, &fileName))
             {
                 // Fall back to the scriptType property
-                PropertyHelpers::TryGetProperty(m_scriptInfo.Get(), "scriptType", &fileName);
+                PropertyHelpers::TryGetProperty(m_scriptInfo.Get(), PropertyHelpers::Names::ScriptType, &fileName);
             }
         }
 
@@ -72,7 +72,7 @@ namespace JsDebug
     {
         if (!m_scriptSource.IsEmpty())
         {
-            return PropertyHelpers::GetPropertyString(m_scriptSource.Get(), "source");
+            return PropertyHelpers::GetPropertyString(m_scriptSource.Get(), PropertyHelpers::Names::Source);
         }
 
         return String();
@@ -97,7 +97,7 @@ namespace JsDebug
     {
         if (!m_scriptInfo.IsEmpty())
         {
-            return PropertyHelpers::GetPropertyInt(m_scriptInfo.Get(), "lineCount");
+            return PropertyHelpers::GetPropertyInt(m_scriptInfo.Get(), PropertyHelpers::Names::LineCount);
         }
 
         return 0;

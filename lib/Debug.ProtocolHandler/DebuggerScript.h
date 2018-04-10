@@ -15,7 +15,7 @@ namespace JsDebug
     class DebuggerScript
     {
     public:
-        DebuggerScript(JsValueRef scriptInfo);
+        explicit DebuggerScript(JsValueRef scriptInfo);
 
         protocol::String ScriptId() const;
         protocol::String Url() const;

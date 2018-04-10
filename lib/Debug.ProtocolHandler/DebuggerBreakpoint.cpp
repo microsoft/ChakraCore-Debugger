@@ -11,6 +11,11 @@ namespace JsDebug
     using protocol::Debugger::Location;
     using protocol::String;
 
+    namespace
+    {
+        const char c_ErrorRegexNotImplemented[] = "Regex query not implemented";
+    }
+
     DebuggerBreakpoint::DebuggerBreakpoint(
         const String& query,
         QueryType queryType,
@@ -147,7 +152,7 @@ namespace JsDebug
 
         case QueryType::UrlRegex:
             // TODO: Implement regex matching
-            throw std::runtime_error("Regex query not implemented");
+            throw std::runtime_error(c_ErrorRegexNotImplemented);
 
         default:
             return false;

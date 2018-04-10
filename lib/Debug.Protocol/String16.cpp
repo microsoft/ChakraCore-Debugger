@@ -13,6 +13,12 @@
 
 namespace JsDebug
 {
+    namespace
+    {
+        const char c_ErrorInvalidAsciiCharacters[] = "String contains invalid ASCII characters";
+        const char c_ErrorInvalidIntegerCharacters[] = "String is not a valid integer or contains non-integer characters";
+    }
+
     String16::String16()
     {
     }
@@ -128,7 +134,7 @@ namespace JsDebug
             // Make sure the character contains only ASCII character codes
             if ((chars[i] & 0x7f) != chars[i])
             {
-                throw std::runtime_error("String contains invalid ASCII characters");
+                throw std::runtime_error(c_ErrorInvalidAsciiCharacters);
             }
 
             retVal.push_back(static_cast<char>(chars[i]));
@@ -146,7 +152,7 @@ namespace JsDebug
         // Make sure a valid integer is found and that the stream contains no more characters.
         if (!(i >> x) || !i.eof())
         {
-            throw std::runtime_error("String doesn't not contain only a valid integer");
+            throw std::runtime_error(c_ErrorInvalidIntegerCharacters);
         }
 
         return x;

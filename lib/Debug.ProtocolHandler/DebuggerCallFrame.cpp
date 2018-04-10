@@ -21,23 +21,23 @@ namespace JsDebug
 
     DebuggerCallFrame::DebuggerCallFrame(JsValueRef callFrameInfo)
         : m_callFrameInfo(callFrameInfo)
-        , m_callFrameIndex(PropertyHelpers::GetPropertyInt(m_callFrameInfo.Get(), "index"))
+        , m_callFrameIndex(PropertyHelpers::GetPropertyInt(m_callFrameInfo.Get(), PropertyHelpers::Names::Index))
     {
     }
 
     int DebuggerCallFrame::SourceId() const
     {
-        return PropertyHelpers::GetPropertyInt(m_callFrameInfo.Get(), "scriptId");
+        return PropertyHelpers::GetPropertyInt(m_callFrameInfo.Get(), PropertyHelpers::Names::ScriptId);
     }
 
     int DebuggerCallFrame::Line() const
     {
-        return PropertyHelpers::GetPropertyInt(m_callFrameInfo.Get(), "line");
+        return PropertyHelpers::GetPropertyInt(m_callFrameInfo.Get(), PropertyHelpers::Names::Line);
     }
 
     int DebuggerCallFrame::Column() const
     {
-        return PropertyHelpers::GetPropertyInt(m_callFrameInfo.Get(), "column");
+        return PropertyHelpers::GetPropertyInt(m_callFrameInfo.Get(), PropertyHelpers::Names::Column);
     }
 
     int DebuggerCallFrame::ContextId() const
@@ -51,12 +51,28 @@ namespace JsDebug
         IfJsErrorThrow(JsDiagGetStackProperties(m_callFrameIndex, &properties));
 
         JsValueRef propVal = JS_INVALID_REFERENCE;
-        if (PropertyHelpers::TryGetProperty(m_callFrameInfo.Get(), "returnValue", &propVal))
+        if (PropertyHelpers::TryGetProperty(m_callFrameInfo.Get(), PropertyHelpers::Names::ReturnValue, &propVal))
         {
-            return PropertyHelpers::HasProperty(propVal, "handle");
+            return PropertyHelpers::HasProperty(propVal, PropertyHelpers::Names::Handle);
         }
 
         return false;
+    }
+
+    DebuggerLocalScope DebuggerCallFrame::GetLocals() const
+    {
+        JsValueRef properties = JS_INVALID_REFERENCE;
+        IfJsErrorThrow(JsDiagGetStackProperties(m_callFrameIndex, &properties));
+
+        return DebuggerLocalScope(properties);
+    }
+
+    DebuggerObject DebuggerCallFrame::GetGlobals() const
+    {
+        JsValueRef properties = JS_INVALID_REFERENCE;
+        IfJsErrorThrow(JsDiagGetStackProperties(m_callFrameIndex, &properties));
+
+        return DebuggerObject(PropertyHelpers::GetProperty(properties, PropertyHelpers::Names::Globals));
     }
 
     std::unique_ptr<CallFrame> DebuggerCallFrame::ToProtocolValue() const
@@ -77,9 +93,16 @@ namespace JsDebug
         return "{\"ordinal\":" + String::fromInteger(m_callFrameIndex) + "}";
     }
 
+    String DebuggerCallFrame::GetObjectIdForFrameProp(const char* propName) const
+    {
+        return "{\"ordinal\":" + String::fromInteger(m_callFrameIndex) + ",\"name\":\"" + propName + "\"}";
+    }
+
     std::unique_ptr<Location> DebuggerCallFrame::GetFunctionLocation() const
     {
-        int functionHandle = PropertyHelpers::GetPropertyInt(m_callFrameInfo.Get(), "functionHandle");
+        int functionHandle = PropertyHelpers::GetPropertyInt(
+            m_callFrameInfo.Get(),
+            PropertyHelpers::Names::FunctionHandle);
 
         JsValueRef funcObj = JS_INVALID_REFERENCE;
         IfJsErrorThrow(JsDiagGetObjectFromHandle(functionHandle, &funcObj));
@@ -89,12 +112,14 @@ namespace JsDebug
 
     String DebuggerCallFrame::GetFunctionName() const
     {
-        int functionHandle = PropertyHelpers::GetPropertyInt(m_callFrameInfo.Get(), "functionHandle");
+        int functionHandle = PropertyHelpers::GetPropertyInt(
+            m_callFrameInfo.Get(),
+            PropertyHelpers::Names::FunctionHandle);
 
         JsValueRef funcObj = JS_INVALID_REFERENCE;
         IfJsErrorThrow(JsDiagGetObjectFromHandle(functionHandle, &funcObj));
 
-        return PropertyHelpers::GetPropertyString(funcObj, "name");
+        return PropertyHelpers::GetPropertyString(funcObj, PropertyHelpers::Names::Name);
     }
 
     std::unique_ptr<Location> DebuggerCallFrame::GetLocation() const
@@ -108,18 +133,12 @@ namespace JsDebug
         IfJsErrorThrow(JsDiagGetStackProperties(m_callFrameIndex, &stackProperties));
 
         JsValueRef returnObj = JS_INVALID_REFERENCE;
-        if (PropertyHelpers::TryGetProperty(stackProperties, "returnValue", &returnObj))
+        if (PropertyHelpers::TryGetProperty(stackProperties, PropertyHelpers::Names::ReturnValue, &returnObj))
         {
             return ProtocolHelpers::WrapObject(returnObj);
         }
 
         return nullptr;
-    }
-
-    std::unique_ptr<Array<Scope>> DebuggerCallFrame::GetScopeChain() const
-    {
-        // TODO: Fill this in
-        return Array<Scope>::create();
     }
 
     std::unique_ptr<RemoteObject> DebuggerCallFrame::GetThis() const
@@ -128,12 +147,91 @@ namespace JsDebug
         IfJsErrorThrow(JsDiagGetStackProperties(m_callFrameIndex, &stackProperties));
 
         JsValueRef thisObject = JS_INVALID_REFERENCE;
-        if (PropertyHelpers::TryGetProperty(stackProperties, "thisObject", &thisObject))
+        if (PropertyHelpers::TryGetProperty(stackProperties, PropertyHelpers::Names::ThisObject, &thisObject))
         {
             return ProtocolHelpers::WrapObject(thisObject);
         }
 
         // The protocol requires a "this" member, so create an undefined object to return.
         return ProtocolHelpers::GetUndefinedObject();
+    }
+
+    std::unique_ptr<Array<Scope>> DebuggerCallFrame::GetScopeChain() const
+    {
+        auto scopeChain = Array<Scope>::create();
+
+        JsValueRef stackProperties = JS_INVALID_REFERENCE;
+        IfJsErrorThrow(JsDiagGetStackProperties(m_callFrameIndex, &stackProperties));
+
+        if (PropertyHelpers::HasProperty(stackProperties, PropertyHelpers::Names::Locals))
+        {
+            scopeChain->addItem(GetLocalScope());
+        }
+
+        JsValueRef scopes = JS_INVALID_REFERENCE;
+        if (PropertyHelpers::TryGetProperty(stackProperties, PropertyHelpers::Names::Scopes, &scopes))
+        {
+            int length = PropertyHelpers::GetPropertyInt(scopes, PropertyHelpers::Names::Length);
+
+            for (int i = 0; i < length; i++)
+            {
+                JsValueRef scopeObj = PropertyHelpers::GetIndexedProperty(scopes, i);
+                scopeChain->addItem(GetClosureScope(scopeObj));
+            }
+        }
+
+        if (PropertyHelpers::HasProperty(stackProperties, PropertyHelpers::Names::Globals))
+        {
+            scopeChain->addItem(GetGlobalScope());
+        }
+
+        return scopeChain;
+    }
+
+    std::unique_ptr<Scope> DebuggerCallFrame::GetLocalScope() const
+    {
+        auto remoteObj = RemoteObject::create()
+            .setType("object")
+            .setClassName("Object")
+            .setDescription("Object")
+            .setObjectId(GetObjectIdForFrameProp(PropertyHelpers::Names::Locals))
+            .build();
+
+        return Scope::create()
+            .setType("local")
+            .setObject(std::move(remoteObj))
+            .build();
+    }
+
+    std::unique_ptr<Scope> DebuggerCallFrame::GetClosureScope(JsValueRef scopeObj) const
+    {
+        int handle = PropertyHelpers::GetPropertyInt(scopeObj, PropertyHelpers::Names::Handle);
+
+        auto remoteObj = RemoteObject::create()
+            .setType("object")
+            .setClassName("Object")
+            .setDescription("Object")
+            .setObjectId(ProtocolHelpers::GetObjectId(handle))
+            .build();
+
+        return Scope::create()
+            .setType("closure")
+            .setObject(std::move(remoteObj))
+            .build();
+    }
+
+    std::unique_ptr<Scope> DebuggerCallFrame::GetGlobalScope() const
+    {
+        auto remoteObj = RemoteObject::create()
+            .setType("object")
+            .setClassName("global")
+            .setDescription("global")
+            .setObjectId(GetObjectIdForFrameProp(PropertyHelpers::Names::Globals))
+            .build();
+
+        return Scope::create()
+            .setType("global")
+            .setObject(std::move(remoteObj))
+            .build();
     }
 }

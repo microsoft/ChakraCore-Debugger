@@ -5,22 +5,49 @@
 
 #include "stdafx.h"
 #include "RuntimeImpl.h"
+
+#include "PropertyHelpers.h"
 #include "ProtocolHandler.h"
+
+#include <StringUtil.h>
 
 namespace JsDebug
 {
+    using protocol::Array;
+    using protocol::DictionaryValue;
+    using protocol::FrontendChannel;
     using protocol::Maybe;
     using protocol::Response;
+    using protocol::Runtime::CallArgument;
+    using protocol::Runtime::ExceptionDetails;
+    using protocol::Runtime::InternalPropertyDescriptor;
+    using protocol::Runtime::PropertyDescriptor;
     using protocol::String;
+    using protocol::StringUtil;
+    using protocol::Value;
 
     namespace
     {
-        const char c_RuntimeNotEnabledError[] = "Runtime is not enabled";
+        const char c_ErrorNotEnabled[] = "Runtime is not enabled";
+        const char c_ErrorNotImplemented[] = "Not implemented";
+        const char c_ErrorInvalidObjectId[] = "Invalid object ID";
+
+        std::unique_ptr<DictionaryValue> ParseObjectId(const String& objectId)
+        {
+            auto parsedValue = StringUtil::parseJSON(objectId);
+            if (parsedValue == nullptr || parsedValue->type() != Value::TypeObject)
+            {
+                throw std::runtime_error(c_ErrorInvalidObjectId);
+            }
+
+            return std::unique_ptr<DictionaryValue>(DictionaryValue::cast(parsedValue.release()));
+        }
     }
 
-    RuntimeImpl::RuntimeImpl(ProtocolHandler* handler, protocol::FrontendChannel* frontendChannel)
+    RuntimeImpl::RuntimeImpl(ProtocolHandler* handler, FrontendChannel* frontendChannel, Debugger* debugger)
         : m_handler(handler)
         , m_frontend(frontendChannel)
+        , m_debugger(debugger)
         , m_isEnabled(false)
     {
     }
@@ -54,7 +81,7 @@ namespace JsDebug
     void RuntimeImpl::callFunctionOn(
         const String & in_objectId,
         const String & in_functionDeclaration,
-        Maybe<protocol::Array<protocol::Runtime::CallArgument>> in_arguments,
+        Maybe<Array<CallArgument>> in_arguments,
         Maybe<bool> in_silent,
         Maybe<bool> in_returnByValue,
         Maybe<bool> in_generatePreview,
@@ -69,28 +96,72 @@ namespace JsDebug
         Maybe<bool> in_ownProperties,
         Maybe<bool> in_accessorPropertiesOnly,
         Maybe<bool> in_generatePreview,
-        std::unique_ptr<protocol::Array<protocol::Runtime::PropertyDescriptor>>* out_result,
-        Maybe<protocol::Array<protocol::Runtime::InternalPropertyDescriptor>>* out_internalProperties,
-        Maybe<protocol::Runtime::ExceptionDetails>* out_exceptionDetails)
+        std::unique_ptr<Array<PropertyDescriptor>>* out_result,
+        Maybe<Array<InternalPropertyDescriptor>>* out_internalProperties,
+        Maybe<ExceptionDetails>* out_exceptionDetails)
     {
-        return Response::Error("Not implemented");
+        if (in_accessorPropertiesOnly.fromMaybe(false))
+        {
+            // We don't support accessorPropertiesOnly queries, just return an empty list.
+            *out_result = Array<PropertyDescriptor>::create();
+            return Response::OK();
+        }
+
+        auto parsedId = ParseObjectId(in_objectId);
+
+        int handle = 0;
+        int ordinal = 0;
+        String name;
+
+        if (parsedId->getInteger(PropertyHelpers::Names::Handle, &handle))
+        {
+            DebuggerObject obj = m_debugger->GetObjectFromHandle(handle);
+            *out_result = obj.GetPropertyDescriptors();
+            *out_internalProperties = obj.GetInternalPropertyDescriptors();
+
+            return Response::OK();
+        }
+        else if (parsedId->getInteger(PropertyHelpers::Names::Ordinal, &ordinal) &&
+                 parsedId->getString(PropertyHelpers::Names::Name, &name))
+        {
+            DebuggerCallFrame callFrame = m_debugger->GetCallFrame(ordinal);
+
+            if (name == PropertyHelpers::Names::Locals)
+            {
+                DebuggerLocalScope obj = callFrame.GetLocals();
+                *out_result = obj.GetPropertyDescriptors();
+                *out_internalProperties = obj.GetInternalPropertyDescriptors();
+
+                return Response::OK();
+            }
+            else if (name == PropertyHelpers::Names::Globals)
+            {
+                DebuggerObject obj = callFrame.GetGlobals();
+                *out_result = obj.GetPropertyDescriptors();
+                *out_internalProperties = obj.GetInternalPropertyDescriptors();
+
+                return Response::OK();
+            }
+        }
+
+        return Response::Error(c_ErrorInvalidObjectId);
     }
 
     Response RuntimeImpl::releaseObject(const String & in_objectId)
     {
-        return Response::Error("Not implemented");
+        return Response::Error(c_ErrorNotImplemented);
     }
 
     Response RuntimeImpl::releaseObjectGroup(const String & in_objectGroup)
     {
-        return Response::Error("Not implemented");
+        return Response::Error(c_ErrorNotImplemented);
     }
 
     Response RuntimeImpl::runIfWaitingForDebugger()
     {
         if (!IsEnabled())
         {
-            return Response::Error(c_RuntimeNotEnabledError);
+            return Response::Error(c_ErrorNotEnabled);
         }
 
         m_handler->RunIfWaitingForDebugger();
@@ -125,12 +196,12 @@ namespace JsDebug
 
     Response RuntimeImpl::discardConsoleEntries()
     {
-        return Response::Error("Not implemented");
+        return Response::Error(c_ErrorNotImplemented);
     }
 
     Response RuntimeImpl::setCustomObjectFormatterEnabled(bool in_enabled)
     {
-        return Response::Error("Not implemented");
+        return Response::Error(c_ErrorNotImplemented);
     }
 
     Response RuntimeImpl::compileScript(
@@ -139,9 +210,9 @@ namespace JsDebug
         bool in_persistScript,
         Maybe<int> in_executionContextId,
         Maybe<String>* out_scriptId,
-        Maybe<protocol::Runtime::ExceptionDetails>* out_exceptionDetails)
+        Maybe<ExceptionDetails>* out_exceptionDetails)
     {
-        return Response::Error("Not implemented");
+        return Response::Error(c_ErrorNotImplemented);
     }
 
     void RuntimeImpl::runScript(

@@ -14,8 +14,11 @@ namespace JsDebug
 {
     namespace ProtocolHelpers
     {
+        protocol::String GetObjectId(int handle);
         std::unique_ptr<protocol::Runtime::RemoteObject> WrapObject(JsValueRef object);
         std::unique_ptr<protocol::Runtime::RemoteObject> WrapException(JsValueRef exception);
+        std::unique_ptr<protocol::Runtime::PropertyDescriptor> WrapProperty(JsValueRef property);
+        std::unique_ptr<protocol::Runtime::InternalPropertyDescriptor> WrapInternalProperty(JsValueRef property);
         std::unique_ptr<protocol::Debugger::Location> WrapLocation(JsValueRef exception);
         std::unique_ptr<protocol::Runtime::RemoteObject> GetUndefinedObject();
     }

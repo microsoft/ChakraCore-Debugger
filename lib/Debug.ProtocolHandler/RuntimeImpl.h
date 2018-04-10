@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include "Debugger.h"
+
 #include <protocol\Runtime.h>
 #include <protocol\Forward.h>
 
@@ -15,7 +17,7 @@ namespace JsDebug
     class RuntimeImpl : public protocol::Runtime::Backend
     {
     public:
-        RuntimeImpl(ProtocolHandler* handler, protocol::FrontendChannel* frontendChannel);
+        RuntimeImpl(ProtocolHandler* handler, protocol::FrontendChannel* frontendChannel, Debugger* debugger);
         ~RuntimeImpl() override;
         RuntimeImpl(const RuntimeImpl&) = delete;
         RuntimeImpl& operator=(const RuntimeImpl&) = delete;
@@ -85,6 +87,7 @@ namespace JsDebug
 
         ProtocolHandler* m_handler;
         protocol::Runtime::Frontend m_frontend;
+        Debugger* m_debugger;
         bool m_isEnabled;
     };
 }

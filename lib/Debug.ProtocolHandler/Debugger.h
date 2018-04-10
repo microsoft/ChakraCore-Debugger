@@ -8,6 +8,7 @@
 #include "DebuggerBreak.h"
 #include "DebuggerBreakpoint.h"
 #include "DebuggerCallFrame.h"
+#include "DebuggerObject.h"
 #include "DebuggerScript.h"
 
 #include <ChakraCore.h>
@@ -46,10 +47,15 @@ namespace JsDebug
         void PauseOnNextStatement();
 
         std::vector<DebuggerScript> GetScripts();
+        DebuggerCallFrame GetCallFrame(int ordinal);
         std::vector<DebuggerCallFrame> GetCallFrames(int limit = 0);
+        DebuggerObject GetObjectFromHandle(int handle);
 
         void SetBreakpoint(DebuggerBreakpoint& breakpoint);
         void RemoveBreakpoint(DebuggerBreakpoint& breakpoint);
+
+        JsDiagBreakOnExceptionAttributes GetBreakOnException();
+        void SetBreakOnException(JsDiagBreakOnExceptionAttributes attributes);
 
         bool IsPaused();
         void Continue();

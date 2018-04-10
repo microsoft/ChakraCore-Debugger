@@ -158,6 +158,8 @@
     <ClInclude Include="DebuggerCallFrame.h" />
     <ClInclude Include="DebuggerImpl.h" />
     <ClInclude Include="ChakraDebugProtocolHandler.h" />
+    <ClInclude Include="DebuggerLocalScope.h" />
+    <ClInclude Include="DebuggerObject.h" />
     <ClInclude Include="DebuggerScript.h" />
     <ClInclude Include="ErrorHelpers.h" />
     <ClInclude Include="JsPersistent.h" />
@@ -177,6 +179,8 @@
     <ClCompile Include="DebuggerCallFrame.cpp" />
     <ClCompile Include="DebuggerImpl.cpp" />
     <ClCompile Include="ChakraDebugProtocolHandler.cpp" />
+    <ClCompile Include="DebuggerLocalScope.cpp" />
+    <ClCompile Include="DebuggerObject.cpp" />
     <ClCompile Include="DebuggerScript.cpp" />
     <ClCompile Include="ErrorHelpers.cpp" />
     <ClCompile Include="PropertyHelpers.cpp" />

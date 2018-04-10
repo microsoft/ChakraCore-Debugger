@@ -84,6 +84,12 @@
     <ClInclude Include="DebuggerBreakpoint.h">
       <Filter>Header Files\Debugger</Filter>
     </ClInclude>
+    <ClInclude Include="DebuggerObject.h">
+      <Filter>Header Files\Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="DebuggerLocalScope.h">
+      <Filter>Header Files\Debugger</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -129,6 +135,12 @@
       <Filter>Source Files\Helpers</Filter>
     </ClCompile>
     <ClCompile Include="DebuggerBreakpoint.cpp">
+      <Filter>Source Files\Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="DebuggerObject.cpp">
+      <Filter>Source Files\Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="DebuggerLocalScope.cpp">
       <Filter>Source Files\Debugger</Filter>
     </ClCompile>
   </ItemGroup>

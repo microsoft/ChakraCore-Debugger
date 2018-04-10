@@ -18,7 +18,7 @@ namespace JsDebug
     class DebuggerBreak
     {
     public:
-        DebuggerBreak(JsValueRef breakInfo);
+        explicit DebuggerBreak(JsValueRef breakInfo);
 
         protocol::String GetReason() const;
         protocol::Maybe<protocol::DictionaryValue> GetData() const;

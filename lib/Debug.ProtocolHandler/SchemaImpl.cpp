@@ -10,6 +10,11 @@ namespace JsDebug
 {
     using protocol::Response;
 
+    namespace
+    {
+        const char c_ErrorNotImplemented[] = "Not implemented";
+    }
+
     SchemaImpl::SchemaImpl(ProtocolHandler* handler, protocol::FrontendChannel* frontendChannel)
         : m_handler(handler)
         , m_frontend(frontendChannel)
@@ -22,6 +27,6 @@ namespace JsDebug
 
     Response SchemaImpl::getDomains(std::unique_ptr<protocol::Array<protocol::Schema::Domain>>* out_domains)
     {
-        return Response::Error("Not implemented");
+        return Response::Error(c_ErrorNotImplemented);
     }
 }

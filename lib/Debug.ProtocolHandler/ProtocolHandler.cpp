@@ -10,6 +10,11 @@ namespace JsDebug
 {
     using protocol::Serializable;
 
+    namespace
+    {
+        const char c_ErrorHandlerAlreadyConnected[] = "Handler is already connected";
+    }
+
     ProtocolHandler::ProtocolHandler(JsRuntimeHandle runtime)
         : m_callback(nullptr)
         , m_callbackState(nullptr)
@@ -24,7 +29,7 @@ namespace JsDebug
         m_debuggerAgent = std::make_unique<DebuggerImpl>(this, this, m_debugger.get());
         protocol::Debugger::Dispatcher::wire(&m_dispatcher, m_debuggerAgent.get());
 
-        m_runtimeAgent = std::make_unique<RuntimeImpl>(this, this);
+        m_runtimeAgent = std::make_unique<RuntimeImpl>(this, this, m_debugger.get());
         protocol::Runtime::Dispatcher::wire(&m_dispatcher, m_runtimeAgent.get());
 
         m_schemaAgent = std::make_unique<SchemaImpl>(this, this);
@@ -42,7 +47,7 @@ namespace JsDebug
     {
         if (m_callback != nullptr)
         {
-            throw std::runtime_error("Handler is already connected");
+            throw std::runtime_error(c_ErrorHandlerAlreadyConnected);
         }
 
         m_callback = callback;
@@ -100,25 +105,8 @@ namespace JsDebug
     void ProtocolHandler::sendProtocolNotification(std::unique_ptr<Serializable> message)
     {
         protocol::String str = message->serialize();
-
-        const UChar* chars = str.characters16();
-        size_t len = str.length();
-        std::vector<char> buffer;
-        buffer.reserve(len + 1);
-
-        for (size_t i = 0; i < len; i++)
-        {
-            if ((chars[i] & 0xff) != chars[i])
-            {
-                throw std::runtime_error("Invalid character");
-            }
-
-            buffer.push_back(static_cast<char>(chars[i]));
-        }
-
-        buffer.push_back('\0');
-
-        const char* response = buffer.data();
+        std::string asciiStr = str.toAscii();
+        const char* response = asciiStr.c_str();
 
 #ifdef _DEBUG
         OutputDebugStringA("{\"type\":\"response\",\"payload\":");
