@@ -10,7 +10,6 @@
 
 #include "Debugger.h"
 #include "DebuggerBreakpoint.h"
-#include "DebuggerCallFrame.h"
 #include "DebuggerScript.h"
 
 #include <ChakraCore.h>
@@ -115,6 +114,5 @@ namespace JsDebug
 
         protocol::HashMap<protocol::String, DebuggerScript> m_scriptMap;
         protocol::HashMap<protocol::String, DebuggerBreakpoint> m_breakpointMap;
-        std::vector<DebuggerCallFrame> m_callFrames;
     };
 }

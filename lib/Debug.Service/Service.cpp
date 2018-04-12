@@ -17,7 +17,6 @@ namespace JsDebug
     using websocketpp::lib::bind;
     using websocketpp::lib::mutex;
     using websocketpp::lib::placeholders::_1;
-    using websocketpp::lib::placeholders::_2;
     using websocketpp::lib::thread;
     using websocketpp::lib::unique_lock;
 
@@ -31,7 +30,6 @@ namespace JsDebug
 
         m_server.init_asio();
         m_server.set_validate_handler(bind(&Service::OnValidate, this, _1));
-        m_server.set_close_handler(bind(&Service::OnClose, this, _1));
     }
 
     Service::~Service()
@@ -84,12 +82,10 @@ namespace JsDebug
             {
                 unique_lock<mutex> lock(m_lock);
 
-                for (const auto& conHandle : m_connections)
+                for (const auto& handler : m_handlers)
                 {
-                    m_server.close(conHandle, websocketpp::close::status::normal, "Server shutting down...");
+                    handler.second->Disconnect();
                 }
-
-                m_connections.clear();
             }
         }
         catch (const websocketpp::exception& e)
@@ -114,24 +110,12 @@ namespace JsDebug
                 unique_lock<mutex> lock(m_lock);
 
                 auto handler = m_handlers.find(resource);
-                if (handler == m_handlers.end()) {
-                    return false;
-                }
-
-                if (handler->second->RegisterConnection(hdl))
-                {
-                    m_connections.insert(hdl);
-                    return true;
+                if (handler != m_handlers.end()) {
+                    return handler->second->Connect(hdl);
                 }
             }
         }
 
         return false;
-    }
-
-    void Service::OnClose(connection_hdl hdl)
-    {
-        unique_lock<mutex> lock(m_lock);
-        m_connections.erase(hdl);
     }
 }

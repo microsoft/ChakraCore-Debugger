@@ -43,9 +43,9 @@ namespace JsDebug
             JsValueRef properties = PropertyHelpers::GetProperty(diagProperties, PropertyHelpers::Names::Properties);
             int length = PropertyHelpers::GetPropertyInt(properties, PropertyHelpers::Names::Length);
 
-            for (int i = 0; i < length; i++)
+            for (int index = 0; index < length; index++)
             {
-                JsValueRef prop = PropertyHelpers::GetIndexedProperty(properties, i);
+                JsValueRef prop = PropertyHelpers::GetIndexedProperty(properties, index);
                 propertyDescriptors->addItem(ProtocolHelpers::WrapProperty(prop));
             }
         }
@@ -67,9 +67,9 @@ namespace JsDebug
                 PropertyHelpers::Names::DebuggerOnlyProperties);
             int length = PropertyHelpers::GetPropertyInt(properties, PropertyHelpers::Names::Length);
 
-            for (int i = 0; i < length; i++)
+            for (int index = 0; index < length; index++)
             {
-                JsValueRef prop = PropertyHelpers::GetIndexedProperty(properties, i);
+                JsValueRef prop = PropertyHelpers::GetIndexedProperty(properties, index);
                 propertyDescriptors->addItem(ProtocolHelpers::WrapInternalProperty(prop));
             }
         }

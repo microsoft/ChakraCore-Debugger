@@ -173,9 +173,9 @@ namespace JsDebug
         {
             int length = PropertyHelpers::GetPropertyInt(scopes, PropertyHelpers::Names::Length);
 
-            for (int i = 0; i < length; i++)
+            for (int index = 0; index < length; index++)
             {
-                JsValueRef scopeObj = PropertyHelpers::GetIndexedProperty(scopes, i);
+                JsValueRef scopeObj = PropertyHelpers::GetIndexedProperty(scopes, index);
                 scopeChain->addItem(GetClosureScope(scopeObj));
             }
         }

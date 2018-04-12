@@ -6,6 +6,8 @@
 #include "stdafx.h"
 #include "SchemaImpl.h"
 
+#include "ProtocolHandler.h"
+
 namespace JsDebug
 {
     using protocol::Response;
@@ -27,6 +29,7 @@ namespace JsDebug
 
     Response SchemaImpl::getDomains(std::unique_ptr<protocol::Array<protocol::Schema::Domain>>* out_domains)
     {
-        return Response::Error(c_ErrorNotImplemented);
+        *out_domains = m_handler->GetSupportedDomains();
+        return Response::OK();
     }
 }

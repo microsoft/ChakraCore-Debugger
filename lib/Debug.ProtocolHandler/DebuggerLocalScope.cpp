@@ -38,9 +38,9 @@ namespace JsDebug
         {
             int length = PropertyHelpers::GetPropertyInt(functionCallsReturn, PropertyHelpers::Names::Length);
 
-            for (int i = 0; i < length; i++)
+            for (int index = 0; index < length; index++)
             {
-                JsValueRef prop = PropertyHelpers::GetIndexedProperty(functionCallsReturn, i);
+                JsValueRef prop = PropertyHelpers::GetIndexedProperty(functionCallsReturn, index);
                 propertyDescriptors->addItem(ProtocolHelpers::WrapProperty(prop));
             }
         }
@@ -50,9 +50,9 @@ namespace JsDebug
         {
             int length = PropertyHelpers::GetPropertyInt(locals, PropertyHelpers::Names::Length);
 
-            for (int i = 0; i < length; i++)
+            for (int index = 0; index < length; index++)
             {
-                JsValueRef prop = PropertyHelpers::GetIndexedProperty(locals, i);
+                JsValueRef prop = PropertyHelpers::GetIndexedProperty(locals, index);
                 propertyDescriptors->addItem(ProtocolHelpers::WrapProperty(prop));
             }
         }

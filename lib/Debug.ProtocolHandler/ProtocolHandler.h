@@ -37,9 +37,11 @@ namespace JsDebug
         void Disconnect();
 
         void SendCommand(const char* command);
-        void ProcessCommandQueue(bool waitForCommands);
+        void ProcessCommandQueue();
         void WaitForDebugger();
         void RunIfWaitingForDebugger();
+
+        std::unique_ptr<protocol::Array<protocol::Schema::Domain>> GetSupportedDomains();
 
         // protocol::FrontendChannel implementation
         void sendProtocolResponse(int callId, std::unique_ptr<protocol::Serializable> message) override;
@@ -47,7 +49,19 @@ namespace JsDebug
         void flushProtocolNotifications() override;
 
     private:
+        enum class CommandType
+        {
+            None,
+            Connect,
+            Disconnect,
+            MessageReceived,
+        };
+
         void SendResponse(const char* response);
+        void EnqueueCommand(CommandType type, std::string message = "");
+        void HandleConnect();
+        void HandleDisconnect();
+        void HandleMessageReceived(const std::string& message);
 
         std::unique_ptr<Debugger> m_debugger;
         ProtocolHandlerSendResponseCallback m_callback;
@@ -55,8 +69,10 @@ namespace JsDebug
 
         std::mutex m_lock;
         std::condition_variable m_commandWaiting;
-        std::vector<std::string> m_commandQueue;
+        std::vector<std::pair<CommandType, std::string>> m_commandQueue;
+        bool m_isConnected;
         bool m_waitingForDebugger;
+        bool m_breakOnNextLine;
 
         protocol::UberDispatcher m_dispatcher;
         std::unique_ptr<ConsoleImpl> m_consoleAgent;

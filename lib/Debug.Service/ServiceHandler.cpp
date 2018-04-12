@@ -16,34 +16,50 @@ namespace JsDebug
         const char* id,
         JsDebugProtocolHandler protocolHandler,
         bool breakOnNextLine)
-        : m_server(server)
+        : m_connected(false)
+        , m_server(server)
         , m_id(id)
         , m_protocolHandler(protocolHandler)
         , m_breakOnNextLine(breakOnNextLine)
     {
-        JsDebugProtocolHandlerConnect(
-            m_protocolHandler,
-            m_breakOnNextLine,
-            &ServiceHandler::SendResponseCallback,
-            this);
     }
 
     ServiceHandler::~ServiceHandler()
     {
-        JsDebugProtocolHandlerDisconnect(m_protocolHandler);
+        Disconnect();
     }
 
-    bool ServiceHandler::RegisterConnection(connection_hdl hdl)
+    bool ServiceHandler::Connect(connection_hdl hdl)
     {
-        if (!m_hdl.expired()) {
+        if (!m_hdl.expired())
+        {
             return false;
         }
 
         auto connection = m_server->get_con_from_hdl(hdl);
         connection->set_message_handler(bind(&ServiceHandler::OnMessage, this, _1, _2));
+        connection->set_close_handler(bind(&ServiceHandler::OnClose, this, _1));
 
+        JsDebugProtocolHandlerConnect(
+            m_protocolHandler,
+            m_breakOnNextLine,
+            &ServiceHandler::SendResponseCallback,
+            this);
+
+        m_connected = true;
         m_hdl = hdl;
+
         return true;
+    }
+
+    void ServiceHandler::Disconnect()
+    {
+        if (m_hdl.expired())
+        {
+            return;
+        }
+
+        m_server->close(m_hdl, websocketpp::close::status::going_away, "Server shutting down...");
     }
 
     void ServiceHandler::SendResponseCallback(const char* response, void* callbackState)
@@ -54,7 +70,8 @@ namespace JsDebug
 
     void ServiceHandler::SendResponse(const char* response)
     {
-        if (m_hdl.expired()) {
+        if (m_hdl.expired())
+        {
             return;
         }
 
@@ -64,5 +81,14 @@ namespace JsDebug
     void ServiceHandler::OnMessage(connection_hdl hdl, server::message_ptr msg)
     {
         JsDebugProtocolHandlerSendCommand(m_protocolHandler, msg->get_payload().c_str());
+    }
+
+    void ServiceHandler::OnClose(connection_hdl hdl)
+    {
+        if (m_connected)
+        {
+            JsDebugProtocolHandlerDisconnect(m_protocolHandler);
+            m_connected = false;
+        }
     }
 }

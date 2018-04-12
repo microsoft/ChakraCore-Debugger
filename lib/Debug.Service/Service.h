@@ -35,9 +35,7 @@ namespace JsDebug
 
     private:
         bool OnValidate(websocketpp::connection_hdl hdl);
-        void OnClose(websocketpp::connection_hdl hdl);
 
-        typedef std::set<websocketpp::connection_hdl, std::owner_less<websocketpp::connection_hdl>> con_list;
         typedef std::map<std::string, std::unique_ptr<ServiceHandler>> handler_map;
 
         // Although access to the server object is thread-safe, access to all other objects is not. The lock must be
@@ -46,7 +44,6 @@ namespace JsDebug
         websocketpp::lib::thread m_thread;
         websocketpp::lib::mutex m_lock;
 
-        con_list m_connections;
         handler_map m_handlers;
     };
 }

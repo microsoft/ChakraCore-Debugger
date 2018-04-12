@@ -6,9 +6,10 @@
 #include "stdafx.h"
 #include "DebuggerImpl.h"
 
-#include "ProtocolHandler.h"
 #include "Debugger.h"
+#include "DebuggerCallFrame.h"
 #include "DebuggerScript.h"
+#include "ProtocolHandler.h"
 
 #include <StringUtil.h>
 
@@ -80,6 +81,10 @@ namespace JsDebug
         m_isEnabled = false;
         m_debugger->Disable();
         m_debugger->SetSourceEventHandler(nullptr, nullptr);
+
+        m_breakpointMap.clear();
+        m_scriptMap.clear();
+        m_shouldSkipAllPauses = false;
 
         return Response::OK();
     }
@@ -233,7 +238,8 @@ namespace JsDebug
 
     Response DebuggerImpl::pause()
     {
-        return Response::Error(c_ErrorNotImplemented);
+        m_debugger->PauseOnNextStatement();
+        return Response::OK();
     }
 
     Response DebuggerImpl::resume()

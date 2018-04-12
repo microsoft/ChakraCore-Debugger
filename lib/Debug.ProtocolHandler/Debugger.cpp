@@ -101,9 +101,9 @@ namespace JsDebug
 
         int length = PropertyHelpers::GetPropertyInt(scriptsArray, PropertyHelpers::Names::Length);
 
-        for (int i = 0; i < length; i++)
+        for (int index = 0; index < length; index++)
         {
-            JsValueRef scriptValue = PropertyHelpers::GetIndexedProperty(scriptsArray, i);
+            JsValueRef scriptValue = PropertyHelpers::GetIndexedProperty(scriptsArray, index);
 
             scripts.emplace_back(scriptValue);
         }
@@ -139,8 +139,8 @@ namespace JsDebug
 
         std::vector<DebuggerCallFrame> callFrames;
 
-        for (int i = 0; i < length; ++i) {
-            JsValueRef callFrameValue = PropertyHelpers::GetIndexedProperty(stackTrace, i);
+        for (int index = 0; index < length; ++index) {
+            JsValueRef callFrameValue = PropertyHelpers::GetIndexedProperty(stackTrace, index);
 
             callFrames.emplace_back(callFrameValue);
         }
@@ -150,7 +150,7 @@ namespace JsDebug
 
     DebuggerObject Debugger::GetObjectFromHandle(int handle)
     {
-        JsValueRef obj;
+        JsValueRef obj = JS_INVALID_REFERENCE;
         IfJsErrorThrow(JsDiagGetObjectFromHandle(handle, &obj));
 
         return DebuggerObject(obj);
@@ -223,7 +223,7 @@ namespace JsDebug
 
     void Debugger::HandleDebugEvent(JsDiagDebugEvent debugEvent, JsValueRef eventData)
     {
-        m_handler->ProcessCommandQueue(false);
+        m_handler->ProcessCommandQueue();
 
         if (!m_isEnabled)
         {
@@ -301,5 +301,16 @@ namespace JsDebug
 
     void Debugger::ClearBreakpoints()
     {
+        JsValueRef breakpoints = JS_INVALID_REFERENCE;
+        IfJsErrorThrow(JsDiagGetBreakpoints(&breakpoints));
+
+        int length = PropertyHelpers::GetPropertyInt(breakpoints, PropertyHelpers::Names::Length);
+
+        for (int index = 0; index < length; index++)
+        {
+            JsValueRef breakpoint = PropertyHelpers::GetIndexedProperty(breakpoints, index);
+            int breakpointId = PropertyHelpers::GetPropertyInt(breakpoint, PropertyHelpers::Names::BreakpointId);
+            IfJsErrorThrow(JsDiagRemoveBreakpoint(breakpointId));
+        }
     }
 }

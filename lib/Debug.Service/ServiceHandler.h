@@ -15,14 +15,17 @@ namespace JsDebug
             bool breakOnNextLine);
         ~ServiceHandler();
 
-        bool RegisterConnection(websocketpp::connection_hdl hdl);
+        bool Connect(websocketpp::connection_hdl hdl);
+        void Disconnect();
 
     private:
         static void CHAKRA_CALLBACK SendResponseCallback(const char* response, void* callbackState);
         void SendResponse(const char* response);
 
         void OnMessage(websocketpp::connection_hdl hdl, websocketpp::server<websocketpp::config::asio>::message_ptr msg);
+        void OnClose(websocketpp::connection_hdl hdl);
 
+        bool m_connected;
         websocketpp::server<websocketpp::config::asio>* m_server;
         std::string m_id;
         JsDebugProtocolHandler m_protocolHandler;

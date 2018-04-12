@@ -22,13 +22,10 @@ function doStuff() {
 }
 
 function errorStuff() {
-  try
-  {
+  try {
     throw { foo: 4, bar: [ 1, 2, 3 ] };
     return true;
-  }
-  catch (e)
-  {
+  } catch (e) {
     return false;
   }
 }
