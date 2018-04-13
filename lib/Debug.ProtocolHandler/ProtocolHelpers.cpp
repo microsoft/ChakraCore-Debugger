@@ -10,15 +10,20 @@
 
 namespace JsDebug
 {
+    using protocol::DictionaryValue;
     using protocol::Debugger::Location;
+    using protocol::Runtime::ExceptionDetails;
     using protocol::Runtime::InternalPropertyDescriptor;
     using protocol::Runtime::PropertyDescriptor;
     using protocol::Runtime::RemoteObject;
     using protocol::String;
+    using protocol::StringUtil;
     using protocol::Value;
 
     namespace
     {
+        const char c_DefaultExceptionText[] = "Uncaught";
+        const char c_ErrorInvalidObjectId[] = "Invalid object ID";
         const char c_ErrorNoDisplayString[] = "No display string found";
         const int c_JsrtDebugPropertyReadOnly = 0x4;
 
@@ -39,6 +44,17 @@ namespace JsDebug
     String ProtocolHelpers::GetObjectId(int handle)
     {
         return "{\"handle\":" + String::fromInteger(handle) + "}";
+    }
+
+    std::unique_ptr<DictionaryValue> ProtocolHelpers::ParseObjectId(const String& objectId)
+    {
+        auto parsedValue = StringUtil::parseJSON(objectId);
+        if (parsedValue == nullptr || parsedValue->type() != Value::TypeObject)
+        {
+            throw std::runtime_error(c_ErrorInvalidObjectId);
+        }
+
+        return std::unique_ptr<DictionaryValue>(DictionaryValue::cast(parsedValue.release()));
     }
 
     std::unique_ptr<RemoteObject> ProtocolHelpers::WrapObject(JsValueRef object)
@@ -91,6 +107,20 @@ namespace JsDebug
         wrapped->setSubtype("error");
 
         return wrapped;
+    }
+
+    std::unique_ptr<ExceptionDetails> ProtocolHelpers::WrapExceptionDetails(JsValueRef exception)
+    {
+        int handle = PropertyHelpers::GetPropertyInt(exception, PropertyHelpers::Names::Handle);
+        String text = PropertyHelpers::GetPropertyString(exception, PropertyHelpers::Names::Display);
+
+        return ExceptionDetails::create()
+            .setExceptionId(handle)
+            .setText(!text.empty() ? text : c_DefaultExceptionText)
+            .setLineNumber(0)
+            .setColumnNumber(0)
+            .setException(WrapException(exception))
+            .build();
     }
     
     std::unique_ptr<PropertyDescriptor> ProtocolHelpers::WrapProperty(JsValueRef property)

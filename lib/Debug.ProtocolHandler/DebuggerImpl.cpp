@@ -9,7 +9,9 @@
 #include "Debugger.h"
 #include "DebuggerCallFrame.h"
 #include "DebuggerScript.h"
+#include "PropertyHelpers.h"
 #include "ProtocolHandler.h"
+#include "ProtocolHelpers.h"
 
 #include <StringUtil.h>
 
@@ -21,6 +23,7 @@ namespace JsDebug
     using protocol::FrontendChannel;
     using protocol::Maybe;
     using protocol::Response;
+    using protocol::Runtime::ExceptionDetails;
     using protocol::Runtime::StackTrace;
     using protocol::String;
     using protocol::StringUtil;
@@ -30,6 +33,7 @@ namespace JsDebug
         const char c_ErrorBreakpointCouldNotResolve[] = "Breakpoint could not be resolved";
         const char c_ErrorBreakpointExists[] = "Breakpoint at specified location already exists";
         const char c_ErrorBreakpointNotFound[] = "Breakpoint could not be found";
+        const char c_ErrorCallFrameInvalidId[] = "Invalid call frame ID specified";
         const char c_ErrorInvalidColumnNumber[] = "Invalid column number specified";
         const char c_ErrorNotEnabled[] = "Debugger is not enabled";
         const char c_ErrorNotImplemented[] = "Debugger method not implemented";
@@ -335,7 +339,25 @@ namespace JsDebug
         std::unique_ptr<protocol::Runtime::RemoteObject>* out_result,
         Maybe<protocol::Runtime::ExceptionDetails>* out_exceptionDetails)
     {
-        return Response::Error(c_ErrorNotImplemented);
+        auto parsedId = ProtocolHelpers::ParseObjectId(in_callFrameId);
+
+        int ordinal = 0;
+        if (parsedId->getInteger(PropertyHelpers::Names::Ordinal, &ordinal))
+        {
+            auto callFrame = m_debugger->GetCallFrame(ordinal);
+
+            std::unique_ptr<ExceptionDetails> exceptionDetails;
+            *out_result = callFrame.Evaluate(in_expression, in_returnByValue.fromMaybe(false), &exceptionDetails);
+
+            if (exceptionDetails != nullptr)
+            {
+                *out_exceptionDetails = std::move(exceptionDetails);
+            }
+
+            return Response::OK();
+        }
+
+        return Response::Error(c_ErrorCallFrameInvalidId);
     }
 
     Response DebuggerImpl::setVariableValue(

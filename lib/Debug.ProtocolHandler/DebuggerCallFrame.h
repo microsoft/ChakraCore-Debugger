@@ -27,6 +27,10 @@ namespace JsDebug
 
         DebuggerLocalScope GetLocals() const;
         DebuggerObject GetGlobals() const;
+        std::unique_ptr<protocol::Runtime::RemoteObject> Evaluate(
+            const protocol::String& expression,
+            bool returnByValue,
+            std::unique_ptr<protocol::Runtime::ExceptionDetails>* exceptionDetails);
         std::unique_ptr<protocol::Debugger::CallFrame> ToProtocolValue() const;
 
     private:

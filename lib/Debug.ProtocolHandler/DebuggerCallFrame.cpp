@@ -16,6 +16,7 @@ namespace JsDebug
     using protocol::Debugger::CallFrame;
     using protocol::Debugger::Location;
     using protocol::Debugger::Scope;
+    using protocol::Runtime::ExceptionDetails;
     using protocol::Runtime::RemoteObject;
     using protocol::String;
 
@@ -73,6 +74,36 @@ namespace JsDebug
         IfJsErrorThrow(JsDiagGetStackProperties(m_callFrameIndex, &properties));
 
         return DebuggerObject(PropertyHelpers::GetProperty(properties, PropertyHelpers::Names::Globals));
+    }
+
+    std::unique_ptr<RemoteObject> DebuggerCallFrame::Evaluate(
+        const String& expression,
+        bool returnByValue,
+        std::unique_ptr<ExceptionDetails>* exceptionDetails)
+    {
+        JsValueRef expressionStr = JS_INVALID_REFERENCE;
+        IfJsErrorThrow(JsCreateStringUtf16(expression.characters16(), expression.length(), &expressionStr));
+
+        JsValueRef evalResult = JS_INVALID_REFERENCE;
+        JsErrorCode err = JsDiagEvaluate(
+            expressionStr,
+            m_callFrameIndex,
+            JsParseScriptAttributeNone,
+            returnByValue,
+            &evalResult);
+
+        if (err == JsErrorScriptException)
+        {
+            if (exceptionDetails != nullptr)
+            {
+                *exceptionDetails = ProtocolHelpers::WrapExceptionDetails(evalResult);
+            }
+
+            return ProtocolHelpers::WrapException(evalResult);
+        }
+
+        IfJsErrorThrow(err);
+        return ProtocolHelpers::WrapObject(evalResult);
     }
 
     std::unique_ptr<CallFrame> DebuggerCallFrame::ToProtocolValue() const

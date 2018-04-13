@@ -8,6 +8,7 @@
 
 #include "PropertyHelpers.h"
 #include "ProtocolHandler.h"
+#include "ProtocolHelpers.h"
 
 #include <StringUtil.h>
 
@@ -28,20 +29,9 @@ namespace JsDebug
 
     namespace
     {
+        const char c_ErrorInvalidObjectId[] = "Invalid object ID";
         const char c_ErrorNotEnabled[] = "Runtime is not enabled";
         const char c_ErrorNotImplemented[] = "Not implemented";
-        const char c_ErrorInvalidObjectId[] = "Invalid object ID";
-
-        std::unique_ptr<DictionaryValue> ParseObjectId(const String& objectId)
-        {
-            auto parsedValue = StringUtil::parseJSON(objectId);
-            if (parsedValue == nullptr || parsedValue->type() != Value::TypeObject)
-            {
-                throw std::runtime_error(c_ErrorInvalidObjectId);
-            }
-
-            return std::unique_ptr<DictionaryValue>(DictionaryValue::cast(parsedValue.release()));
-        }
     }
 
     RuntimeImpl::RuntimeImpl(ProtocolHandler* handler, FrontendChannel* frontendChannel, Debugger* debugger)
@@ -68,6 +58,7 @@ namespace JsDebug
         Maybe<bool> in_awaitPromise,
         std::unique_ptr<EvaluateCallback> callback)
     {
+        callback->sendFailure(Response::Error(c_ErrorNotImplemented));
     }
 
     void RuntimeImpl::awaitPromise(
@@ -76,6 +67,7 @@ namespace JsDebug
         Maybe<bool> in_generatePreview,
         std::unique_ptr<AwaitPromiseCallback> callback)
     {
+        callback->sendFailure(Response::Error(c_ErrorNotImplemented));
     }
 
     void RuntimeImpl::callFunctionOn(
@@ -89,6 +81,7 @@ namespace JsDebug
         Maybe<bool> in_awaitPromise,
         std::unique_ptr<CallFunctionOnCallback> callback)
     {
+        callback->sendFailure(Response::Error(c_ErrorNotImplemented));
     }
 
     Response RuntimeImpl::getProperties(
@@ -107,7 +100,7 @@ namespace JsDebug
             return Response::OK();
         }
 
-        auto parsedId = ParseObjectId(in_objectId);
+        auto parsedId = ProtocolHelpers::ParseObjectId(in_objectId);
 
         int handle = 0;
         int ordinal = 0;
@@ -226,6 +219,7 @@ namespace JsDebug
         Maybe<bool> in_awaitPromise,
         std::unique_ptr<RunScriptCallback> callback)
     {
+        callback->sendFailure(Response::Error(c_ErrorNotImplemented));
     }
 
     bool RuntimeImpl::IsEnabled()
