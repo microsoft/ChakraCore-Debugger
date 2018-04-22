@@ -31,7 +31,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="test.js" />
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>
