@@ -14,7 +14,10 @@ namespace JsDebug
         : public std::runtime_error
     {
     public:
-        JsErrorException(JsErrorCode error);
+        explicit JsErrorException(JsErrorCode error);
+        JsErrorException(JsErrorCode error, const std::string& message);
+
+        JsErrorCode code() const;
 
     private:
         static std::string MakeMessage(JsErrorCode error);
@@ -23,6 +26,8 @@ namespace JsDebug
         /// Uses error messages from the enum comments in ChakraCommon.h to create friendlier error messages.
         /// </summary>
         static std::string TranslateError(JsErrorCode error);
+
+        JsErrorCode m_code;
     };
 
     inline void IfJsErrorThrow(JsErrorCode error)

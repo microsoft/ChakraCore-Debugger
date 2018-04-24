@@ -9,8 +9,18 @@
 namespace JsDebug
 {
     JsErrorException::JsErrorException(JsErrorCode error)
-        : std::runtime_error(MakeMessage(error))
+        : std::runtime_error(MakeMessage(error)), m_code(error)
     {
+    }
+
+    JsErrorException::JsErrorException(JsErrorCode error, const std::string& message)
+        : std::runtime_error(message), m_code(error)
+    {
+    }
+
+    JsErrorCode JsErrorException::code() const
+    {
+        return m_code;
     }
 
     std::string JsErrorException::MakeMessage(JsErrorCode error)

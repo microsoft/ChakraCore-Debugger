@@ -35,6 +35,13 @@ namespace JsDebug
 
     private:
         bool OnValidate(websocketpp::connection_hdl hdl);
+        void OnHttpRequest(websocketpp::connection_hdl hdl);
+
+        void HandleListRequest(websocketpp::connection_hdl hdl);
+        void HandleProtocolRequest(websocketpp::connection_hdl hdl);
+        void HandleVersionRequest(websocketpp::connection_hdl hdl);
+
+        void SendHttpJsonResponse(websocketpp::connection_hdl hdl, const std::string& jsonBody);
 
         typedef std::map<std::string, std::unique_ptr<ServiceHandler>> handler_map;
 
@@ -44,6 +51,7 @@ namespace JsDebug
         websocketpp::lib::thread m_thread;
         websocketpp::lib::mutex m_lock;
 
+        uint16_t m_port;
         handler_map m_handlers;
     };
 }

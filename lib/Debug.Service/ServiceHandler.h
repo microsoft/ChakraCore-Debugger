@@ -18,6 +18,8 @@ namespace JsDebug
         bool Connect(websocketpp::connection_hdl hdl);
         void Disconnect();
 
+        std::string Id();
+
     private:
         static void CHAKRA_CALLBACK SendResponseCallback(const char* response, void* callbackState);
         void SendResponse(const char* response);
