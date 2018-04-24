@@ -95,17 +95,19 @@ namespace JsDebug
     std::vector<DebuggerScript> Debugger::GetScripts()
     {
         std::vector<DebuggerScript> scripts;
-
         JsValueRef scriptsArray = JS_INVALID_REFERENCE;
-        IfJsErrorThrow(JsDiagGetScripts(&scriptsArray));
-
-        int length = PropertyHelpers::GetPropertyInt(scriptsArray, PropertyHelpers::Names::Length);
-
-        for (int index = 0; index < length; index++)
+        JsErrorCode result = JsDiagGetScripts(&scriptsArray);
+          
+        if (result == JsNoError)
         {
+          int length = PropertyHelpers::GetPropertyInt(scriptsArray, PropertyHelpers::Names::Length);
+
+          for (int index = 0; index < length; index++)
+          {
             JsValueRef scriptValue = PropertyHelpers::GetIndexedProperty(scriptsArray, index);
 
             scripts.emplace_back(scriptValue);
+          }
         }
 
         return scripts;
