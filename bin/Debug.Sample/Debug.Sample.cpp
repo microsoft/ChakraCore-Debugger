@@ -418,24 +418,30 @@ JsErrorCode EnableDebugging(
     JsRuntimeHandle runtime,
     std::string const& runtimeName,
     bool breakOnNextLine, 
-    int port, 
-    JsDebugProtocolHandler* pProtocolHandler, 
-    JsDebugService* pService)
+    uint16_t port, 
+    std::unique_ptr<DebugProtocolHandler>& debugProtocolHandler,
+    std::unique_ptr<DebugService>& debugService)
 {
-    JsDebugProtocolHandler protocolHandler = nullptr;
-    JsDebugService service = nullptr;
+    JsErrorCode result = JsNoError;
+    auto protocolHandler = std::make_unique<DebugProtocolHandler>(runtime);
+    auto service = std::make_unique<DebugService>(runtime);
 
-    IfFailRet(JsDebugProtocolHandlerCreate(runtime, &protocolHandler));
-    IfFailRet(JsDebugServiceCreate(&service));
-    IfFailRet(JsDebugServiceRegisterHandler(service, runtimeName.c_str(), protocolHandler, breakOnNextLine));
-    IfFailRet(JsDebugServiceListen(service, port));
+    result = service->RegisterHandler(runtimeName, *protocolHandler, breakOnNextLine);
 
-    std::cout << "Listening on ws://127.0.0.1:" << port << "/" << runtimeName << std::endl;
+    if (result == JsNoError)
+    {
+        result = service->Listen(port);
 
-    *pProtocolHandler = protocolHandler;
-    *pService = service;
+        std::cout << "Listening on ws://127.0.0.1:" << port << "/" << runtimeName << std::endl;
+    }
 
-    return JsNoError;
+    if (result == JsNoError)
+    {
+        debugProtocolHandler = std::move(protocolHandler);
+        debugService = std::move(service);
+    }
+
+    return result;
 }
 
 //
@@ -459,8 +465,9 @@ int _cdecl wmain(int argc, wchar_t* argv[])
     {
         JsRuntimeHandle runtime = JS_INVALID_RUNTIME_HANDLE;
         JsContextRef context = JS_INVALID_REFERENCE;
-        JsDebugProtocolHandler protocolHandler = nullptr;
-        JsDebugService service = nullptr;
+        std::unique_ptr<DebugProtocolHandler> debugProtocolHandler;
+        std::unique_ptr<DebugService> debugService;
+        std::string runtimeName("runtime1");
 
         //
         // Create the runtime. We're only going to use one runtime for this host.
@@ -471,7 +478,7 @@ int _cdecl wmain(int argc, wchar_t* argv[])
         if (arguments.enableDebugging)
         {
             IfFailError(
-                EnableDebugging(runtime, "runtime1", arguments.breakOnNextLine, arguments.port, &protocolHandler, &service),
+                EnableDebugging(runtime, runtimeName, arguments.breakOnNextLine, arguments.port, debugProtocolHandler, debugService),
                 L"failed to enable debugging.");
         }
 
@@ -498,10 +505,10 @@ int _cdecl wmain(int argc, wchar_t* argv[])
             goto error;
         }
 
-        if (protocolHandler)
+        if (debugProtocolHandler)
         {
             std::cout << "Waiting for debugger to connect..." << std::endl;
-            IfFailError(JsDebugProtocolHandlerWaitForDebugger(protocolHandler), L"failed to wait for debugger");
+            IfFailError(debugProtocolHandler->WaitForDebugger(), L"failed to wait for debugger");
             std::cout << "Debugger connected" << std::endl;
         }
 
@@ -533,18 +540,16 @@ int _cdecl wmain(int argc, wchar_t* argv[])
         returnValue = (int)doubleResult;
         std::cout << returnValue << std::endl;
 
-        if (service)
+        if (debugService)
         {
-            IfFailError(JsDebugServiceClose(service), L"failed to close service");
-            IfFailError(JsDebugServiceUnregisterHandler(service, "runtime1"), L"failed to unregister handler");
-            IfFailError(JsDebugServiceDestroy(service), L"failed to destroy service");
-            service = nullptr;
+            IfFailError(debugService->Close(), L"failed to close service");
+            IfFailError(debugService->UnregisterHandler(runtimeName), L"failed to unregister handler");
+            IfFailError(debugService->Destroy(), L"failed to destroy service");
         }
 
-        if (protocolHandler)
+        if (debugProtocolHandler)
         {
-            IfFailError(JsDebugProtocolHandlerDestroy(protocolHandler), L"failed to destroy handler");
-            protocolHandler = nullptr;
+            IfFailError(debugProtocolHandler->Destroy(), L"failed to destroy handler");
         }
 
         //
