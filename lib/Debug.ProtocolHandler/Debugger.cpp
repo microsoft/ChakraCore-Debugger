@@ -303,16 +303,24 @@ namespace JsDebug
 
     void Debugger::ClearBreakpoints()
     {
-        JsValueRef breakpoints = JS_INVALID_REFERENCE;
-        IfJsErrorThrow(JsDiagGetBreakpoints(&breakpoints));
-
-        int length = PropertyHelpers::GetPropertyInt(breakpoints, PropertyHelpers::Names::Length);
-
-        for (int index = 0; index < length; index++)
+        // Work around an issue where getting breakpoints requires a current context.
+        JsContextRef currentContext = JS_INVALID_REFERENCE;
+        if (JsGetCurrentContext(&currentContext) != JsNoError || currentContext == JS_INVALID_REFERENCE)
         {
-            JsValueRef breakpoint = PropertyHelpers::GetIndexedProperty(breakpoints, index);
-            int breakpointId = PropertyHelpers::GetPropertyInt(breakpoint, PropertyHelpers::Names::BreakpointId);
-            IfJsErrorThrow(JsDiagRemoveBreakpoint(breakpointId));
+            return;
+        }
+
+        JsValueRef breakpoints = JS_INVALID_REFERENCE;
+        if (JsDiagGetBreakpoints(&breakpoints) == JsNoError)
+        {
+            int length = PropertyHelpers::GetPropertyInt(breakpoints, PropertyHelpers::Names::Length);
+
+            for (int index = 0; index < length; index++)
+            {
+                JsValueRef breakpoint = PropertyHelpers::GetIndexedProperty(breakpoints, index);
+                int breakpointId = PropertyHelpers::GetPropertyInt(breakpoint, PropertyHelpers::Names::BreakpointId);
+                IfJsErrorThrow(JsDiagRemoveBreakpoint(breakpointId));
+            }
         }
     }
 }

@@ -8,7 +8,6 @@
 //
 // Class to store information about command-line arguments to the host.
 //
-
 class CommandLineArguments
 {
 public:
@@ -95,14 +94,12 @@ public:
 //
 // Source context counter.
 //
-
 unsigned currentSourceContext = 0;
 
 //
 // This "throws" an exception in the Chakra space. Useful routine for callbacks
 // that need to throw a JS error to indicate failure.
 //
-
 void ThrowJsError(std::wstring errorString)
 {
     // We ignore error since we're already in an error state.
@@ -116,7 +113,6 @@ void ThrowJsError(std::wstring errorString)
 //
 // Helper to load a script from disk.
 //
-
 std::wstring LoadScript(const std::wstring& fileName)
 {
     FILE* file;
@@ -166,7 +162,6 @@ std::wstring LoadScript(const std::wstring& fileName)
 //
 // Callback to echo something to the command-line.
 //
-
 JsValueRef CALLBACK Echo(
     JsValueRef callee, 
     bool isConstructCall, 
@@ -181,7 +176,7 @@ JsValueRef CALLBACK Echo(
             wprintf(L" ");
         }
 
-        JsValueRef stringValue;
+        JsValueRef stringValue = JS_INVALID_REFERENCE;
         IfFailThrowJsError(JsConvertValueToString(arguments[index], &stringValue), L"invalid argument");
 
         const wchar_t* string;
@@ -199,7 +194,6 @@ JsValueRef CALLBACK Echo(
 //
 // Callback to load a script and run it.
 //
-
 JsValueRef CALLBACK RunScript(
     JsValueRef callee, 
     bool isConstructCall, 
@@ -215,18 +209,13 @@ JsValueRef CALLBACK RunScript(
         return result;
     }
 
-    //
     // Convert filename.
-    //
     const wchar_t* filename;
     size_t length;
 
     IfFailThrowJsError(JsStringToPointer(arguments[1], &filename, &length), L"invalid filename argument");
 
-    //
     // Load the script from the disk.
-    //
-
     std::wstring script = LoadScript(filename);
     if (script.empty())
     {
@@ -234,10 +223,7 @@ JsValueRef CALLBACK RunScript(
         return result;
     }
 
-    //
     // Run the script.
-    //
-
     IfFailThrowJsError(JsRunScript(script.c_str(), currentSourceContext++, filename, &result), L"failed to run script.");
 
     return result;
@@ -246,31 +232,21 @@ JsValueRef CALLBACK RunScript(
 //
 // Helper to define a host callback method on the global host object.
 //
-
 JsErrorCode DefineHostCallback(
     JsValueRef globalObject, 
     const wchar_t* callbackName, 
     JsNativeFunction callback, 
     void* callbackState)
 {
-    //
     // Get property ID.
-    //
-
-    JsPropertyIdRef propertyId;
+    JsPropertyIdRef propertyId = JS_INVALID_REFERENCE;
     IfFailRet(JsGetPropertyIdFromName(callbackName, &propertyId));
 
-    //
     // Create a function
-    //
-
-    JsValueRef function;
+    JsValueRef function = JS_INVALID_REFERENCE;
     IfFailRet(JsCreateFunction(callback, callbackState, &function));
 
-    //
     // Set the property
-    //
-
     IfFailRet(JsSetProperty(globalObject, propertyId, function, true));
 
     return JsNoError;
@@ -279,104 +255,61 @@ JsErrorCode DefineHostCallback(
 //
 // Creates a host execution context and sets up the host object in it.
 //
-
 JsErrorCode CreateHostContext(JsRuntimeHandle runtime, std::vector<std::wstring>& scriptArgs, JsContextRef* context)
 {
-    //
     // Create the context.
-    //
-
     IfFailRet(JsCreateContext(runtime, context));
 
-    //
     // Now set the execution context as being the current one on this thread.
-    //
-
     IfFailRet(JsSetCurrentContext(*context));
 
-    //
     // Create the host object the script will use.
-    //
-
-    JsValueRef hostObject;
+    JsValueRef hostObject = JS_INVALID_REFERENCE;
     IfFailRet(JsCreateObject(&hostObject));
 
-    //
     // Get the global object
-    //
-
-    JsValueRef globalObject;
+    JsValueRef globalObject = JS_INVALID_REFERENCE;
     IfFailRet(JsGetGlobalObject(&globalObject));
 
-    //
     // Get the name of the property ("host") that we're going to set on the global object.
-    //
-
-    JsPropertyIdRef hostPropertyId;
+    JsPropertyIdRef hostPropertyId = JS_INVALID_REFERENCE;
     IfFailRet(JsGetPropertyIdFromName(L"host", &hostPropertyId));
 
-    //
     // Set the property.
-    //
-
     IfFailRet(JsSetProperty(globalObject, hostPropertyId, hostObject, true));
 
-    //
     // Now create the host callbacks that we're going to expose to the script.
-    //
-
     IfFailRet(DefineHostCallback(hostObject, L"echo", Echo, nullptr));
     IfFailRet(DefineHostCallback(hostObject, L"runScript", RunScript, nullptr));
 
-    //
     // Create an array for arguments.
-    //
-
     JsValueRef arguments = JS_INVALID_REFERENCE;
     IfFailRet(JsCreateArray(static_cast<unsigned int>(scriptArgs.size()), &arguments));
 
     for (int index = 0; index < scriptArgs.size(); index++)
     {
-        //
         // Create the argument value.
-        //
-
         std::wstring& str = scriptArgs[index];
 
-        JsValueRef argument;
+        JsValueRef argument = JS_INVALID_REFERENCE;
         IfFailRet(JsPointerToString(str.c_str(), str.length(), &argument));
 
-        //
         // Create the index.
-        //
-
-        JsValueRef indexValue;
+        JsValueRef indexValue = JS_INVALID_REFERENCE;
         IfFailRet(JsIntToNumber(index, &indexValue));
 
-        //
         // Set the value.
-        //
-
         IfFailRet(JsSetIndexedProperty(arguments, indexValue, argument));
     }
 
-    //
     // Get the name of the property that we're going to set on the host object.
-    //
-
-    JsPropertyIdRef argumentsPropertyId;
+    JsPropertyIdRef argumentsPropertyId = JS_INVALID_REFERENCE;
     IfFailRet(JsGetPropertyIdFromName(L"arguments", &argumentsPropertyId));
 
-    //
     // Set the arguments property.
-    //
-
     IfFailRet(JsSetProperty(hostObject, argumentsPropertyId, arguments, true));
 
-    //
     // Clean up the current execution context.
-    //
-
     IfFailRet(JsSetCurrentContext(JS_INVALID_REFERENCE));
 
     return JsNoError;
@@ -385,24 +318,17 @@ JsErrorCode CreateHostContext(JsRuntimeHandle runtime, std::vector<std::wstring>
 //
 // Print out a script exception.
 //
-
 JsErrorCode PrintScriptException()
 {
-    //
     // Get script exception.
-    //
-
-    JsValueRef exception;
+    JsValueRef exception = JS_INVALID_REFERENCE;
     IfFailRet(JsGetAndClearException(&exception));
 
-    //
     // Get message.
-    //
-
-    JsPropertyIdRef messageName;
+    JsPropertyIdRef messageName = JS_INVALID_REFERENCE;
     IfFailRet(JsGetPropertyIdFromName(L"message", &messageName));
 
-    JsValueRef messageValue;
+    JsValueRef messageValue = JS_INVALID_REFERENCE;
     IfFailRet(JsGetProperty(exception, messageName, &messageValue));
 
     const wchar_t* message;
@@ -447,7 +373,6 @@ JsErrorCode EnableDebugging(
 //
 // The main entry point for the host.
 //
-
 int _cdecl wmain(int argc, wchar_t* argv[])
 {
     int returnValue = EXIT_FAILURE;
@@ -469,10 +394,7 @@ int _cdecl wmain(int argc, wchar_t* argv[])
         std::unique_ptr<DebugService> debugService;
         std::string runtimeName("runtime1");
 
-        //
         // Create the runtime. We're only going to use one runtime for this host.
-        //
-
         IfFailError(JsCreateRuntime(JsRuntimeAttributeNone, nullptr, &runtime), L"failed to create runtime.");
 
         if (arguments.enableDebugging)
@@ -482,22 +404,14 @@ int _cdecl wmain(int argc, wchar_t* argv[])
                 L"failed to enable debugging.");
         }
 
-        //
         // Similarly, create a single execution context. Note that we're putting it on the stack here,
         // so it will stay alive through the entire run.
-        //
-
         IfFailError(CreateHostContext(runtime, arguments.scriptArgs, &context), L"failed to create execution context.");
 
-        //
         // Now set the execution context as being the current one on this thread.
-        //
-
         IfFailError(JsSetCurrentContext(context), L"failed to set current context.");
 
-        //
         // Load the script from the disk.
-        //
         const std::wstring& scriptName = arguments.scriptArgs[0];
         std::wstring script = LoadScript(scriptName);
         if (script.empty())
@@ -512,10 +426,7 @@ int _cdecl wmain(int argc, wchar_t* argv[])
             std::cout << "Debugger connected" << std::endl;
         }
 
-        //
         // Run the script.
-        //
-
         JsValueRef result = JS_INVALID_REFERENCE;
         JsErrorCode errorCode = JsRunScript(script.c_str(), currentSourceContext++, scriptName.c_str(), &result);
 
@@ -529,16 +440,17 @@ int _cdecl wmain(int argc, wchar_t* argv[])
             IfFailError(errorCode, L"failed to run script.");
         }
 
-        //
         // Convert the return value.
-        //
-
-        JsValueRef numberResult;
+        JsValueRef numberResult = JS_INVALID_REFERENCE;
         double doubleResult;
         IfFailError(JsConvertValueToNumber(result, &numberResult), L"failed to convert return value.");
         IfFailError(JsNumberToDouble(numberResult, &doubleResult), L"failed to convert return value.");
         returnValue = (int)doubleResult;
         std::cout << returnValue << std::endl;
+
+        // Clean up the current execution context.
+        IfFailError(JsSetCurrentContext(JS_INVALID_REFERENCE), L"failed to cleanup current context.");
+        context = JS_INVALID_REFERENCE;
 
         if (debugService)
         {
@@ -552,16 +464,7 @@ int _cdecl wmain(int argc, wchar_t* argv[])
             IfFailError(debugProtocolHandler->Destroy(), L"failed to destroy handler");
         }
 
-        //
-        // Clean up the current execution context.
-        //
-
-        IfFailError(JsSetCurrentContext(JS_INVALID_REFERENCE), L"failed to cleanup current context.");
-
-        //
         // Clean up the runtime.
-        //
-
         IfFailError(JsDisposeRuntime(runtime), L"failed to cleanup runtime.");
     }
     catch (...)

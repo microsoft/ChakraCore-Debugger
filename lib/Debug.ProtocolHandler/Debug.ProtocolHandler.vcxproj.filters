@@ -1,148 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\Protocol">
-      <UniqueIdentifier>{09212b62-b0f4-4cae-bca9-74dbdfbadcca}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Protocol">
-      <UniqueIdentifier>{889a2860-f405-4451-8d7d-8157d181eb75}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Helpers">
-      <UniqueIdentifier>{6d94007d-dc64-451b-8c50-e13adfe9b91c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Helpers">
-      <UniqueIdentifier>{c61a2456-4639-4f00-aff0-ad347fea4c7b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Debugger">
+    <Filter Include="Debugger">
       <UniqueIdentifier>{070fc079-3f79-42d3-8bb5-4fbb516f2be5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Debugger">
-      <UniqueIdentifier>{e6e18869-57d3-4e25-916c-3817b740018d}</UniqueIdentifier>
+    <Filter Include="Helpers">
+      <UniqueIdentifier>{6d94007d-dc64-451b-8c50-e13adfe9b91c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Protocol">
+      <UniqueIdentifier>{09212b62-b0f4-4cae-bca9-74dbdfbadcca}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="targetver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ChakraDebugProtocolHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ProtocolHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ConsoleImpl.h">
-      <Filter>Header Files\Protocol</Filter>
+      <Filter>Protocol</Filter>
     </ClInclude>
     <ClInclude Include="DebuggerImpl.h">
-      <Filter>Header Files\Protocol</Filter>
+      <Filter>Protocol</Filter>
     </ClInclude>
     <ClInclude Include="RuntimeImpl.h">
-      <Filter>Header Files\Protocol</Filter>
+      <Filter>Protocol</Filter>
     </ClInclude>
     <ClInclude Include="SchemaImpl.h">
-      <Filter>Header Files\Protocol</Filter>
+      <Filter>Protocol</Filter>
     </ClInclude>
     <ClInclude Include="PropertyHelpers.h">
-      <Filter>Header Files\Helpers</Filter>
+      <Filter>Helpers</Filter>
     </ClInclude>
     <ClInclude Include="ErrorHelpers.h">
-      <Filter>Header Files\Helpers</Filter>
+      <Filter>Helpers</Filter>
     </ClInclude>
     <ClInclude Include="Debugger.h">
-      <Filter>Header Files\Debugger</Filter>
+      <Filter>Debugger</Filter>
     </ClInclude>
     <ClInclude Include="DebuggerScript.h">
-      <Filter>Header Files\Debugger</Filter>
+      <Filter>Debugger</Filter>
     </ClInclude>
     <ClInclude Include="DebuggerCallFrame.h">
-      <Filter>Header Files\Debugger</Filter>
+      <Filter>Debugger</Filter>
     </ClInclude>
     <ClInclude Include="JsPersistent.h">
-      <Filter>Header Files\Helpers</Filter>
+      <Filter>Helpers</Filter>
     </ClInclude>
     <ClInclude Include="ProtocolHelpers.h">
-      <Filter>Header Files\Helpers</Filter>
+      <Filter>Helpers</Filter>
     </ClInclude>
     <ClInclude Include="DebuggerBreak.h">
-      <Filter>Header Files\Debugger</Filter>
+      <Filter>Debugger</Filter>
     </ClInclude>
     <ClInclude Include="DebuggerBreakpoint.h">
-      <Filter>Header Files\Debugger</Filter>
+      <Filter>Debugger</Filter>
     </ClInclude>
     <ClInclude Include="DebuggerObject.h">
-      <Filter>Header Files\Debugger</Filter>
+      <Filter>Debugger</Filter>
     </ClInclude>
     <ClInclude Include="DebuggerLocalScope.h">
-      <Filter>Header Files\Debugger</Filter>
+      <Filter>Debugger</Filter>
     </ClInclude>
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="ChakraDebugProtocolHandler.h" />
+    <ClInclude Include="ProtocolHandler.h" />
+    <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ChakraDebugProtocolHandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ProtocolHandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ConsoleImpl.cpp">
-      <Filter>Source Files\Protocol</Filter>
-    </ClCompile>
-    <ClCompile Include="DebuggerImpl.cpp">
-      <Filter>Source Files\Protocol</Filter>
-    </ClCompile>
-    <ClCompile Include="RuntimeImpl.cpp">
-      <Filter>Source Files\Protocol</Filter>
-    </ClCompile>
-    <ClCompile Include="SchemaImpl.cpp">
-      <Filter>Source Files\Protocol</Filter>
-    </ClCompile>
-    <ClCompile Include="PropertyHelpers.cpp">
-      <Filter>Source Files\Helpers</Filter>
-    </ClCompile>
     <ClCompile Include="Debugger.cpp">
-      <Filter>Source Files\Debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="DebuggerScript.cpp">
-      <Filter>Source Files\Debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="DebuggerCallFrame.cpp">
-      <Filter>Source Files\Debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="ProtocolHelpers.cpp">
-      <Filter>Source Files\Helpers</Filter>
+      <Filter>Debugger</Filter>
     </ClCompile>
     <ClCompile Include="DebuggerBreak.cpp">
-      <Filter>Source Files\Debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="ErrorHelpers.cpp">
-      <Filter>Source Files\Helpers</Filter>
+      <Filter>Debugger</Filter>
     </ClCompile>
     <ClCompile Include="DebuggerBreakpoint.cpp">
-      <Filter>Source Files\Debugger</Filter>
+      <Filter>Debugger</Filter>
     </ClCompile>
-    <ClCompile Include="DebuggerObject.cpp">
-      <Filter>Source Files\Debugger</Filter>
+    <ClCompile Include="DebuggerCallFrame.cpp">
+      <Filter>Debugger</Filter>
     </ClCompile>
     <ClCompile Include="DebuggerLocalScope.cpp">
-      <Filter>Source Files\Debugger</Filter>
+      <Filter>Debugger</Filter>
     </ClCompile>
+    <ClCompile Include="DebuggerObject.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="DebuggerScript.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="ErrorHelpers.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertyHelpers.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ProtocolHelpers.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ConsoleImpl.cpp">
+      <Filter>Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="DebuggerImpl.cpp">
+      <Filter>Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="RuntimeImpl.cpp">
+      <Filter>Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="SchemaImpl.cpp">
+      <Filter>Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="ChakraDebugProtocolHandler.cpp" />
+    <ClCompile Include="ProtocolHandler.cpp" />
+    <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
