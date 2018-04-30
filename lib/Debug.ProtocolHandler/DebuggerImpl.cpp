@@ -112,17 +112,23 @@ namespace JsDebug
         String  *out_breakpointId,
         std::unique_ptr<Array<Location>>* out_locations)
     {
-        if (!in_url.isJust() && !in_urlRegex.isJust())
+        String url;
+        DebuggerBreakpoint::QueryType type;
+
+        if (in_url.isJust())
+        {
+            url = in_url.fromJust();
+            type = DebuggerBreakpoint::QueryType::Url;
+        }
+        else if (in_urlRegex.isJust())
+        {
+            url = in_urlRegex.fromJust();
+            type = DebuggerBreakpoint::QueryType::UrlRegex;
+        }
+        else
         {
             return Response::Error(c_ErrorUrlRequired);
         }
-
-        if (!in_url.isJust())
-        {
-            return Response::Error(c_ErrorNotImplemented);
-        }
-
-        String url = in_url.fromJust();
 
         int columnNumber = in_columnNumber.fromMaybe(0);
         if (columnNumber < 0)
@@ -133,8 +139,9 @@ namespace JsDebug
         String condition = in_condition.fromMaybe("");
 
         DebuggerBreakpoint breakpoint(
+            m_debugger,
             url,
-            DebuggerBreakpoint::QueryType::Url,
+            type,
             in_lineNumber,
             columnNumber,
             condition);
@@ -181,6 +188,7 @@ namespace JsDebug
         std::unique_ptr<Location>* out_actualLocation)
     {
         DebuggerBreakpoint breakpoint = DebuggerBreakpoint::FromLocation(
+            m_debugger,
             in_location.get(),
             in_condition.fromMaybe(""));
 

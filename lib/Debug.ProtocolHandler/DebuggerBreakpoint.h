@@ -10,6 +10,8 @@
 
 namespace JsDebug
 {
+    class Debugger;
+
     class DebuggerBreakpoint
     {
     public:
@@ -21,6 +23,7 @@ namespace JsDebug
         };
 
         DebuggerBreakpoint(
+            Debugger* debugger,
             const protocol::String& query,
             QueryType queryType,
             int lineNumber,
@@ -28,6 +31,7 @@ namespace JsDebug
             const protocol::String& condition);
 
         static DebuggerBreakpoint FromLocation(
+            Debugger* debugger,
             protocol::Debugger::Location* location,
             const protocol::String& condition);
 
@@ -51,6 +55,7 @@ namespace JsDebug
     private:
         bool IsScriptMatch(const DebuggerScript& script) const;
 
+        Debugger* m_debugger;
         protocol::String m_query;
         QueryType m_queryType;
         int m_lineNumber;

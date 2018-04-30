@@ -6,6 +6,9 @@
 #include "stdafx.h"
 #include "DebuggerBreakpoint.h"
 
+#include "Debugger.h"
+#include "DebuggerRegExp.h"
+
 namespace JsDebug
 {
     using protocol::Debugger::Location;
@@ -17,12 +20,14 @@ namespace JsDebug
     }
 
     DebuggerBreakpoint::DebuggerBreakpoint(
+        Debugger* debugger,
         const String& query,
         QueryType queryType,
         int lineNumber,
         int columnNumber,
         const String& condition)
-        : m_query(query)
+        : m_debugger(debugger)
+        , m_query(query)
         , m_queryType(queryType)
         , m_lineNumber(lineNumber)
         , m_columnNumber(columnNumber)
@@ -37,9 +42,13 @@ namespace JsDebug
         }
     }
 
-    DebuggerBreakpoint DebuggerBreakpoint::FromLocation(Location* location, const String& condition)
+    DebuggerBreakpoint DebuggerBreakpoint::FromLocation(
+        Debugger* debugger,
+        Location* location,
+        const String& condition)
     {
         return DebuggerBreakpoint(
+            debugger,
             location->getScriptId(),
             QueryType::ScriptId,
             location->getLineNumber(),
@@ -151,8 +160,10 @@ namespace JsDebug
             return script.SourceUrl() == m_query;
 
         case QueryType::UrlRegex:
-            // TODO: Implement regex matching
-            throw std::runtime_error(c_ErrorRegexNotImplemented);
+        {
+            DebuggerRegExp regExp(m_debugger, m_query, "");
+            return regExp.Test(script.SourceUrl());
+        }
 
         default:
             return false;

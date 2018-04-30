@@ -20,6 +20,7 @@ namespace JsDebug
     Debugger::Debugger(ProtocolHandler* handler, JsRuntimeHandle runtime)
         : m_handler(handler)
         , m_runtime(runtime)
+        , m_debugContext(runtime)
         , m_isEnabled(false)
         , m_isPaused(false)
         , m_isRunningNestedMessageLoop(false)
@@ -44,6 +45,11 @@ namespace JsDebug
         {
             std::cerr << e.what() << std::endl;
         }
+    }
+
+    DebuggerContext* Debugger::GetDebugContext()
+    {
+        return &m_debugContext;
     }
 
     void Debugger::Enable()

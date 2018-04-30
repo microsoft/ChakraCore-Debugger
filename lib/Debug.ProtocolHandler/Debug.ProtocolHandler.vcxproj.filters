@@ -65,6 +65,12 @@
     <ClInclude Include="ChakraDebugProtocolHandler.h" />
     <ClInclude Include="ProtocolHandler.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="DebuggerRegExp.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="DebuggerContext.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Debugger.cpp">
@@ -112,6 +118,12 @@
     <ClCompile Include="ChakraDebugProtocolHandler.cpp" />
     <ClCompile Include="ProtocolHandler.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="DebuggerRegExp.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="DebuggerContext.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -8,6 +8,7 @@
 #include "DebuggerBreak.h"
 #include "DebuggerBreakpoint.h"
 #include "DebuggerCallFrame.h"
+#include "DebuggerContext.h"
 #include "DebuggerObject.h"
 #include "DebuggerScript.h"
 
@@ -36,6 +37,8 @@ namespace JsDebug
         ~Debugger();
         Debugger(const Debugger&) = delete;
         Debugger& operator=(const Debugger&) = delete;
+
+        DebuggerContext* GetDebugContext();
 
         void Enable();
         void Disable();
@@ -77,6 +80,7 @@ namespace JsDebug
 
         ProtocolHandler* m_handler;
         JsRuntimeHandle m_runtime;
+        DebuggerContext m_debugContext;
 
         bool m_isEnabled;
         bool m_isPaused;
