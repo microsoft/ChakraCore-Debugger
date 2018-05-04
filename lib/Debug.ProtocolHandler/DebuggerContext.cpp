@@ -28,7 +28,7 @@ namespace JsDebug
             IfJsErrorThrow(JsGetCurrentContext(&currentContext));
             assert(currentContext == m_currentContext.Get());
         }
-        catch (const JsErrorException& e)
+        catch (const JsErrorException&)
         {
             // Consider this best effort, if it fails still continue and set the previous context.
         }
@@ -37,7 +37,7 @@ namespace JsDebug
         {
             IfJsErrorThrow(JsSetCurrentContext(m_previousContext.Get()));
         }
-        catch (const JsErrorException& e)
+        catch (const JsErrorException&)
         {
             // We couldn't restore the context, we really can't continue from here.
             assert(false);
