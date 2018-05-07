@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Program",
+            "program": "${workspaceFolder}/bin/Debug.Sample/test.js",
+            "protocol": "inspector",
+            "trace": true
+        },
+        {
+            "type": "node",
+            "request": "attach",
+            "name": "Attach",
+            "port": 9230,
+            "protocol": "inspector",
+            "trace": true
+        }
+    ]
+}

@@ -113,12 +113,12 @@ void ThrowJsError(std::wstring errorString)
 //
 // Helper to load a script from disk.
 //
-std::wstring LoadScript(const std::wstring& fileName)
+std::wstring LoadScript(const wchar_t* filename)
 {
     FILE* file;
-    if (_wfopen_s(&file, fileName.c_str(), L"rb"))
+    if (_wfopen_s(&file, filename, L"rb"))
     {
-        fwprintf(stderr, L"chakrahost: unable to open file: %s.\n", fileName.c_str());
+        fwprintf(stderr, L"chakrahost: unable to open file: %s.\n", filename);
         return std::wstring();
     }
 
@@ -159,10 +159,32 @@ std::wstring LoadScript(const std::wstring& fileName)
     return result;
 }
 
+JsErrorCode RunScript(const wchar_t* filename, JsValueRef* result)
+{
+    wchar_t fullPath[MAX_PATH];
+    DWORD pathLength = GetFullPathName(filename, MAX_PATH, fullPath, nullptr);
+    if (pathLength > MAX_PATH || pathLength == 0)
+    {
+        return JsErrorInvalidArgument;
+    }
+
+    // Load the script from the disk.
+    std::wstring script = LoadScript(fullPath);
+    if (script.empty())
+    {
+        return JsErrorInvalidArgument;
+    }
+
+    // Run the script.
+    IfFailRet(JsRunScript(script.c_str(), currentSourceContext++, fullPath, result));
+
+    return JsNoError;
+}
+
 //
 // Callback to echo something to the command-line.
 //
-JsValueRef CALLBACK Echo(
+JsValueRef CALLBACK HostEcho(
     JsValueRef callee, 
     bool isConstructCall, 
     JsValueRef* arguments, 
@@ -194,7 +216,7 @@ JsValueRef CALLBACK Echo(
 //
 // Callback to load a script and run it.
 //
-JsValueRef CALLBACK RunScript(
+JsValueRef CALLBACK HostRunScript(
     JsValueRef callee, 
     bool isConstructCall, 
     JsValueRef* arguments, 
@@ -210,21 +232,11 @@ JsValueRef CALLBACK RunScript(
     }
 
     // Convert filename.
-    const wchar_t* filename;
-    size_t length;
+    const wchar_t* filename = nullptr;
+    size_t length = 0;
 
     IfFailThrowJsError(JsStringToPointer(arguments[1], &filename, &length), L"invalid filename argument");
-
-    // Load the script from the disk.
-    std::wstring script = LoadScript(filename);
-    if (script.empty())
-    {
-        ThrowJsError(L"invalid script");
-        return result;
-    }
-
-    // Run the script.
-    IfFailThrowJsError(JsRunScript(script.c_str(), currentSourceContext++, filename, &result), L"failed to run script.");
+    IfFailThrowJsError(RunScript(filename, &result), L"failed to run script");
 
     return result;
 }
@@ -279,8 +291,8 @@ JsErrorCode CreateHostContext(JsRuntimeHandle runtime, std::vector<std::wstring>
     IfFailRet(JsSetProperty(globalObject, hostPropertyId, hostObject, true));
 
     // Now create the host callbacks that we're going to expose to the script.
-    IfFailRet(DefineHostCallback(hostObject, L"echo", Echo, nullptr));
-    IfFailRet(DefineHostCallback(hostObject, L"runScript", RunScript, nullptr));
+    IfFailRet(DefineHostCallback(hostObject, L"echo", HostEcho, nullptr));
+    IfFailRet(DefineHostCallback(hostObject, L"runScript", HostRunScript, nullptr));
 
     // Create an array for arguments.
     JsValueRef arguments = JS_INVALID_REFERENCE;
@@ -411,14 +423,6 @@ int _cdecl wmain(int argc, wchar_t* argv[])
         // Now set the execution context as being the current one on this thread.
         IfFailError(JsSetCurrentContext(context), L"failed to set current context.");
 
-        // Load the script from the disk.
-        const std::wstring& scriptName = arguments.scriptArgs[0];
-        std::wstring script = LoadScript(scriptName);
-        if (script.empty())
-        {
-            goto error;
-        }
-
         if (debugProtocolHandler)
         {
             std::cout << "Waiting for debugger to connect..." << std::endl;
@@ -428,7 +432,7 @@ int _cdecl wmain(int argc, wchar_t* argv[])
 
         // Run the script.
         JsValueRef result = JS_INVALID_REFERENCE;
-        JsErrorCode errorCode = JsRunScript(script.c_str(), currentSourceContext++, scriptName.c_str(), &result);
+        JsErrorCode errorCode = RunScript(arguments.scriptArgs[0].c_str(), &result);
 
         if (errorCode == JsErrorScriptException)
         {

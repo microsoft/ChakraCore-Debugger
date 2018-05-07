@@ -1,6 +1,7 @@
 if (typeof host === "undefined") {
   global.host = {
-    echo: console.log
+    echo: console.log,
+    "arguments": process.argv
   };
 }
 
