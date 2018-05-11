@@ -1,5 +1,7 @@
 <Project>
- <PropertyGroup>
-   <DepsDirectoryPath>$(MSBuildThisFileDirectory)deps\</DepsDirectoryPath>
- </PropertyGroup>
+  <PropertyGroup>
+    <DepsDirectoryPath>$(MSBuildThisFileDirectory)deps\</DepsDirectoryPath>
+    <OutDir>$(MSBuildThisFileDirectory)build\bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(MSBuildThisFileDirectory)build\obj\$(Platform)\$(Configuration)\$(MSBuildProjectName)\</IntDir>
+  </PropertyGroup>
 </Project>

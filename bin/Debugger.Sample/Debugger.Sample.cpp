@@ -80,7 +80,7 @@ public:
     {
         fwprintf(stderr,
             L"\n"
-            L"Usage: Debug.Sample.exe [host-options] <script> [script-arguments]\n"
+            L"Usage: ChakraCore.Debugger.Sample.exe [host-options] <script> [script-arguments]\n"
             L"\n"
             L"Options: \n"
             L"      --inspect          Enable debugging\n"

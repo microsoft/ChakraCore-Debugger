@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -20,9 +20,9 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{AC43259C-97CB-43C1-9B56-983CA31ED5D2}</ProjectGuid>
+    <ProjectGuid>{00DCEE8F-721A-4C93-89CB-F5A79E387912}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>DebugProtocolHandler</RootNamespace>
+    <RootNamespace>DebugService</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -90,7 +90,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\Debug.Protocol\;..\Debug.Protocol\Generated;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Debugger.Protocol;..\Debugger.Protocol\$(IntDir);..\Debugger.ProtocolHandler;$(DepsDirectoryPath)websocketpp;$(DepsDirectoryPath)asio\asio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -105,7 +105,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\Debug.Protocol\;..\Debug.Protocol\Generated;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Debugger.Protocol;..\Debugger.Protocol\$(IntDir);..\Debugger.ProtocolHandler;$(DepsDirectoryPath)websocketpp;$(DepsDirectoryPath)asio\asio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -122,7 +122,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\Debug.Protocol\;..\Debug.Protocol\Generated;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Debugger.Protocol;..\Debugger.Protocol\$(IntDir);..\Debugger.ProtocolHandler;$(DepsDirectoryPath)websocketpp;$(DepsDirectoryPath)asio\asio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -141,7 +141,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\Debug.Protocol\;..\Debug.Protocol\Generated;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Debugger.Protocol;..\Debugger.Protocol\$(IntDir);..\Debugger.ProtocolHandler;$(DepsDirectoryPath)websocketpp;$(DepsDirectoryPath)asio\asio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -151,47 +151,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="ConsoleImpl.h" />
-    <ClInclude Include="Debugger.h" />
-    <ClInclude Include="DebuggerBreak.h" />
-    <ClInclude Include="DebuggerBreakpoint.h" />
-    <ClInclude Include="DebuggerCallFrame.h" />
-    <ClInclude Include="DebuggerContext.h" />
-    <ClInclude Include="DebuggerImpl.h" />
-    <ClInclude Include="ChakraDebugProtocolHandler.h" />
-    <ClInclude Include="DebuggerLocalScope.h" />
-    <ClInclude Include="DebuggerObject.h" />
-    <ClInclude Include="DebuggerRegExp.h" />
-    <ClInclude Include="DebuggerScript.h" />
-    <ClInclude Include="ErrorHelpers.h" />
-    <ClInclude Include="JsPersistent.h" />
-    <ClInclude Include="PropertyHelpers.h" />
-    <ClInclude Include="ProtocolHandler.h" />
-    <ClInclude Include="ProtocolHelpers.h" />
-    <ClInclude Include="RuntimeImpl.h" />
-    <ClInclude Include="SchemaImpl.h" />
+    <ClInclude Include="ChakraDebugService.h" />
+    <ClInclude Include="Service.h" />
+    <ClInclude Include="ServiceHandler.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ConsoleImpl.cpp" />
-    <ClCompile Include="Debugger.cpp" />
-    <ClCompile Include="DebuggerBreak.cpp" />
-    <ClCompile Include="DebuggerBreakpoint.cpp" />
-    <ClCompile Include="DebuggerCallFrame.cpp" />
-    <ClCompile Include="DebuggerContext.cpp" />
-    <ClCompile Include="DebuggerImpl.cpp" />
-    <ClCompile Include="ChakraDebugProtocolHandler.cpp" />
-    <ClCompile Include="DebuggerLocalScope.cpp" />
-    <ClCompile Include="DebuggerObject.cpp" />
-    <ClCompile Include="DebuggerRegExp.cpp" />
-    <ClCompile Include="DebuggerScript.cpp" />
-    <ClCompile Include="ErrorHelpers.cpp" />
-    <ClCompile Include="PropertyHelpers.cpp" />
-    <ClCompile Include="ProtocolHandler.cpp" />
-    <ClCompile Include="ProtocolHelpers.cpp" />
-    <ClCompile Include="RuntimeImpl.cpp" />
-    <ClCompile Include="SchemaImpl.cpp" />
+    <ClCompile Include="ChakraDebugService.cpp" />
+    <ClCompile Include="Service.cpp" />
+    <ClCompile Include="ServiceHandler.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -200,8 +169,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Debug.Protocol\Debug.Protocol.vcxproj">
-      <Project>{d9714e79-129c-4ed7-bebe-7f2e8dc4e2a5}</Project>
+    <ProjectReference Include="..\Debugger.ProtocolHandler\ChakraCore.Debugger.ProtocolHandler.vcxproj">
+      <Project>{ac43259c-97cb-43c1-9b56-983ca31ed5d2}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

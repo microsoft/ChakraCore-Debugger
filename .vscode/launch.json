@@ -5,7 +5,7 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "program": "${workspaceFolder}/bin/Debug.Sample/test.js",
+            "program": "${workspaceFolder}/bin/Debugger.Sample/test.js",
             "protocol": "inspector",
             "trace": true
         },

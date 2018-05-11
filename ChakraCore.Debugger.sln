@@ -3,17 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27427.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Debug.ProtocolHandler", "lib\Debug.ProtocolHandler\Debug.ProtocolHandler.vcxproj", "{AC43259C-97CB-43C1-9B56-983CA31ED5D2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChakraCore.Debugger.ProtocolHandler", "lib\Debugger.ProtocolHandler\ChakraCore.Debugger.ProtocolHandler.vcxproj", "{AC43259C-97CB-43C1-9B56-983CA31ED5D2}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Debug.Service", "lib\Debug.Service\Debug.Service.vcxproj", "{00DCEE8F-721A-4C93-89CB-F5A79E387912}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChakraCore.Debugger.Service", "lib\Debugger.Service\ChakraCore.Debugger.Service.vcxproj", "{00DCEE8F-721A-4C93-89CB-F5A79E387912}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Debug.Sample", "bin\Debug.Sample\Debug.Sample.vcxproj", "{FD3AAF0F-CCF2-4D7B-AF34-1AD7D87944DC}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChakraCore.Debugger.Sample", "bin\Debugger.Sample\ChakraCore.Debugger.Sample.vcxproj", "{FD3AAF0F-CCF2-4D7B-AF34-1AD7D87944DC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bin", "bin", "{5D5A0A19-B133-49F3-9ABB-A0943D81BF45}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{2ACDA3C4-5AD5-4ABB-AB69-2530AC403613}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Debug.Protocol", "lib\Debug.Protocol\Debug.Protocol.vcxproj", "{D9714E79-129C-4ED7-BEBE-7F2E8DC4E2A5}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChakraCore.Debugger.Protocol", "lib\Debugger.Protocol\ChakraCore.Debugger.Protocol.vcxproj", "{D9714E79-129C-4ED7-BEBE-7F2E8DC4E2A5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
