@@ -331,3 +331,6 @@ ASALocalRun/
 
 # Don't ignore the bin folder in the root
 !/[Bb]in/
+
+# Jinja cache files
+__jinja*.cache

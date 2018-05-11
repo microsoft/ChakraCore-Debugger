@@ -5,7 +5,7 @@ Debugging companion for the ChakraCore JavaScript engine
 ## Prerequisites
 
 * Visual Studio 2017
-* Python 2.7 (must be in the PATH)
+* Python 2.7 (For generating the protocol parser only; must be in the PATH)
 
 ## Building
 

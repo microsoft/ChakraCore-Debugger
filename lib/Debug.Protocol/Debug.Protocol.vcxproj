@@ -82,12 +82,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
-  <ItemDefinitionGroup>
-    <PreBuildEvent>
-      <Command>python "$(ProjectDir)\GenerateProtocol.py" --generator_script "$(DepsDirectoryPath)inspector_protocol\CodeGenerator.py" --jinja_dir "$(DepsDirectoryPath)jinja\\" --markupsafe_dir "$(DepsDirectoryPath)markupsafe\\" --output_base "$(ProjectDir)$(IntermediateOutputPath)\" --config "$(ProjectDir)inspector_protocol_config.json"</Command>
-      <Message>Generating protocol definitions</Message>
-    </PreBuildEvent>
-  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -96,7 +90,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\Generated;$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -111,7 +105,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\Generated;$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -128,7 +122,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\Generated;$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -147,7 +141,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\Generated;$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -157,26 +151,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="$(IntermediateOutputPath)protocol\Console.h" />
-    <ClInclude Include="$(IntermediateOutputPath)protocol\Debugger.h" />
-    <ClInclude Include="$(IntermediateOutputPath)protocol\Forward.h" />
-    <ClInclude Include="$(IntermediateOutputPath)protocol\Protocol.h" />
-    <ClInclude Include="$(IntermediateOutputPath)protocol\Runtime.h" />
-    <ClInclude Include="$(IntermediateOutputPath)protocol\Schema.h" />
-    <ClInclude Include="$(IntermediateOutputPath)include\Debugger.h" />
-    <ClInclude Include="$(IntermediateOutputPath)include\Runtime.h" />
-    <ClInclude Include="$(IntermediateOutputPath)include\Schema.h" />
     <ClInclude Include="Common.h" />
+    <ClInclude Include="Generated\include\Debugger.h" />
+    <ClInclude Include="Generated\include\Runtime.h" />
+    <ClInclude Include="Generated\include\Schema.h" />
+    <ClInclude Include="Generated\protocol\Console.h" />
+    <ClInclude Include="Generated\protocol\Debugger.h" />
+    <ClInclude Include="Generated\protocol\Forward.h" />
+    <ClInclude Include="Generated\protocol\Protocol.h" />
+    <ClInclude Include="Generated\protocol\Runtime.h" />
+    <ClInclude Include="Generated\protocol\Schema.h" />
     <ClInclude Include="String16.h" />
     <ClInclude Include="StringUtil.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(IntermediateOutputPath)protocol\Console.cpp" />
-    <ClCompile Include="$(IntermediateOutputPath)protocol\Debugger.cpp" />
-    <ClCompile Include="$(IntermediateOutputPath)protocol\Protocol.cpp" />
-    <ClCompile Include="$(IntermediateOutputPath)protocol\Runtime.cpp" />
-    <ClCompile Include="$(IntermediateOutputPath)protocol\Schema.cpp" />
     <ClCompile Include="Common.cpp" />
+    <ClCompile Include="Generated\protocol\Console.cpp" />
+    <ClCompile Include="Generated\protocol\Debugger.cpp" />
+    <ClCompile Include="Generated\protocol\Protocol.cpp" />
+    <ClCompile Include="Generated\protocol\Runtime.cpp" />
+    <ClCompile Include="Generated\protocol\Schema.cpp" />
     <ClCompile Include="String16.cpp" />
     <ClCompile Include="StringUtil.cpp" />
   </ItemGroup>
