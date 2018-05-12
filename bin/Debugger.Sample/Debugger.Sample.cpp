@@ -296,9 +296,10 @@ JsErrorCode CreateHostContext(JsRuntimeHandle runtime, std::vector<std::wstring>
 
     // Create an array for arguments.
     JsValueRef arguments = JS_INVALID_REFERENCE;
-    IfFailRet(JsCreateArray(static_cast<unsigned int>(scriptArgs.size()), &arguments));
+    unsigned int argCount = static_cast<unsigned int>(scriptArgs.size());
+    IfFailRet(JsCreateArray(argCount, &arguments));
 
-    for (size_t index = 0; index < scriptArgs.size(); index++)
+    for (unsigned int index = 0; index < argCount; index++)
     {
         // Create the argument value.
         std::wstring& str = scriptArgs[index];
