@@ -6,6 +6,8 @@
 #include "stdafx.h"
 #include "DebuggerScript.h"
 
+#include "Debugger.h"
+#include "DebuggerRegExp.h"
 #include "ErrorHelpers.h"
 #include "PropertyHelpers.h"
 
@@ -13,8 +15,25 @@ namespace JsDebug
 {
     using protocol::String;
 
-    DebuggerScript::DebuggerScript(JsValueRef scriptInfo)
-        : m_scriptInfo(scriptInfo)
+    namespace
+    {
+        const char c_PropertySourceMappingURL[] = "sourceMappingURL";
+        const char c_PropertySourceURL[] = "sourceURL";
+        const char c_SourceInfoCommentFlags[] = "mg";
+
+        /// <summary>
+        /// Matches on attribute comments of the form:
+        /// * <c>//# attribute=value</c>
+        /// * <c>/*# attribute=value */</c>
+        /// * <c>//@ attribute=value</c>
+        /// * <c>/*@ attribute=value */</c>
+        /// </summary>
+        const char c_SourceInfoCommentPattern[] = "//[#@][ \\t]*([^=]+?)[ \\t]*=[ \\t]*(.+?)[ \\t]*$|/\\*[#@][ \\t]*([^=]+?)[ \\t]*=[ \\t]*(.+?)[ \\t]*\\*/";
+    }
+
+    DebuggerScript::DebuggerScript(Debugger* debugger, JsValueRef scriptInfo)
+        : m_debugger(debugger)
+        , m_scriptInfo(scriptInfo)
         , m_scriptId(0)
     {
         if (!m_scriptInfo.IsEmpty())
@@ -25,9 +44,8 @@ namespace JsDebug
             IfJsErrorThrow(JsDiagGetSource(m_scriptId, &scriptSource));
             m_scriptSource = scriptSource;
 
-            // TODO: calculate hash
-            // TODO: parse for source URL
-            // TODO: parse for source map URL
+            // TODO: calculate file hash
+            ParseScriptSource();
         }
     }
 
@@ -121,5 +139,42 @@ namespace JsDebug
     bool DebuggerScript::IsLiveEdit() const
     {
         return false;
+    }
+
+    void DebuggerScript::ParseScriptSource()
+    {
+        DebuggerRegExp regExp(m_debugger, c_SourceInfoCommentPattern, c_SourceInfoCommentFlags);
+        std::vector<String> matchGroups;
+
+        JsValueRef sourceValue = PropertyHelpers::GetProperty(m_scriptSource.Get(), PropertyHelpers::Names::Source);
+
+        while (true)
+        {
+            matchGroups = regExp.Exec(sourceValue);
+
+            if (matchGroups.size() == 5)
+            {
+                if (matchGroups[1] == c_PropertySourceMappingURL)
+                {
+                    m_sourceMappingUrl = matchGroups[2];
+                }
+                else if (matchGroups[3] == c_PropertySourceMappingURL)
+                {
+                    m_sourceMappingUrl = matchGroups[4];
+                }
+                else if (matchGroups[1] == c_PropertySourceURL)
+                {
+                    m_sourceUrl = matchGroups[2];
+                }
+                else if (matchGroups[3] == c_PropertySourceURL)
+                {
+                    m_sourceUrl = matchGroups[4];
+                }
+
+                continue;
+            }
+
+            break;
+        }
     }
 }

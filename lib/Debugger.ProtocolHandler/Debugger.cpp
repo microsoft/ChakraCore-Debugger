@@ -112,7 +112,7 @@ namespace JsDebug
           {
             JsValueRef scriptValue = PropertyHelpers::GetIndexedProperty(scriptsArray, index);
 
-            scripts.emplace_back(scriptValue);
+            scripts.emplace_back(this, scriptValue);
           }
         }
 
@@ -266,7 +266,7 @@ namespace JsDebug
     {
         if (m_sourceEventCallback != nullptr)
         {
-            DebuggerScript scriptInfo(eventData);
+            DebuggerScript scriptInfo(this, eventData);
             m_sourceEventCallback(scriptInfo, success, m_sourceEventCallbackState);
         }
     }

@@ -11,6 +11,14 @@ namespace JsDebug
 {
     namespace
     {
+        inline bool IsUndefined(JsValueRef object)
+        {
+            JsValueRef undefinedValue = JS_INVALID_REFERENCE;
+            JsGetUndefinedValue(&undefinedValue);
+
+            return object == undefinedValue;
+        }
+
         template <bool doConversion = false>
         inline String16 ValueAsString(JsValueRef object)
         {
@@ -112,6 +120,18 @@ namespace JsDebug
         IfJsErrorThrow(JsGetIndexedProperty(object, indexValue, &value));
 
         return value;
+    }
+
+    String16 PropertyHelpers::GetIndexedPropertyString(JsValueRef object, int index)
+    {
+        JsValueRef objValue = GetIndexedProperty(object, index);
+
+        if (!IsUndefined(objValue))
+        {
+            return ValueAsString(objValue);
+        }
+
+        return String16();
     }
 
     bool PropertyHelpers::HasProperty(JsValueRef object, const char* name)

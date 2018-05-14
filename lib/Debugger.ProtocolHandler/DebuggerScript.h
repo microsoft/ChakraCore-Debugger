@@ -12,10 +12,12 @@
 
 namespace JsDebug
 {
+    class Debugger;
+
     class DebuggerScript
     {
     public:
-        explicit DebuggerScript(JsValueRef scriptInfo);
+        explicit DebuggerScript(Debugger* debugger, JsValueRef scriptInfo);
 
         protocol::String ScriptId() const;
         protocol::String Url() const;
@@ -33,6 +35,9 @@ namespace JsDebug
         bool IsLiveEdit() const;
 
     private:
+        void ParseScriptSource();
+
+        Debugger* m_debugger;
         JsPersistent m_scriptInfo;
         JsPersistent m_scriptSource;
 

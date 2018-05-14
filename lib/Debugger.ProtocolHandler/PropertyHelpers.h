@@ -21,6 +21,7 @@ namespace JsDebug
             const char DebuggerOnlyProperties[] = "debuggerOnlyProperties";
             const char Display[] = "display";
             const char Exception[] = "exception";
+            const char Exec[] = "exec";
             const char FileName[] = "fileName";
             const char FunctionCallsReturn[] = "functionCallsReturn";
             const char FunctionHandle[] = "functionHandle";
@@ -35,11 +36,13 @@ namespace JsDebug
             const char Ordinal[] = "ordinal";
             const char Properties[] = "properties";
             const char PropertyAttributes[] = "propertyAttributes";
+            const char RegExp[] = "RegExp";
             const char ReturnValue[] = "returnValue";
             const char ScriptId[] = "scriptId";
             const char ScriptType[] = "scriptType";
             const char Scopes[] = "scopes";
             const char Source[] = "source";
+            const char Test[] = "test";
             const char ThisObject[] = "thisObject";
             const char Type[] = "type";
             const char Uncaught[] = "uncaught";
@@ -57,6 +60,7 @@ namespace JsDebug
         String16 GetPropertyStringConvert(JsValueRef object, const char* name);
 
         JsValueRef GetIndexedProperty(JsValueRef object, int index);
+        String16 GetIndexedPropertyString(JsValueRef object, int index);
 
         bool HasProperty(JsValueRef object, const char* name);
 

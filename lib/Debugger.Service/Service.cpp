@@ -26,8 +26,9 @@ namespace JsDebug
     Service::Service()
         : m_port(0)
     {
-        m_server.set_error_channels(elevel::all);
-        m_server.set_access_channels(alevel::all ^ alevel::frame_payload);
+        // TODO: Enable logging to a file
+        m_server.set_error_channels(elevel::none);
+        m_server.set_access_channels(alevel::none);
 
         m_server.init_asio();
         m_server.set_validate_handler(bind(&Service::OnValidate, this, _1));
