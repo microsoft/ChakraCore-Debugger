@@ -48,7 +48,7 @@
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PreprocessorDefinitions>_HAS_AUTO_PTR_ETC;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\Debugger.Protocol;..\Debugger.Protocol\$(IntDir);..\Debugger.ProtocolHandler;$(DepsDirectoryPath)websocketpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)lib\Debugger.ProtocolHandler;$(DepsDirectoryPath)websocketpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
