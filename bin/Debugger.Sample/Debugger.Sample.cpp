@@ -424,7 +424,7 @@ int _cdecl wmain(int argc, wchar_t* argv[])
         // Now set the execution context as being the current one on this thread.
         IfFailError(JsSetCurrentContext(context), L"failed to set current context.");
 
-        if (debugProtocolHandler)
+        if (debugProtocolHandler && arguments.breakOnNextLine)
         {
             std::cout << "Waiting for debugger to connect..." << std::endl;
             IfFailError(debugProtocolHandler->WaitForDebugger(), L"failed to wait for debugger");

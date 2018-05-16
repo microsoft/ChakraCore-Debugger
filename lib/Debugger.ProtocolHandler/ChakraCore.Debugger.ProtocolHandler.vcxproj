@@ -224,6 +224,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="TranslateExceptionToJsErrorCode.h" />
     <ClInclude Include="ConsoleImpl.h" />
     <ClInclude Include="Debugger.h" />
     <ClInclude Include="DebuggerBreak.h" />
@@ -260,6 +261,7 @@
     <ClCompile Include="DebuggerRegExp.cpp" />
     <ClCompile Include="DebuggerScript.cpp" />
     <ClCompile Include="ErrorHelpers.cpp" />
+    <ClCompile Include="JsPersistent.cpp" />
     <ClCompile Include="PropertyHelpers.cpp" />
     <ClCompile Include="ProtocolHandler.cpp" />
     <ClCompile Include="ProtocolHelpers.cpp" />

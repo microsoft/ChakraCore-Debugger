@@ -7,7 +7,6 @@
 
 #include "Common.h"
 
-#include <cassert>
 #include <memory>
 
 //
@@ -54,18 +53,9 @@ namespace JsDebug
     class StringBufferImpl : public StringBuffer
     {
     public:
-        static std::unique_ptr<StringBufferImpl> adopt(String16& s)
-        {
-            // TODO: Implement this when it gets hit.
-            assert(false);
-            return nullptr;
-        }
+        static std::unique_ptr<StringBufferImpl> adopt(String16& s);
 
     private:
-        explicit StringBufferImpl(String16& s)
-        {
-            // TODO: Implement this when it gets hit.
-            assert(false);
-        }
+        explicit StringBufferImpl(String16& s);
     };
 }

@@ -71,6 +71,9 @@
     <ClInclude Include="DebuggerContext.h">
       <Filter>Debugger</Filter>
     </ClInclude>
+    <ClInclude Include="TranslateExceptionToJsErrorCode.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Debugger.cpp">
@@ -123,6 +126,9 @@
     </ClCompile>
     <ClCompile Include="DebuggerContext.cpp">
       <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="JsPersistent.cpp">
+      <Filter>Helpers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

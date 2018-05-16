@@ -7,6 +7,8 @@
 #include "DebuggerContext.h"
 #include "ErrorHelpers.h"
 
+#include <cassert>
+
 namespace JsDebug
 {
     DebuggerContext::Scope::Scope(const DebuggerContext& context)
@@ -16,7 +18,7 @@ namespace JsDebug
         m_previousContext = currentContext;
 
         JsContextRef newContext = context.m_context.Get();
-        IfJsErrorThrow(JsSetCurrentContext(context.m_context.Get()));
+        IfJsErrorThrow(JsSetCurrentContext(newContext));
         m_currentContext = newContext;
     }
 

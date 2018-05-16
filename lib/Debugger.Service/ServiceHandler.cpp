@@ -11,6 +11,11 @@ namespace JsDebug
     using websocketpp::lib::placeholders::_1;
     using websocketpp::lib::placeholders::_2;
 
+    namespace
+    {
+        const char c_MessageServerShutdown[] = "Server shutting down...";
+    }
+
     ServiceHandler::ServiceHandler(
         server* server,
         const char* id,
@@ -33,18 +38,19 @@ namespace JsDebug
                 auto connection = m_server->get_con_from_hdl(m_hdl);
                 connection->set_message_handler(nullptr);
                 connection->set_close_handler(nullptr);
-                connection->close(websocketpp::close::status::going_away, "Server shutting down...");
+                connection->close(websocketpp::close::status::going_away, c_MessageServerShutdown);
             }
         }
-        catch (const websocketpp::exception& e)
+        catch (...)
         {
-            // Catch any exceptions thrown during destruction
-            std::cerr << "Failed to close connection: " << e.what() << std::endl;
+            // Don't allow the exception to propagate.
         }
 
         if (m_connected)
         {
-            JsDebugProtocolHandlerDisconnect(m_protocolHandler);
+            // Ignore any returned error codes
+            JsErrorCode err = JsDebugProtocolHandlerDisconnect(m_protocolHandler);
+            assert(err == JsNoError);
         }
     }
 
@@ -56,11 +62,14 @@ namespace JsDebug
             connection->set_message_handler(bind(&ServiceHandler::OnMessage, this, _1, _2));
             connection->set_close_handler(bind(&ServiceHandler::OnClose, this, _1));
 
-            JsDebugProtocolHandlerConnect(
+            if (JsDebugProtocolHandlerConnect(
                 m_protocolHandler,
                 m_breakOnNextLine,
                 &ServiceHandler::SendResponseCallback,
-                this);
+                this) != JsNoError)
+            {
+                return false;
+            }
 
             m_connected = true;
             m_hdl = hdl;
@@ -75,7 +84,7 @@ namespace JsDebug
     {
         if (!m_hdl.expired())
         {
-            m_server->close(m_hdl, websocketpp::close::status::going_away, "Server shutting down...");
+            m_server->close(m_hdl, websocketpp::close::status::going_away, c_MessageServerShutdown);
         }
     }
 
@@ -100,14 +109,19 @@ namespace JsDebug
 
     void ServiceHandler::OnMessage(connection_hdl hdl, server::message_ptr msg)
     {
-        JsDebugProtocolHandlerSendCommand(m_protocolHandler, msg->get_payload().c_str());
+        // Ignore any returned error codes
+        JsErrorCode err = JsDebugProtocolHandlerSendCommand(m_protocolHandler, msg->get_payload().c_str());
+        assert(err == JsNoError);
     }
 
     void ServiceHandler::OnClose(connection_hdl hdl)
     {
         if (m_connected)
         {
-            JsDebugProtocolHandlerDisconnect(m_protocolHandler);
+            // Ignore any returned error codes
+            JsErrorCode err = JsDebugProtocolHandlerDisconnect(m_protocolHandler);
+            assert(err == JsNoError);
+
             m_connected = false;
         }
     }
