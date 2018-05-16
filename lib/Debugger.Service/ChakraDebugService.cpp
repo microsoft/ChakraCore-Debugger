@@ -6,26 +6,34 @@
 #include "stdafx.h"
 #include "ChakraDebugService.h"
 #include "Service.h"
+#include <TranslateExceptionToJsErrorCode.h>
 
 CHAKRA_API JsDebugServiceCreate(JsDebugService* service)
 {
-    auto svc = std::make_unique<JsDebug::Service>();
+    if (service == nullptr)
+    {
+        return JsErrorInvalidArgument;
+    }
 
-    // Do stuff.
+    return JsDebug::TranslateExceptionToJsErrorCode(
+        [&]() -> void
+        {
+            auto instance = std::make_unique<JsDebug::Service>();
 
-    // Release ownership of the pointer
-    *service = reinterpret_cast<JsDebugService>(svc.release());
-    return JsNoError;
+            // Release ownership of the pointer
+            *service = reinterpret_cast<JsDebugService>(instance.release());
+        });
 }
 
 CHAKRA_API JsDebugServiceDestroy(JsDebugService service)
 {
-    // Take ownership of the pointer
-    auto svc = std::unique_ptr<JsDebug::Service>(reinterpret_cast<JsDebug::Service*>(service));
-
-    // Do stuff.
-
-    return JsNoError;
+    return JsDebug::TranslateExceptionToJsErrorCode<JsDebug::Service*>(
+        service,
+        [&](JsDebug::Service* instance) -> void
+        {
+            // Take ownership of the pointer so that it gets released at the exit of the function.
+            auto holder = std::unique_ptr<JsDebug::Service>(instance);
+        });
 }
 
 CHAKRA_API JsDebugServiceRegisterHandler(
@@ -34,32 +42,40 @@ CHAKRA_API JsDebugServiceRegisterHandler(
     JsDebugProtocolHandler protocolHandler,
     bool breakOnNextLine)
 {
-    auto svc = reinterpret_cast<JsDebug::Service*>(service);
-    svc->RegisterHandler(id, protocolHandler, breakOnNextLine);
-
-    return JsNoError;
+    return JsDebug::TranslateExceptionToJsErrorCode<JsDebug::Service*>(
+        service,
+        [&](JsDebug::Service* instance) -> void
+        {
+            instance->RegisterHandler(id, protocolHandler, breakOnNextLine);
+        });
 }
 
 CHAKRA_API JsDebugServiceUnregisterHandler(JsDebugService service, const char* id)
 {
-    auto svc = reinterpret_cast<JsDebug::Service*>(service);
-    svc->UnregisterHandler(id);
-
-    return JsNoError;
+    return JsDebug::TranslateExceptionToJsErrorCode<JsDebug::Service*>(
+        service,
+        [&](JsDebug::Service* instance) -> void
+        {
+            instance->UnregisterHandler(id);
+        });
 }
 
 CHAKRA_API JsDebugServiceListen(JsDebugService service, uint16_t port)
 {
-    auto svc = reinterpret_cast<JsDebug::Service*>(service);
-    svc->Listen(port);
-
-    return JsNoError;
+    return JsDebug::TranslateExceptionToJsErrorCode<JsDebug::Service*>(
+        service,
+        [&](JsDebug::Service* instance) -> void
+        {
+            instance->Listen(port);
+        });
 }
 
 CHAKRA_API JsDebugServiceClose(JsDebugService service)
 {
-    auto svc = reinterpret_cast<JsDebug::Service*>(service);
-    svc->Close();
-
-    return JsNoError;
+    return JsDebug::TranslateExceptionToJsErrorCode<JsDebug::Service*>(
+        service,
+        [&](JsDebug::Service* instance) -> void
+        {
+            instance->Close();
+        });
 }

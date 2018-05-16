@@ -41,9 +41,9 @@ namespace JsDebug
             void* state = nullptr;
             IfJsErrorThrow(JsDiagStopDebugging(m_runtime, &state));
         }
-        catch (const std::exception& e)
+        catch (...)
         {
-            std::cerr << e.what() << std::endl;
+            // Don't allow the exception to propagate.
         }
     }
 

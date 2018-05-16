@@ -23,6 +23,19 @@ namespace JsDebug
     using websocketpp::log::alevel;
     using websocketpp::log::elevel;
 
+    namespace
+    {
+        const char c_HeaderCacheControlName[] = "Cache-Control";
+        const char c_HeaderCacheControlValue[] = "no-cache";
+        const char c_HeaderContentTypeName[] = "Content-Type";
+        const char c_HeaderContentTypeValue[] = "application/json; charset=UTF-8";
+        const char c_LocalHostName[] = "127.0.0.1";
+        const char c_ResourceJson[] = "/json";
+        const char c_ResourceJsonList[] = "/json/list";
+        const char c_ResourceJsonProtocol[] = "/json/protocol";
+        const char c_ResourceJsonVersion[] = "/json/version";
+    }
+
     Service::Service()
         : m_port(0)
     {
@@ -41,10 +54,9 @@ namespace JsDebug
         {
             m_server.stop();
         }
-        catch (const websocketpp::exception& e)
+        catch (...)
         {
-            // Catch any exceptions thrown during destruction
-            std::cerr << "Failed to stop server: " << e.what() << std::endl;
+            // Don't allow the exception to propagate.
         }
     }
 
@@ -64,39 +76,25 @@ namespace JsDebug
     {
         m_port = port;
 
-        try
-        {
-            m_server.listen("127.0.0.1", std::to_string(m_port));
-            m_server.start_accept();
-        }
-        catch (const websocketpp::exception& e)
-        {
-            std::cerr << "Failed to start server: " << e.what() << std::endl;
-        }
+        m_server.listen(c_LocalHostName, std::to_string(m_port));
+        m_server.start_accept();
 
         m_thread = thread(&server::run, &m_server);
     }
 
     void Service::Close()
     {
-        try
-        {
-            // Stop listening for new connections
-            m_server.stop_listening();
-            m_port = 0;
+        // Stop listening for new connections
+        m_server.stop_listening();
+        m_port = 0;
 
+        {
+            unique_lock<mutex> lock(m_lock);
+
+            for (const auto& handler : m_handlers)
             {
-                unique_lock<mutex> lock(m_lock);
-
-                for (const auto& handler : m_handlers)
-                {
-                    handler.second->Disconnect();
-                }
+                handler.second->Disconnect();
             }
-        }
-        catch (const websocketpp::exception& e)
-        {
-            std::cerr << "Failed to stop server: " << e.what() << std::endl;
         }
 
         // Wait for the thread to exit
@@ -133,15 +131,15 @@ namespace JsDebug
         {
             auto resource = connection->get_uri()->get_resource();
 
-            if (resource.rfind("/json/protocol") == 0)
+            if (resource.rfind(c_ResourceJsonProtocol) == 0)
             {
                 HandleProtocolRequest(hdl);
             }
-            else if (resource.rfind("/json/version") == 0)
+            else if (resource.rfind(c_ResourceJsonVersion) == 0)
             {
                 HandleVersionRequest(hdl);
             }
-            else if (resource.rfind("/json/list") == 0 || resource.rfind("/json") == 0)
+            else if (resource.rfind(c_ResourceJsonList) == 0 || resource.rfind(c_ResourceJson) == 0)
             {
                 HandleListRequest(hdl);
             }
@@ -213,8 +211,8 @@ namespace JsDebug
         auto connection = m_server.get_con_from_hdl(hdl);
         if (connection != nullptr)
         {
-            connection->append_header("Content-Type", "application/json; charset=UTF-8");
-            connection->append_header("Cache-Control", "no-cache");
+            connection->append_header(c_HeaderContentTypeName, c_HeaderContentTypeValue);
+            connection->append_header(c_HeaderCacheControlName, c_HeaderCacheControlValue);
             connection->set_body(jsonBody);
             connection->set_status(websocketpp::http::status_code::ok);
         }

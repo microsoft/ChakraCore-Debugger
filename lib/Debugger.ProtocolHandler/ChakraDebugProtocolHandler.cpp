@@ -6,23 +6,34 @@
 #include "stdafx.h"
 #include "ChakraDebugProtocolHandler.h"
 #include "ProtocolHandler.h"
+#include "TranslateExceptionToJsErrorCode.h"
 
 CHAKRA_API JsDebugProtocolHandlerCreate(JsRuntimeHandle runtime, JsDebugProtocolHandler* protocolHandler)
 {
-    auto handler = std::make_unique<JsDebug::ProtocolHandler>(runtime);
+    if (protocolHandler == nullptr)
+    {
+        return JsErrorInvalidArgument;
+    }
 
-    // Release ownership of the pointer
-    *protocolHandler = reinterpret_cast<JsDebugProtocolHandler>(handler.release());
-    return JsNoError;
+    return JsDebug::TranslateExceptionToJsErrorCode(
+        [&]() -> void
+        {
+            auto instance = std::make_unique<JsDebug::ProtocolHandler>(runtime);
+
+            // Release ownership of the pointer
+            *protocolHandler = reinterpret_cast<JsDebugProtocolHandler>(instance.release());
+        });
 }
 
 CHAKRA_API JsDebugProtocolHandlerDestroy(JsDebugProtocolHandler protocolHandler)
 {
-    // Take ownership of the pointer so that it gets released at the exit of the function.
-    auto handler = std::unique_ptr<JsDebug::ProtocolHandler>(
-        reinterpret_cast<JsDebug::ProtocolHandler*>(protocolHandler));
-
-    return JsNoError;
+    return JsDebug::TranslateExceptionToJsErrorCode<JsDebug::ProtocolHandler*>(
+        protocolHandler,
+        [&](JsDebug::ProtocolHandler* instance) -> void
+        {
+            // Take ownership of the pointer so that it gets released at the exit of the function.
+            auto holder = std::unique_ptr<JsDebug::ProtocolHandler>(instance);
+        });
 }
 
 CHAKRA_API JsDebugProtocolHandlerConnect(
@@ -31,32 +42,40 @@ CHAKRA_API JsDebugProtocolHandlerConnect(
     JsDebugProtocolHandlerSendResponseCallback callback,
     void* callbackState)
 {
-    auto handler = reinterpret_cast<JsDebug::ProtocolHandler*>(protocolHandler);
-    handler->Connect(breakOnNextLine, callback, callbackState);
-
-    return JsNoError;
+    return JsDebug::TranslateExceptionToJsErrorCode<JsDebug::ProtocolHandler*>(
+        protocolHandler,
+        [&](JsDebug::ProtocolHandler* instance) -> void
+        {
+            instance->Connect(breakOnNextLine, callback, callbackState);
+        });
 }
 
 CHAKRA_API JsDebugProtocolHandlerDisconnect(JsDebugProtocolHandler protocolHandler)
 {
-    auto handler = reinterpret_cast<JsDebug::ProtocolHandler*>(protocolHandler);
-    handler->Disconnect();
-
-    return JsNoError;
+    return JsDebug::TranslateExceptionToJsErrorCode<JsDebug::ProtocolHandler*>(
+        protocolHandler,
+        [&](JsDebug::ProtocolHandler* instance) -> void
+        {
+            instance->Disconnect();
+        });
 }
 
 CHAKRA_API JsDebugProtocolHandlerSendCommand(JsDebugProtocolHandler protocolHandler, const char* command)
 {
-    auto handler = reinterpret_cast<JsDebug::ProtocolHandler*>(protocolHandler);
-    handler->SendCommand(command);
-
-    return JsNoError;
+    return JsDebug::TranslateExceptionToJsErrorCode<JsDebug::ProtocolHandler*>(
+        protocolHandler,
+        [&](JsDebug::ProtocolHandler* instance) -> void
+        {
+            instance->SendCommand(command);
+        });
 }
 
 CHAKRA_API JsDebugProtocolHandlerWaitForDebugger(JsDebugProtocolHandler protocolHandler)
 {
-    auto handler = reinterpret_cast<JsDebug::ProtocolHandler*>(protocolHandler);
-    handler->WaitForDebugger();
-
-    return JsNoError;
+    return JsDebug::TranslateExceptionToJsErrorCode<JsDebug::ProtocolHandler*>(
+        protocolHandler,
+        [&](JsDebug::ProtocolHandler* instance) -> void
+        {
+            instance->WaitForDebugger();
+        });
 }

@@ -6,6 +6,7 @@
 #include "StringUtil.h"
 #include "protocol\Protocol.h"
 
+#include <cassert>
 #include <sstream>
 
 //
@@ -117,5 +118,18 @@ namespace JsDebug
 
             return parseJSONCharacters(json.characters16(), static_cast<int>(json.length()));
         }
+    } // namespace protocol
+
+    StringBufferImpl::StringBufferImpl(String16&)
+    {
+        // TODO: Implement this when it gets hit.
+        assert(false);
     }
-}
+
+    std::unique_ptr<StringBufferImpl> StringBufferImpl::adopt(String16&)
+    {
+        // TODO: Implement this when it gets hit.
+        assert(false);
+        return nullptr;
+    }
+} // namespace JsDebug
