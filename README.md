@@ -13,7 +13,7 @@ ChakraCore-Debugger depends on ChakraCore from [NuGet](https://www.nuget.org/pac
 
 1. Clone the project (and submodules)
 ```console
-> git clone --recurse-submodules https://github.com/kfarnung/ChakraCore-Debugger
+> git clone --recurse-submodules https://github.com/Microsoft/ChakraCore-Debugger
 ```
 2. Launch the solution file
 ```console
