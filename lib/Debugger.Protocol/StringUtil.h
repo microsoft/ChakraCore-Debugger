@@ -25,7 +25,7 @@ namespace JsDebug
         class StringUtil
         {
         public:
-            static const size_t kNotFound = String::kNotFound;
+            static const size_t kNotFound;
 
             static String substring(const String& s, size_t pos, size_t len);
 

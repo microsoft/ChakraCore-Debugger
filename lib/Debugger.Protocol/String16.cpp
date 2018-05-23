@@ -19,6 +19,8 @@ namespace JsDebug
         const char c_ErrorInvalidIntegerCharacters[] = "String is not a valid integer or contains non-integer characters";
     }
 
+    const size_t String16::kNotFound = std::basic_string<UChar>::npos;
+
     String16::String16()
     {
     }
