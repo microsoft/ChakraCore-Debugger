@@ -17,6 +17,8 @@ namespace JsDebug
 {
     namespace protocol
     {
+        const size_t StringUtil::kNotFound = String::kNotFound;
+
         String StringUtil::substring(const String& s, size_t pos, size_t len)
         {
             return s.substring(pos, len);

@@ -19,7 +19,7 @@ namespace JsDebug
     class String16
     {
     public:
-        static const size_t kNotFound = std::basic_string<UChar>::npos;
+        static const size_t kNotFound;
 
         String16();
         String16(const UChar* str, size_t length);
