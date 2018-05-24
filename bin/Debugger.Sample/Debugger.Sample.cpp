@@ -185,11 +185,11 @@ JsErrorCode RunScript(const wchar_t* filename, JsValueRef* result)
 // Callback to echo something to the command-line.
 //
 JsValueRef CALLBACK HostEcho(
-    JsValueRef callee, 
-    bool isConstructCall, 
+    JsValueRef /*callee*/, 
+    bool /*isConstructCall*/, 
     JsValueRef* arguments, 
     unsigned short argumentCount, 
-    void* callbackState)
+    void* /*callbackState*/)
 {
     for (unsigned int index = 1; index < argumentCount; index++)
     {
@@ -217,11 +217,11 @@ JsValueRef CALLBACK HostEcho(
 // Callback to load a script and run it.
 //
 JsValueRef CALLBACK HostRunScript(
-    JsValueRef callee, 
-    bool isConstructCall, 
+    JsValueRef /*callee*/, 
+    bool /*isConstructCall*/, 
     JsValueRef* arguments, 
     unsigned short argumentCount, 
-    void* callbackState)
+    void* /*callbackState*/)
 {
     JsValueRef result = JS_INVALID_REFERENCE;
 
@@ -363,7 +363,7 @@ JsErrorCode EnableDebugging(
 {
     JsErrorCode result = JsNoError;
     auto protocolHandler = std::make_unique<DebugProtocolHandler>(runtime);
-    auto service = std::make_unique<DebugService>(runtime);
+    auto service = std::make_unique<DebugService>();
 
     result = service->RegisterHandler(runtimeName, *protocolHandler, breakOnNextLine);
 
@@ -413,7 +413,7 @@ int _cdecl wmain(int argc, wchar_t* argv[])
         if (arguments.enableDebugging)
         {
             IfFailError(
-                EnableDebugging(runtime, runtimeName, arguments.breakOnNextLine, arguments.port, debugProtocolHandler, debugService),
+                EnableDebugging(runtime, runtimeName, arguments.breakOnNextLine, static_cast<uint16_t>(arguments.port), debugProtocolHandler, debugService),
                 L"failed to enable debugging.");
         }
 

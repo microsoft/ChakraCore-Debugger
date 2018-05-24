@@ -144,7 +144,7 @@ private:
     JsDebugService m_service{ nullptr };
 
 public:
-    DebugService(JsRuntimeHandle runtime)
+    DebugService()
     {
         JsDebugService service;
 

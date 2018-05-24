@@ -93,12 +93,12 @@ namespace JsDebug
         return Response::OK();
     }
 
-    Response DebuggerImpl::setBreakpointsActive(bool in_active)
+    Response DebuggerImpl::setBreakpointsActive(bool /*in_active*/)
     {
         return Response::Error(c_ErrorNotImplemented);
     }
 
-    Response DebuggerImpl::setSkipAllPauses(bool in_skip)
+    Response DebuggerImpl::setSkipAllPauses(bool /*in_skip*/)
     {
         return Response::Error(c_ErrorNotImplemented);
     }
@@ -266,30 +266,31 @@ namespace JsDebug
     }
 
     Response DebuggerImpl::searchInContent(
-        const String & in_scriptId,
-        const String & in_query,
-        Maybe<bool> in_caseSensitive,
-        Maybe<bool> in_isRegex,
-        std::unique_ptr<Array<protocol::Debugger::SearchMatch>>* out_result)
+        const String & /*in_scriptId*/,
+        const String & /*in_query*/,
+        Maybe<bool> /*in_caseSensitive*/,
+        Maybe<bool> /*in_isRegex*/,
+        std::unique_ptr<Array<protocol::Debugger::SearchMatch>>* /*out_result*/)
     {
         return Response::Error(c_ErrorNotImplemented);
     }
 
     Response DebuggerImpl::setScriptSource(
-        const String & in_scriptId,
-        const String & in_scriptSource, Maybe<bool> in_dryRun,
-        Maybe<Array<CallFrame>>* out_callFrames,
-        Maybe<bool>* out_stackChanged,
-        Maybe<StackTrace>* out_asyncStackTrace,
-        Maybe<protocol::Runtime::ExceptionDetails>* out_exceptionDetails)
+        const String & /*in_scriptId*/,
+        const String & /*in_scriptSource*/,
+        Maybe<bool> /*in_dryRun*/,
+        Maybe<Array<CallFrame>>* /*out_callFrames*/,
+        Maybe<bool>* /*out_stackChanged*/,
+        Maybe<StackTrace>* /*out_asyncStackTrace*/,
+        Maybe<protocol::Runtime::ExceptionDetails>* /*out_exceptionDetails*/)
     {
         return Response::Error(c_ErrorNotImplemented);
     }
 
     Response DebuggerImpl::restartFrame(
-        const String & in_callFrameId,
-        std::unique_ptr<Array<CallFrame>>* out_callFrames,
-        Maybe<StackTrace>* out_asyncStackTrace)
+        const String & /*in_callFrameId*/,
+        std::unique_ptr<Array<CallFrame>>* /*out_callFrames*/,
+        Maybe<StackTrace>* /*out_asyncStackTrace*/)
     {
         return Response::Error(c_ErrorNotImplemented);
     }
@@ -340,10 +341,10 @@ namespace JsDebug
         const String & in_callFrameId,
         const String & in_expression,
         Maybe<String> in_objectGroup,
-        Maybe<bool> in_includeCommandLineAPI,
-        Maybe<bool> in_silent,
+        Maybe<bool> /*in_includeCommandLineAPI*/,
+        Maybe<bool> /*in_silent*/,
         Maybe<bool> in_returnByValue,
-        Maybe<bool> in_generatePreview,
+        Maybe<bool> /*in_generatePreview*/,
         std::unique_ptr<protocol::Runtime::RemoteObject>* out_result,
         Maybe<protocol::Runtime::ExceptionDetails>* out_exceptionDetails)
     {
@@ -369,15 +370,15 @@ namespace JsDebug
     }
 
     Response DebuggerImpl::setVariableValue(
-        int in_scopeNumber,
-        const String & in_variableName,
-        std::unique_ptr<protocol::Runtime::CallArgument> in_newValue,
-        const String & in_callFrameId)
+        int /*in_scopeNumber*/,
+        const String & /*in_variableName*/,
+        std::unique_ptr<protocol::Runtime::CallArgument> /*in_newValue*/,
+        const String & /*in_callFrameId*/)
     {
         return Response::Error(c_ErrorNotImplemented);
     }
 
-    Response DebuggerImpl::setAsyncCallStackDepth(int in_maxDepth)
+    Response DebuggerImpl::setAsyncCallStackDepth(int /*in_maxDepth*/)
     {
         return Response::Error(c_ErrorNotImplemented);
     }
@@ -388,8 +389,8 @@ namespace JsDebug
     }
 
     Response DebuggerImpl::setBlackboxedRanges(
-        const String & in_scriptId,
-        std::unique_ptr<Array<protocol::Debugger::ScriptPosition>> in_positions)
+        const String & /*in_scriptId*/,
+        std::unique_ptr<Array<protocol::Debugger::ScriptPosition>> /*in_positions*/)
     {
         return Response::Error(c_ErrorNotImplemented);
     }
