@@ -73,8 +73,8 @@ namespace JsDebug
 
             for (int i = 0; i < length; i++)
             {
-                String value = PropertyHelpers::GetIndexedPropertyString(result, i);
-                match.push_back(value);
+                String strValue = PropertyHelpers::GetIndexedPropertyString(result, i);
+                match.push_back(strValue);
             }
         }
 
