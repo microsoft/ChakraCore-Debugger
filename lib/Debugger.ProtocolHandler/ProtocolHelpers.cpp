@@ -27,7 +27,7 @@ namespace JsDebug
         const char c_ErrorNoDisplayString[] = "No display string found";
         const int c_JsrtDebugPropertyReadOnly = 0x4;
 
-        std::unique_ptr<Value> ToProtocolValue(JsValueRef object)
+        std::unique_ptr<Value> ToProtocolValue(JsValueRef /*object*/)
         {
             // TODO: traverse object graph and build protocol value.
             return Value::null();

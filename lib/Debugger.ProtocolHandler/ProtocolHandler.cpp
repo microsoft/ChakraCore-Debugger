@@ -119,7 +119,7 @@ namespace JsDebug
         return domains;
     }
 
-    void ProtocolHandler::sendProtocolResponse(int callId, std::unique_ptr<Serializable> message)
+    void ProtocolHandler::sendProtocolResponse(int /*callId*/, std::unique_ptr<Serializable> message)
     {
         sendProtocolNotification(std::move(message));
     }

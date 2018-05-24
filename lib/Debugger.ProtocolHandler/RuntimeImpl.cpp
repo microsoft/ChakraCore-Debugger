@@ -47,51 +47,51 @@ namespace JsDebug
     }
 
     void RuntimeImpl::evaluate(
-        const String & in_expression,
-        Maybe<String> in_objectGroup,
-        Maybe<bool> in_includeCommandLineAPI,
-        Maybe<bool> in_silent,
-        Maybe<int> in_contextId,
-        Maybe<bool> in_returnByValue,
-        Maybe<bool> in_generatePreview,
-        Maybe<bool> in_userGesture,
-        Maybe<bool> in_awaitPromise,
+        const String& /*in_expression*/,
+        Maybe<String> /*in_objectGroup*/,
+        Maybe<bool> /*in_includeCommandLineAPI*/,
+        Maybe<bool> /*in_silent*/,
+        Maybe<int> /*in_contextId*/,
+        Maybe<bool> /*in_returnByValue*/,
+        Maybe<bool> /*in_generatePreview*/,
+        Maybe<bool> /*in_userGesture*/,
+        Maybe<bool> /*in_awaitPromise*/,
         std::unique_ptr<EvaluateCallback> callback)
     {
         callback->sendFailure(Response::Error(c_ErrorNotImplemented));
     }
 
     void RuntimeImpl::awaitPromise(
-        const String & in_promiseObjectId,
-        Maybe<bool> in_returnByValue,
-        Maybe<bool> in_generatePreview,
+        const String& /*in_promiseObjectId*/,
+        Maybe<bool> /*in_returnByValue*/,
+        Maybe<bool> /*in_generatePreview*/,
         std::unique_ptr<AwaitPromiseCallback> callback)
     {
         callback->sendFailure(Response::Error(c_ErrorNotImplemented));
     }
 
     void RuntimeImpl::callFunctionOn(
-        const String & in_objectId,
-        const String & in_functionDeclaration,
-        Maybe<Array<CallArgument>> in_arguments,
-        Maybe<bool> in_silent,
-        Maybe<bool> in_returnByValue,
-        Maybe<bool> in_generatePreview,
-        Maybe<bool> in_userGesture,
-        Maybe<bool> in_awaitPromise,
+        const String& /*in_objectId*/,
+        const String& /*in_functionDeclaration*/,
+        Maybe<Array<CallArgument>> /*in_arguments*/,
+        Maybe<bool> /*in_silent*/,
+        Maybe<bool> /*in_returnByValue*/,
+        Maybe<bool> /*in_generatePreview*/,
+        Maybe<bool> /*in_userGesture*/,
+        Maybe<bool> /*in_awaitPromise*/,
         std::unique_ptr<CallFunctionOnCallback> callback)
     {
         callback->sendFailure(Response::Error(c_ErrorNotImplemented));
     }
 
     Response RuntimeImpl::getProperties(
-        const String & in_objectId,
-        Maybe<bool> in_ownProperties,
+        const String& in_objectId,
+        Maybe<bool> /*in_ownProperties*/,
         Maybe<bool> in_accessorPropertiesOnly,
-        Maybe<bool> in_generatePreview,
+        Maybe<bool> /*in_generatePreview*/,
         std::unique_ptr<Array<PropertyDescriptor>>* out_result,
         Maybe<Array<InternalPropertyDescriptor>>* out_internalProperties,
-        Maybe<ExceptionDetails>* out_exceptionDetails)
+        Maybe<ExceptionDetails>* /*out_exceptionDetails*/)
     {
         if (in_accessorPropertiesOnly.fromMaybe(false))
         {
@@ -140,12 +140,12 @@ namespace JsDebug
         return Response::Error(c_ErrorInvalidObjectId);
     }
 
-    Response RuntimeImpl::releaseObject(const String & in_objectId)
+    Response RuntimeImpl::releaseObject(const String& /*in_objectId*/)
     {
         return Response::Error(c_ErrorNotImplemented);
     }
 
-    Response RuntimeImpl::releaseObjectGroup(const String & in_objectGroup)
+    Response RuntimeImpl::releaseObjectGroup(const String& /*in_objectGroup*/)
     {
         return Response::Error(c_ErrorNotImplemented);
     }
@@ -192,31 +192,31 @@ namespace JsDebug
         return Response::Error(c_ErrorNotImplemented);
     }
 
-    Response RuntimeImpl::setCustomObjectFormatterEnabled(bool in_enabled)
+    Response RuntimeImpl::setCustomObjectFormatterEnabled(bool /*in_enabled*/)
     {
         return Response::Error(c_ErrorNotImplemented);
     }
 
     Response RuntimeImpl::compileScript(
-        const String & in_expression,
-        const String & in_sourceURL,
-        bool in_persistScript,
-        Maybe<int> in_executionContextId,
-        Maybe<String>* out_scriptId,
-        Maybe<ExceptionDetails>* out_exceptionDetails)
+        const String& /*in_expression*/,
+        const String& /*in_sourceURL*/,
+        bool /*in_persistScript*/,
+        Maybe<int> /*in_executionContextId*/,
+        Maybe<String>* /*out_scriptId*/,
+        Maybe<ExceptionDetails>* /*out_exceptionDetails*/)
     {
         return Response::Error(c_ErrorNotImplemented);
     }
 
     void RuntimeImpl::runScript(
-        const String & in_scriptId,
-        Maybe<int> in_executionContextId,
-        Maybe<String> in_objectGroup,
-        Maybe<bool> in_silent,
-        Maybe<bool> in_includeCommandLineAPI,
-        Maybe<bool> in_returnByValue,
-        Maybe<bool> in_generatePreview,
-        Maybe<bool> in_awaitPromise,
+        const String& /*in_scriptId*/,
+        Maybe<int> /*in_executionContextId*/,
+        Maybe<String> /*in_objectGroup*/,
+        Maybe<bool> /*in_silent*/,
+        Maybe<bool> /*in_includeCommandLineAPI*/,
+        Maybe<bool> /*in_returnByValue*/,
+        Maybe<bool> /*in_generatePreview*/,
+        Maybe<bool> /*in_awaitPromise*/,
         std::unique_ptr<RunScriptCallback> callback)
     {
         callback->sendFailure(Response::Error(c_ErrorNotImplemented));
