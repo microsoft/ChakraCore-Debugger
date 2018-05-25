@@ -50,7 +50,8 @@ namespace JsDebug
     {
         try
         {
-            m_server.stop();
+            // Close any open connections
+            Close();
         }
         catch (...)
         {
