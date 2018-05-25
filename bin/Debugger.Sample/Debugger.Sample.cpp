@@ -212,6 +212,39 @@ JsValueRef CALLBACK HostEcho(
 }
 
 //
+// Callback to test handling of exceptions thrown from native code. This isn't a realistic function for a host to
+// implement, simply a sample function for testing purposes only.
+//
+JsValueRef CALLBACK HostThrow(
+    JsValueRef /*callee*/,
+    bool /*isConstructCall*/,
+    JsValueRef* arguments,
+    unsigned short argumentCount,
+    void* /*callbackState*/)
+{
+    JsValueRef error = JS_INVALID_REFERENCE;
+
+    if (argumentCount >= 2)
+    {
+        // Attempt to use the provided object as the error to set.
+        error = arguments[1];
+    }
+    else
+    {
+        // By default create a sample error object with a message.
+        const std::string errStr("Sample error message");
+        JsValueRef errorMsg = JS_INVALID_REFERENCE;
+        JsCreateString(errStr.c_str(), errStr.length(), &errorMsg);
+
+        JsCreateError(errorMsg, &error);
+    }
+
+    JsSetException(error);
+
+    return JS_INVALID_REFERENCE;
+}
+
+//
 // Callback to load a script and run it.
 //
 JsValueRef CALLBACK HostRunScript(
@@ -291,6 +324,7 @@ JsErrorCode CreateHostContext(JsRuntimeHandle runtime, std::vector<std::wstring>
     // Now create the host callbacks that we're going to expose to the script.
     IfFailRet(DefineHostCallback(hostObject, L"echo", HostEcho, nullptr));
     IfFailRet(DefineHostCallback(hostObject, L"runScript", HostRunScript, nullptr));
+    IfFailRet(DefineHostCallback(hostObject, L"throw", HostThrow, nullptr));
 
     // Create an array for arguments.
     JsValueRef arguments = JS_INVALID_REFERENCE;
@@ -406,7 +440,9 @@ int _cdecl wmain(int argc, wchar_t* argv[])
         std::string runtimeName("runtime1");
 
         // Create the runtime. We're only going to use one runtime for this host.
-        IfFailError(JsCreateRuntime(JsRuntimeAttributeNone, nullptr, &runtime), L"failed to create runtime.");
+        IfFailError(
+            JsCreateRuntime(JsRuntimeAttributeDispatchSetExceptionsToDebugger, nullptr, &runtime),
+            L"failed to create runtime.");
 
         if (arguments.enableDebugging)
         {
