@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 if (typeof host === "undefined") {
   global.host = {
     echo: console.log,
