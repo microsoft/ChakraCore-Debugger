@@ -67,10 +67,12 @@ namespace JsDebug
 
         JsValueRef value = JS_INVALID_REFERENCE;
         bool hasValue = PropertyHelpers::TryGetProperty(object, PropertyHelpers::Names::Value, &value);
-        if (hasValue)
-        {
-            remoteObject->setValue(ToProtocolValue(value));
-        }
+        // TODO: Once `ToProtocolValue` is implemented uncomment the following code. VS Code prefers `value` in most
+        //       cases and prevents viewing the values of variables.
+        ////if (hasValue)
+        ////{
+        ////    remoteObject->setValue(ToProtocolValue(value));
+        ////}
 
         String display;
         bool hasDisplay = PropertyHelpers::TryGetProperty(object, PropertyHelpers::Names::Display, &display);
