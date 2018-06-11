@@ -51,13 +51,28 @@ function testScopes() {
   let i = 47;
   i += deepScope();
   i += 4584;
-  return i;
+  host.echo(i);
+}
+
+function testValues() {
+  let nullVal = null;
+  let nanVal = NaN;
+  let negZeroVal = -0;
+  let posInfVal = Number.POSITIVE_INFINITY;
+  let negInfVal = Number.NEGATIVE_INFINITY;
+
+  host.echo(nullVal);
+  host.echo(nanVal);
+  host.echo(negZeroVal);
+  host.echo(posInfVal);
+  host.echo(negInfVal);
 }
 
 // Run the test scenarios.
 testScriptThrow();
 testNativeThrow();
-host.echo(testScopes());
+testScopes();
+testValues();
 
 // The exit code
 0;
