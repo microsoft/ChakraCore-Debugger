@@ -5,7 +5,9 @@
 
 #include "targetver.h"
 
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
+#endif
 
 // WebSocket++ generates some build warnings internally that just add noise to the build. The library author considers
 // them safe to be ignored so we'll do so here.
