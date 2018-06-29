@@ -14,9 +14,10 @@
 // * C4127 - conditional expression is constant
 // * C4244 - conversion' conversion from 'type1' to 'type2', possible loss of data
 // * C4267 - narrowing conversion of size_t
+// * C4834 - discarding return value of function with 'nodiscard' attribute
 // * C4996 - usage of deprecated functions
 #pragma warning( push )
-#pragma warning( disable : 4127 4244 4267 4996 )
+#pragma warning( disable : 4127 4244 4267 4834 4996 )
 #define ASIO_STANDALONE
 #define _WEBSOCKETPP_CPP11_TYPE_TRAITS_
 #include <websocketpp/config/asio_no_tls.hpp>
