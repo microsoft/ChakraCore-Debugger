@@ -17,7 +17,10 @@
 // * C4996 - usage of deprecated functions
 #pragma warning( push )
 #pragma warning( disable : 4127 4244 4267 4996 )
-#define ASIO_STANDALONE
+#if !defined (ASIO_STANDALONE)
+#define BOOST_ERROR_CODE_HEADER_ONLY  // Avoid link-time dependencies for boost::system::error_code.
+#define BOOST_ASIO_DISABLE_BOOST_REGEX
+#endif
 #define _WEBSOCKETPP_CPP11_TYPE_TRAITS_
 #include <websocketpp/config/asio_no_tls.hpp>
 #include <websocketpp/server.hpp>
