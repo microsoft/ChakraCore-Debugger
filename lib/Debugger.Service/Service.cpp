@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 #include "stdafx.h"
-
 #include "Service.h"
+
 #include <iostream>
 
 namespace JsDebug

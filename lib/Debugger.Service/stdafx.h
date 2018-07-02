@@ -27,6 +27,7 @@
 #include <map>
 #include <memory>
 #include <set>
+#include <string>
 
 #include <ChakraCore.h>
 #include <ChakraDebugProtocolHandler.h>

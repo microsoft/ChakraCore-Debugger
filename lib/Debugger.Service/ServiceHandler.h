@@ -3,9 +3,6 @@
 
 #pragma once
 
-#include <ChakraDebugProtocolHandler.h>
-#include <string>
-
 namespace JsDebug
 {
     class ServiceHandler
