@@ -53,6 +53,7 @@ namespace JsDebug
         {
             // Ignore any returned error codes
             JsErrorCode err = JsDebugProtocolHandlerDisconnect(m_protocolHandler);
+            UNREFERENCED_PARAMETER(err);
             assert(err == JsNoError);
         }
     }
@@ -114,6 +115,7 @@ namespace JsDebug
     {
         // Ignore any returned error codes
         JsErrorCode err = JsDebugProtocolHandlerSendCommand(m_protocolHandler, msg->get_payload().c_str());
+          UNREFERENCED_PARAMETER(err);
         assert(err == JsNoError);
     }
 
@@ -123,6 +125,7 @@ namespace JsDebug
         {
             // Ignore any returned error codes
             JsErrorCode err = JsDebugProtocolHandlerDisconnect(m_protocolHandler);
+            UNREFERENCED_PARAMETER(err);
             assert(err == JsNoError);
 
             m_connected = false;
