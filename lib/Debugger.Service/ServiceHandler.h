@@ -3,8 +3,7 @@
 
 #pragma once
 
-#include <ChakraDebugProtocolHandler.h>
-#include <string>
+#include <ChakraDebugProtocolHandler.h> 
 
 namespace JsDebug
 {

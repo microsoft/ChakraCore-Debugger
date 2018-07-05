@@ -3,18 +3,6 @@
 
 #pragma once
 
-#pragma warning( push )
-#pragma warning( disable : 4267 4996 )
-#define ASIO_STANDALONE
-#define _WEBSOCKETPP_CPP11_TYPE_TRAITS_
-#include <websocketpp/config/asio_no_tls.hpp>
-#include <websocketpp/server.hpp>
-#pragma warning( pop )
-
-#include <map>
-#include <set>
-
-#include <ChakraDebugProtocolHandler.h>
 #include "ServiceHandler.h"
 
 namespace JsDebug

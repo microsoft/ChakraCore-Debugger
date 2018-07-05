@@ -18,7 +18,6 @@
 // * C4996 - usage of deprecated functions
 #pragma warning( push )
 #pragma warning( disable : 4127 4244 4267 4834 4996 )
-#define ASIO_STANDALONE
 #define _WEBSOCKETPP_CPP11_TYPE_TRAITS_
 #include <websocketpp/config/asio_no_tls.hpp>
 #include <websocketpp/server.hpp>
@@ -28,6 +27,7 @@
 #include <map>
 #include <memory>
 #include <set>
+#include <string>
 
 #include <ChakraCore.h>
 #include <ChakraDebugProtocolHandler.h>
