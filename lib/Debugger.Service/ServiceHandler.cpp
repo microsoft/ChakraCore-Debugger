@@ -115,7 +115,7 @@ namespace JsDebug
     {
         // Ignore any returned error codes
         JsErrorCode err = JsDebugProtocolHandlerSendCommand(m_protocolHandler, msg->get_payload().c_str());
-          UNREFERENCED_PARAMETER(err);
+        UNREFERENCED_PARAMETER(err);
         assert(err == JsNoError);
     }
 
