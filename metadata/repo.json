@@ -1,0 +1,10 @@
+{
+    "contacts": [],
+    "description": "",
+    "deployedToProduction": true,
+    "complianceTypes": [],
+    "inventoryId": [],
+    "schema": {
+        "office": "1.0.0"
+    }
+}
