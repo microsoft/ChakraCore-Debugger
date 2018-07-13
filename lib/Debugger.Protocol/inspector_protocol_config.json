@@ -1,0 +1,43 @@
+{
+    "protocol": {
+        "path": "js_protocol.json",
+        "package": "protocol",
+        "output": "protocol",
+        "namespace": ["JsDebug", "protocol"],
+        "options": [
+            {
+                "domain": "Schema",
+                "exported": ["Domain"]
+            },
+            {
+                "domain": "Runtime",
+                "async": ["evaluate", "awaitPromise", "callFunctionOn", "runScript"],
+                "exported": ["StackTrace", "StackTraceId", "RemoteObject", "ExecutionContextId"]
+            },
+            {
+                "domain": "Debugger",
+                "async": [ "scheduleStepIntoAsync" ],
+                "exported": ["SearchMatch", "paused.reason"]
+            },
+            {
+                "domain": "Console"
+            }
+        ]
+    },
+
+    "exported": {
+        "package": "include",
+        "output": "include",
+        "string_header": "Common.h",
+        "string_in": "StringView",
+        "string_out": "std::unique_ptr<StringBuffer>",
+        "to_string_out": "StringBufferImpl::adopt(%s)",
+        "export_macro": "LIB_EXPORT"
+    },
+
+    "lib": {
+        "package": "protocol",
+        "output": "protocol",
+        "string_header": "StringUtil.h"
+    }
+}

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Debugger">
+      <UniqueIdentifier>{070fc079-3f79-42d3-8bb5-4fbb516f2be5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Helpers">
+      <UniqueIdentifier>{6d94007d-dc64-451b-8c50-e13adfe9b91c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Protocol">
+      <UniqueIdentifier>{09212b62-b0f4-4cae-bca9-74dbdfbadcca}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ConsoleImpl.h">
+      <Filter>Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="DebuggerImpl.h">
+      <Filter>Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="RuntimeImpl.h">
+      <Filter>Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="SchemaImpl.h">
+      <Filter>Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="PropertyHelpers.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ErrorHelpers.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="Debugger.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="DebuggerScript.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="DebuggerCallFrame.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="JsPersistent.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ProtocolHelpers.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="DebuggerBreak.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="DebuggerBreakpoint.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="DebuggerObject.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="DebuggerLocalScope.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="ChakraDebugProtocolHandler.h" />
+    <ClInclude Include="ProtocolHandler.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="DebuggerRegExp.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="DebuggerContext.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="TranslateExceptionToJsErrorCode.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Debugger.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="DebuggerBreak.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="DebuggerBreakpoint.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="DebuggerCallFrame.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="DebuggerLocalScope.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="DebuggerObject.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="DebuggerScript.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="ErrorHelpers.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertyHelpers.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ProtocolHelpers.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ConsoleImpl.cpp">
+      <Filter>Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="DebuggerImpl.cpp">
+      <Filter>Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="RuntimeImpl.cpp">
+      <Filter>Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="SchemaImpl.cpp">
+      <Filter>Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="ChakraDebugProtocolHandler.cpp" />
+    <ClCompile Include="ProtocolHandler.cpp" />
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="DebuggerRegExp.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="DebuggerContext.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="JsPersistent.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+</Project>
