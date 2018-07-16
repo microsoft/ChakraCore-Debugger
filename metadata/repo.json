@@ -1,6 +1,6 @@
 {
-    "contacts": [],
-    "description": "",
+    "contacts": [Adam.Krantz@microsoft.com],
+    "description": "ChakraCore debugging library",
     "deployedToProduction": true,
     "complianceTypes": [],
     "inventoryId": [],
