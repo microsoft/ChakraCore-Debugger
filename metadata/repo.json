@@ -1,5 +1,5 @@
 {
-    "contacts": [Adam.Krantz@microsoft.com],
+    "contacts": ["Adam.Krantz@microsoft.com", "dxtceng@microsoft.com"],
     "description": "ChakraCore debugging library",
     "deployedToProduction": true,
     "complianceTypes": [],
