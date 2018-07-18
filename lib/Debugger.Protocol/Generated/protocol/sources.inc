@@ -5,8 +5,8 @@ LIBLET_NO_PRECOMP = 1
 !include $(WAREHOUSEIMPORTDIR)\libletmake\x-none\nmake\make.inc
 
 INCLUDES = $(INCLUDES); \
-	$(OPENSOURCE_REACTNATIVE)\OfficeISS\ChakraCore-Debugger\lib\Debugger.Protocol; \
-	$(OPENSOURCE_REACTNATIVE)\OfficeISS\ChakraCore-Debugger\lib\Debugger.Protocol\Generated; \
+	$(OPENSOURCE_CHAKRACOREDEBUG)\lib\Debugger.Protocol; \
+	$(OPENSOURCE_CHAKRACOREDEBUG)\lib\Debugger.Protocol\Generated; \
 
 SOURCES_SHARED = \
 	..\Console.cpp \

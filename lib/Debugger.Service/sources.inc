@@ -5,10 +5,10 @@ LIBLET_NO_PRECOMP = 1
 !include $(WAREHOUSEIMPORTDIR)\libletmake\x-none\nmake\make.inc
 
 INCLUDES = $(INCLUDES); \
-	$(OPENSOURCE_REACTNATIVE)\OfficeISS\ChakraCore-Debugger\lib\Debugger.Protocol; \
-	$(OPENSOURCE_REACTNATIVE)\OfficeISS\ChakraCore-Debugger\lib\Debugger.ProtocolHandler; \
-	$(OPENSOURCE_REACTNATIVE)\OfficeISS\ChakraCore-Debugger\lib\Debugger.Service; \
-	$(OPENSOURCE_REACTNATIVE)\OfficeISS\ChakraCore-Debugger\deps\websocketpp; \
+	$(OPENSOURCE_CHAKRACOREDEBUG)\lib\Debugger.Protocol; \
+	$(OPENSOURCE_CHAKRACOREDEBUG)\lib\Debugger.ProtocolHandler; \
+	$(OPENSOURCE_CHAKRACOREDEBUG)\lib\Debugger.Service; \
+	$(OPENSOURCE_CHAKRACOREDEBUG)\deps\websocketpp; \
 	$(PKGBOOST)\lib\native\include; \
 	$(WAREHOUSEIMPORTDIR)\microsoft_chakracore\x-none\inc; \
 
