@@ -25,6 +25,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PropertySheets", "PropertyS
 		PropertySheets\x86.props = PropertySheets\x86.props
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{F0BB2163-D0AA-4DF2-8245-7AF1130D5833}"
+	ProjectSection(SolutionItems) = preProject
+		NuGet\ChakraCore.Debugger.nuspec = NuGet\ChakraCore.Debugger.nuspec
+		NuGet\ChakraCore.Debugger.targets = NuGet\ChakraCore.Debugger.targets
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
