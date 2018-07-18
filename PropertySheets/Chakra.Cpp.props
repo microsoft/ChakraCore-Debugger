@@ -12,6 +12,11 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
 
+  <ImportGroup Label="Defaults">
+    <Import Project="$(Platform).props" />
+    <Import Project="$(Configuration).props" />
+  </ImportGroup>
+
   <ItemDefinitionGroup>
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
