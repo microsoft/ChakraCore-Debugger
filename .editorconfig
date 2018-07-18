@@ -5,13 +5,9 @@ root = true
 
 # Unix-style newlines with a newline ending every file
 [*]
-end_of_line = lf
+end_of_line = crlf
 indent_style = space
 indent_size = 2
 
-[*.{vcxproj,vcxproj.filters,props,targets,config,nuspec}]
-end_of_line = crlf
-
-[*.{h,cpp}]
-end_of_line = crlf
+[*.{c,cpp,h,hpp}]
 indent_size = 4
