@@ -7,7 +7,7 @@ root = true
 [*]
 end_of_line = crlf
 indent_style = space
-indent_size = 2
-
-[*.{c,cpp,h,hpp}]
 indent_size = 4
+
+[*.{vcxproj,vcxproj.filters,props,targets,config,nuspec}]
+indent_size = 2
