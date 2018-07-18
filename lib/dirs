@@ -1,0 +1,6 @@
+DIRS = \
+    Debugger.Protocol \
+    Debugger.ProtocolHandler \
+    Debugger.Service \
+
+    
