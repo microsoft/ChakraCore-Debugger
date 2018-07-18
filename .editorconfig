@@ -9,7 +9,7 @@ end_of_line = lf
 indent_style = space
 indent_size = 2
 
-[*.{vcxproj,vcxproj.filters,props,targets,config}]
+[*.{vcxproj,vcxproj.filters,props,targets,config,nuspec}]
 end_of_line = crlf
 
 [*.{h,cpp}]
