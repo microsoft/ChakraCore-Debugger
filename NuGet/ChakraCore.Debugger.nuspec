@@ -17,6 +17,8 @@
     <file src="..\build\bin\x64\Release\*" target="lib\x64\Release" exclude="*.ilk" />
     <file src="..\build\bin\Win32\Debug\*" target="lib\x86\Debug" exclude="*.ilk" />
     <file src="..\build\bin\Win32\Release\*" target="lib\x86\Release" exclude="*.ilk" />
+    <file src="..\build\bin\ARM\Debug\*" target="lib\ARM\Debug" exclude="*.ilk" />
+    <file src="..\build\bin\ARM\Release\*" target="lib\ARM\Release" exclude="*.ilk" />
 
     <file src="ChakraCore.Debugger.targets" target="build\native\" />
   </files>
