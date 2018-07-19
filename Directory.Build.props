@@ -1,5 +1,6 @@
 <Project>
   <PropertyGroup>
+    <SolutionDir Condition="'$(SolutionDir)' == ''">$(MSBuildThisFileDirectory)</SolutionDir>
     <WindowsSDKDesktopARMSupport Condition="'$(Platform)'=='ARM'">true</WindowsSDKDesktopARMSupport>
     <DepsDirectoryPath>$(MSBuildThisFileDirectory)deps\</DepsDirectoryPath>
     <OutDir>$(MSBuildThisFileDirectory)build\bin\$(Platform)\$(Configuration)\</OutDir>
