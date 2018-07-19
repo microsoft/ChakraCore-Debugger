@@ -14,14 +14,31 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{2ACDA3C4-5AD
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChakraCore.Debugger.Protocol", "lib\Debugger.Protocol\ChakraCore.Debugger.Protocol.vcxproj", "{D9714E79-129C-4ED7-BEBE-7F2E8DC4E2A5}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PropertySheets", "PropertySheets", "{565022AE-8DB2-4646-BD0E-C25019D241A3}"
+	ProjectSection(SolutionItems) = preProject
+		PropertySheets\ARM.props = PropertySheets\ARM.props
+		PropertySheets\Chakra.Cpp.props = PropertySheets\Chakra.Cpp.props
+		PropertySheets\Debug.props = PropertySheets\Debug.props
+		PropertySheets\Release.props = PropertySheets\Release.props
+		PropertySheets\Win32.props = PropertySheets\Win32.props
+		PropertySheets\x64.props = PropertySheets\x64.props
+		PropertySheets\x86.props = PropertySheets\x86.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{F0BB2163-D0AA-4DF2-8245-7AF1130D5833}"
+	ProjectSection(SolutionItems) = preProject
+		NuGet\Microsoft.ChakraCore.Debugger.nuspec = NuGet\Microsoft.ChakraCore.Debugger.nuspec
+		NuGet\Microsoft.ChakraCore.Debugger.targets = NuGet\Microsoft.ChakraCore.Debugger.targets
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|ARM = Debug|ARM
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
-		Release|ARM = Release|ARM
+		Debug|ARM = Debug|ARM
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
+		Release|ARM = Release|ARM
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{AC43259C-97CB-43C1-9B56-983CA31ED5D2}.Debug|ARM.ActiveCfg = Debug|ARM

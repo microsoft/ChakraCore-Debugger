@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Microsoft.ChakraCore.Debugger</id>
+    <version>$version$</version>
+    <description>Debugging companion library for the ChakraCore JavaScript engine.</description>
+    <authors>Microsoft</authors>
+    <projectUrl>https://github.com/Microsoft/ChakraCore-Debugger</projectUrl>
+    <licenseUrl>https://github.com/Microsoft/ChakraCore-Debugger/blob/master/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <copyright>Copyright © 2018 Microsoft</copyright>
+  </metadata>
+
+  <files>
+    <file src="..\lib\Debugger.Service\ChakraDebugService.h" target="include" />
+    <file src="..\lib\Debugger.ProtocolHandler\ChakraDebugProtocolHandler.h" target="include" />
+
+    <file src="..\build\bin\x64\Debug\*" target="lib\x64\Debug" exclude="*.ilk" />
+    <file src="..\build\bin\x64\Release\*" target="lib\x64\Release" exclude="*.ilk" />
+    <file src="..\build\bin\Win32\Debug\*" target="lib\x86\Debug" exclude="*.ilk" />
+    <file src="..\build\bin\Win32\Release\*" target="lib\x86\Release" exclude="*.ilk" />
+    <file src="..\build\bin\ARM\Debug\*" target="lib\ARM\Debug" exclude="*.ilk" />
+    <file src="..\build\bin\ARM\Release\*" target="lib\ARM\Release" exclude="*.ilk" />
+
+    <file src="Microsoft.ChakraCore.Debugger.targets" target="build\native\" />
+  </files>
+</package>
