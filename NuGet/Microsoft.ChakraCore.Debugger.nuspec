@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
-    <id>ChakraCore.Debugger</id>
+    <id>Microsoft.ChakraCore.Debugger</id>
     <version>$version$</version>
     <description>Debugging companion library for the ChakraCore JavaScript engine.</description>
     <authors>Microsoft</authors>
@@ -20,6 +20,6 @@
     <file src="..\build\bin\ARM\Debug\*" target="lib\ARM\Debug" exclude="*.ilk" />
     <file src="..\build\bin\ARM\Release\*" target="lib\ARM\Release" exclude="*.ilk" />
 
-    <file src="ChakraCore.Debugger.targets" target="build\native\" />
+    <file src="Microsoft.ChakraCore.Debugger.targets" target="build\native\" />
   </files>
 </package>
