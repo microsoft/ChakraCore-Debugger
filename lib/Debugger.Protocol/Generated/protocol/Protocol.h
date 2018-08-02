@@ -2,51 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef JsDebug_protocol_Collections_h
-#define JsDebug_protocol_Collections_h
-
-#include "protocol/Forward.h"
-#include <cstddef>
-
-#if defined(__APPLE__) && !defined(_LIBCPP_VERSION)
-#include <map>
-#include <set>
-
-namespace JsDebug {
-namespace protocol {
-
-template <class Key, class T> using HashMap = std::map<Key, T>;
-template <class Key> using HashSet = std::set<Key>;
-
-} // namespace JsDebug
-} // namespace protocol
-
-#else
-#include <unordered_map>
-#include <unordered_set>
-
-namespace JsDebug {
-namespace protocol {
-
-template <class Key, class T> using HashMap = std::unordered_map<Key, T>;
-template <class Key> using HashSet = std::unordered_set<Key>;
-
-} // namespace JsDebug
-} // namespace protocol
-
-#endif // defined(__APPLE__) && !defined(_LIBCPP_VERSION)
-
-#endif // !defined(JsDebug_protocol_Collections_h)
-
-
-// Copyright 2016 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 #ifndef JsDebug_protocol_ErrorSupport_h
 #define JsDebug_protocol_ErrorSupport_h
 
-//#include "Forward.h"
+#include "protocol/Forward.h"
 
 namespace JsDebug {
 namespace protocol {
@@ -84,7 +43,6 @@ private:
 #define JsDebug_protocol_Values_h
 
 //#include "Allocator.h"
-//#include "Collections.h"
 //#include "Forward.h"
 
 namespace JsDebug {
@@ -277,7 +235,7 @@ private:
             m_order.push_back(key);
     }
 
-    using Dictionary = protocol::HashMap<String, std::unique_ptr<Value>>;
+    using Dictionary = std::unordered_map<String, std::unique_ptr<Value>>;
     Dictionary m_data;
     std::vector<String> m_order;
 };
@@ -757,9 +715,8 @@ template<> class Array<bool> : public ArrayBase<bool> {};
 #ifndef JsDebug_protocol_DispatcherBase_h
 #define JsDebug_protocol_DispatcherBase_h
 
-//#include "Collections.h"
-//#include "ErrorSupport.h"
 //#include "Forward.h"
+//#include "ErrorSupport.h"
 //#include "Values.h"
 
 namespace JsDebug {
@@ -773,7 +730,6 @@ public:
         kSuccess = 0,
         kError = 1,
         kFallThrough = 2,
-        kAsync = 3
     };
 
     enum ErrorCode {
@@ -819,7 +775,7 @@ public:
 
     class  Callback {
     public:
-        Callback(std::unique_ptr<WeakPtr> backendImpl, int callId, int callbackId);
+        Callback(std::unique_ptr<WeakPtr> backendImpl, int callId, const String& method, const String& message);
         virtual ~Callback();
         void dispose();
 
@@ -830,13 +786,16 @@ public:
     private:
         std::unique_ptr<WeakPtr> m_backendImpl;
         int m_callId;
-        int m_callbackId;
+        String m_method;
+        String m_message;
     };
 
     explicit DispatcherBase(FrontendChannel*);
     virtual ~DispatcherBase();
 
-    virtual DispatchResponse::Status dispatch(int callId, const String& method, std::unique_ptr<protocol::DictionaryValue> messageObject) = 0;
+    virtual bool canDispatch(const String& method) = 0;
+    virtual void dispatch(int callId, const String& method, const String& rawMessage, std::unique_ptr<protocol::DictionaryValue> messageObject) = 0;
+    FrontendChannel* channel() { return m_frontendChannel; }
 
     void sendResponse(int callId, const DispatchResponse&, std::unique_ptr<protocol::DictionaryValue> result);
     void sendResponse(int callId, const DispatchResponse&);
@@ -846,15 +805,9 @@ public:
 
     std::unique_ptr<WeakPtr> weakPtr();
 
-    int nextCallbackId();
-    void markFallThrough(int callbackId);
-    bool lastCallbackFallThrough() { return m_lastCallbackFallThrough; }
-
 private:
     FrontendChannel* m_frontendChannel;
-    protocol::HashSet<WeakPtr*> m_weakPtrs;
-    int m_lastCallbackId;
-    bool m_lastCallbackFallThrough;
+    std::unordered_set<WeakPtr*> m_weakPtrs;
 };
 
 class  UberDispatcher {
@@ -862,19 +815,18 @@ class  UberDispatcher {
 public:
     explicit UberDispatcher(FrontendChannel*);
     void registerBackend(const String& name, std::unique_ptr<protocol::DispatcherBase>);
-    void setupRedirects(const HashMap<String, String>&);
-    DispatchResponse::Status dispatch(std::unique_ptr<Value> message, int* callId = nullptr, String* method = nullptr);
+    void setupRedirects(const std::unordered_map<String, String>&);
+    bool parseCommand(Value* message, int* callId, String* method);
+    bool canDispatch(const String& method);
+    void dispatch(int callId, const String& method, std::unique_ptr<Value> message, const String& rawMessage);
     FrontendChannel* channel() { return m_frontendChannel; }
-    bool fallThroughForNotFound() { return m_fallThroughForNotFound; }
-    void setFallThroughForNotFound(bool);
-    bool getCommandName(const String& message, String* method, std::unique_ptr<protocol::DictionaryValue>* parsedMessage);
     virtual ~UberDispatcher();
 
 private:
+    protocol::DispatcherBase* findDispatcher(const String& method);
     FrontendChannel* m_frontendChannel;
-    bool m_fallThroughForNotFound;
-    HashMap<String, String> m_redirects;
-    protocol::HashMap<String, std::unique_ptr<protocol::DispatcherBase>> m_dispatchers;
+    std::unordered_map<String, String> m_redirects;
+    std::unordered_map<String, std::unique_ptr<protocol::DispatcherBase>> m_dispatchers;
 };
 
 class InternalResponse : public Serializable {

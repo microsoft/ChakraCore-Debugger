@@ -260,7 +260,20 @@ namespace JsDebug
 
     void ProtocolHandler::HandleMessageReceived(const std::string& message)
     {
-        protocol::String messageStr = protocol::String::fromUtf8(message.c_str(), message.length());
-        m_dispatcher.dispatch(protocol::StringUtil::parseJSON(messageStr));
+	    protocol::String messageStr = protocol::String::fromUtf8(message.c_str(), message.length());
+        std::unique_ptr<protocol::Value> parsedMessage = protocol::StringUtil::parseJSON(messageStr);
+
+        int callId = 0;
+        protocol::String method;
+        m_dispatcher.parseCommand(parsedMessage.get(), &callId, &method);
+        m_dispatcher.dispatch(callId, method, std::move(parsedMessage), messageStr);
+    }
+
+    void ProtocolHandler::fallThrough(
+        int /*callId*/,
+        const protocol::String& /*method*/,
+        const protocol::String& /*message*/)
+    {
+        // TODO(kfarnung): Implement this
     }
 }

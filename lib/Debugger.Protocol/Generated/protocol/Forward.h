@@ -7,7 +7,10 @@
 
 #include "StringUtil.h"
 
+#include <cstddef>
 #include <vector>
+#include <unordered_map>
+#include <unordered_set>
 
 namespace JsDebug {
 namespace protocol {
@@ -83,6 +86,7 @@ public:
     virtual ~FrontendChannel() { }
     virtual void sendProtocolResponse(int callId, std::unique_ptr<Serializable> message) = 0;
     virtual void sendProtocolNotification(std::unique_ptr<Serializable> message) = 0;
+    virtual void fallThrough(int callId, const String& method, const String& message) = 0;
     virtual void flushProtocolNotifications() = 0;
 };
 

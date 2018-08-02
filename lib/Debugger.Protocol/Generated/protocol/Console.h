@@ -231,9 +231,9 @@ class  Backend {
 public:
     virtual ~Backend() { }
 
-    virtual DispatchResponse enable() = 0;
-    virtual DispatchResponse disable() = 0;
     virtual DispatchResponse clearMessages() = 0;
+    virtual DispatchResponse disable() = 0;
+    virtual DispatchResponse enable() = 0;
 
 };
 

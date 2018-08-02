@@ -16,13 +16,19 @@
 namespace JsDebug
 {
     using protocol::Array;
+    using protocol::Debugger::BreakLocation;
     using protocol::Debugger::CallFrame;
     using protocol::Debugger::Location;
+    using protocol::Debugger::ScriptPosition;
+    using protocol::Debugger::SearchMatch;
     using protocol::FrontendChannel;
     using protocol::Maybe;
     using protocol::Response;
+    using protocol::Runtime::CallArgument;
     using protocol::Runtime::ExceptionDetails;
+    using protocol::Runtime::RemoteObject;
     using protocol::Runtime::StackTrace;
+    using protocol::Runtime::StackTraceId;
     using protocol::String;
     using protocol::StringUtil;
 
@@ -53,7 +59,7 @@ namespace JsDebug
         disable();
     }
 
-    Response DebuggerImpl::enable()
+    Response DebuggerImpl::enable(String* /*out_debuggerId*/)
     {
         if (m_isEnabled)
         {
@@ -105,6 +111,7 @@ namespace JsDebug
         int in_lineNumber,
         Maybe<String> in_url,
         Maybe<String> in_urlRegex,
+        Maybe<String> /*in_scriptHash*/,
         Maybe<int> in_columnNumber,
         Maybe<String> in_condition,
         String  *out_breakpointId,
@@ -223,7 +230,9 @@ namespace JsDebug
         return Response::Error(c_ErrorBreakpointNotFound);
     }
 
-    Response DebuggerImpl::continueToLocation(std::unique_ptr<Location> in_location)
+    Response DebuggerImpl::continueToLocation(
+        std::unique_ptr<Location> /*in_location*/,
+        Maybe<String> /*in_targetCallFrames*/)
     {
         return Response::Error(c_ErrorNotImplemented);
     }
@@ -234,7 +243,7 @@ namespace JsDebug
         return Response::OK();
     }
 
-    Response DebuggerImpl::stepInto()
+    Response DebuggerImpl::stepInto(Maybe<bool> /*in_breakOnAsyncCall*/)
     {
         m_debugger->StepIn();
         return Response::OK();
@@ -268,7 +277,7 @@ namespace JsDebug
         const String & /*in_query*/,
         Maybe<bool> /*in_caseSensitive*/,
         Maybe<bool> /*in_isRegex*/,
-        std::unique_ptr<Array<protocol::Debugger::SearchMatch>>* /*out_result*/)
+        std::unique_ptr<Array<SearchMatch>>* /*out_result*/)
     {
         return Response::Error(c_ErrorNotImplemented);
     }
@@ -280,7 +289,8 @@ namespace JsDebug
         Maybe<Array<CallFrame>>* /*out_callFrames*/,
         Maybe<bool>* /*out_stackChanged*/,
         Maybe<StackTrace>* /*out_asyncStackTrace*/,
-        Maybe<protocol::Runtime::ExceptionDetails>* /*out_exceptionDetails*/)
+        Maybe<StackTraceId>* /*out_asyncStackTraceId*/,
+        Maybe<ExceptionDetails>* /*out_exceptionDetails*/)
     {
         return Response::Error(c_ErrorNotImplemented);
     }
@@ -288,7 +298,8 @@ namespace JsDebug
     Response DebuggerImpl::restartFrame(
         const String & /*in_callFrameId*/,
         std::unique_ptr<Array<CallFrame>>* /*out_callFrames*/,
-        Maybe<StackTrace>* /*out_asyncStackTrace*/)
+        Maybe<StackTrace>* /*out_asyncStackTrace*/,
+        Maybe<StackTraceId>* /*out_asyncStackTraceId*/)
     {
         return Response::Error(c_ErrorNotImplemented);
     }
@@ -343,8 +354,10 @@ namespace JsDebug
         Maybe<bool> /*in_silent*/,
         Maybe<bool> in_returnByValue,
         Maybe<bool> /*in_generatePreview*/,
-        std::unique_ptr<protocol::Runtime::RemoteObject>* out_result,
-        Maybe<protocol::Runtime::ExceptionDetails>* out_exceptionDetails)
+        Maybe<bool> /*in_throwOnSideEffect*/,
+        Maybe<double> /*in_timeout*/,
+        std::unique_ptr<RemoteObject>* out_result,
+        Maybe<ExceptionDetails>* out_exceptionDetails)
     {
         auto parsedId = ProtocolHelpers::ParseObjectId(in_callFrameId);
 
@@ -370,7 +383,7 @@ namespace JsDebug
     Response DebuggerImpl::setVariableValue(
         int /*in_scopeNumber*/,
         const String & /*in_variableName*/,
-        std::unique_ptr<protocol::Runtime::CallArgument> /*in_newValue*/,
+        std::unique_ptr<CallArgument> /*in_newValue*/,
         const String & /*in_callFrameId*/)
     {
         return Response::Error(c_ErrorNotImplemented);
@@ -388,7 +401,46 @@ namespace JsDebug
 
     Response DebuggerImpl::setBlackboxedRanges(
         const String & /*in_scriptId*/,
-        std::unique_ptr<Array<protocol::Debugger::ScriptPosition>> /*in_positions*/)
+        std::unique_ptr<Array<ScriptPosition>> /*in_positions*/)
+    {
+        return Response::Error(c_ErrorNotImplemented);
+    }
+    
+    Response DebuggerImpl::getPossibleBreakpoints(
+        std::unique_ptr<Location> /*in_start*/,
+        Maybe<Location> /*in_end*/,
+        Maybe<bool> /*in_restrictToFunction*/,
+        std::unique_ptr<Array<BreakLocation>>* /*out_locations*/)
+    {
+        return Response::Error(c_ErrorNotImplemented);
+    }
+
+    Response DebuggerImpl::getStackTrace(
+        std::unique_ptr<StackTraceId> /*in_stackTraceId*/,
+        std::unique_ptr<StackTrace>* /*out_stackTrace*/)
+    {
+        return Response::Error(c_ErrorNotImplemented);
+    }
+
+    Response DebuggerImpl::pauseOnAsyncCall(std::unique_ptr<StackTraceId> /*in_parentStackTraceId*/)
+    {
+        return Response::Error(c_ErrorNotImplemented);
+    }
+
+    void DebuggerImpl::scheduleStepIntoAsync(std::unique_ptr<ScheduleStepIntoAsyncCallback> callback)
+    {
+        callback->sendFailure(Response::Error(c_ErrorNotImplemented));
+    }
+
+    Response DebuggerImpl::setReturnValue(std::unique_ptr<CallArgument> in_newValue)
+    {
+        return Response::Error(c_ErrorNotImplemented);
+    }
+
+    Response DebuggerImpl::setBreakpointOnFunctionCall(
+        const String& /*in_objectId*/,
+        Maybe<String> /*in_condition*/,
+        String* /*out_breakpointId*/)
     {
         return Response::Error(c_ErrorNotImplemented);
     }

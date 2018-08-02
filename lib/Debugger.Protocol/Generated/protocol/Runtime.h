@@ -32,22 +32,19 @@ using ExecutionContextId = int;
 class ExecutionContextDescription;
 class ExceptionDetails;
 using Timestamp = double;
+using TimeDelta = double;
 class CallFrame;
 class StackTrace;
+using UniqueDebuggerId = String;
+class StackTraceId;
+class BindingCalledNotification;
+class ConsoleAPICalledNotification;
+class ExceptionRevokedNotification;
+class ExceptionThrownNotification;
 class ExecutionContextCreatedNotification;
 class ExecutionContextDestroyedNotification;
 using ExecutionContextsClearedNotification = Object;
-class ExceptionThrownNotification;
-class ExceptionRevokedNotification;
-class ConsoleAPICalledNotification;
 class InspectRequestedNotification;
-
-namespace UnserializableValueEnum {
- extern const char Infinity[];
- extern const char NaN[];
- extern const char NegativeInfinity[];
- extern const char Negative0[];
-} // namespace UnserializableValueEnum
 
 namespace ConsoleAPICalled {
 namespace TypeEnum {
@@ -67,6 +64,8 @@ namespace TypeEnum {
  extern const char* Assert;
  extern const char* Profile;
  extern const char* ProfileEnd;
+ extern const char* Count;
+ extern const char* TimeEnd;
 } // TypeEnum
 } // ConsoleAPICalled
 
@@ -87,6 +86,7 @@ public:
         static const char* Number;
         static const char* Boolean;
         static const char* Symbol;
+        static const char* Bigint;
     }; // TypeEnum
 
     String getType() { return m_type; }
@@ -100,6 +100,8 @@ public:
         static const char* Date;
         static const char* Map;
         static const char* Set;
+        static const char* Weakmap;
+        static const char* Weakset;
         static const char* Iterator;
         static const char* Generator;
         static const char* Error;
@@ -374,6 +376,7 @@ public:
         static const char* Number;
         static const char* Boolean;
         static const char* Symbol;
+        static const char* Bigint;
     }; // TypeEnum
 
     String getType() { return m_type; }
@@ -387,6 +390,8 @@ public:
         static const char* Date;
         static const char* Map;
         static const char* Set;
+        static const char* Weakmap;
+        static const char* Weakset;
         static const char* Iterator;
         static const char* Generator;
         static const char* Error;
@@ -521,6 +526,7 @@ public:
         static const char* Boolean;
         static const char* Symbol;
         static const char* Accessor;
+        static const char* Bigint;
     }; // TypeEnum
 
     String getType() { return m_type; }
@@ -542,6 +548,8 @@ public:
         static const char* Date;
         static const char* Map;
         static const char* Set;
+        static const char* Weakmap;
+        static const char* Weakset;
         static const char* Iterator;
         static const char* Generator;
         static const char* Error;
@@ -1411,6 +1419,10 @@ public:
     protocol::Runtime::StackTrace* getParent(protocol::Runtime::StackTrace* defaultValue) { return m_parent.isJust() ? m_parent.fromJust() : defaultValue; }
     void setParent(std::unique_ptr<protocol::Runtime::StackTrace> value) { m_parent = std::move(value); }
 
+    bool hasParentId() { return m_parentId.isJust(); }
+    protocol::Runtime::StackTraceId* getParentId(protocol::Runtime::StackTraceId* defaultValue) { return m_parentId.isJust() ? m_parentId.fromJust() : defaultValue; }
+    void setParentId(std::unique_ptr<protocol::Runtime::StackTraceId> value) { m_parentId = std::move(value); }
+
     std::unique_ptr<protocol::DictionaryValue> toValue() const;
     String serialize() override { return toValue()->serialize(); }
     std::unique_ptr<StackTrace> clone() const;
@@ -1441,6 +1453,12 @@ public:
         StackTraceBuilder<STATE>& setParent(std::unique_ptr<protocol::Runtime::StackTrace> value)
         {
             m_result->setParent(std::move(value));
+            return *this;
+        }
+
+        StackTraceBuilder<STATE>& setParentId(std::unique_ptr<protocol::Runtime::StackTraceId> value)
+        {
+            m_result->setParentId(std::move(value));
             return *this;
         }
 
@@ -1475,6 +1493,461 @@ private:
     Maybe<String> m_description;
     std::unique_ptr<protocol::Array<protocol::Runtime::CallFrame>> m_callFrames;
     Maybe<protocol::Runtime::StackTrace> m_parent;
+    Maybe<protocol::Runtime::StackTraceId> m_parentId;
+};
+
+
+class  StackTraceId : public Serializable, public API::StackTraceId{
+    PROTOCOL_DISALLOW_COPY(StackTraceId);
+public:
+    static std::unique_ptr<StackTraceId> fromValue(protocol::Value* value, ErrorSupport* errors);
+
+    ~StackTraceId() override { }
+
+    String getId() { return m_id; }
+    void setId(const String& value) { m_id = value; }
+
+    bool hasDebuggerId() { return m_debuggerId.isJust(); }
+    String getDebuggerId(const String& defaultValue) { return m_debuggerId.isJust() ? m_debuggerId.fromJust() : defaultValue; }
+    void setDebuggerId(const String& value) { m_debuggerId = value; }
+
+    std::unique_ptr<protocol::DictionaryValue> toValue() const;
+    String serialize() override { return toValue()->serialize(); }
+    std::unique_ptr<StackTraceId> clone() const;
+    std::unique_ptr<StringBuffer> toJSONString() const override;
+
+    template<int STATE>
+    class StackTraceIdBuilder {
+    public:
+        enum {
+            NoFieldsSet = 0,
+            IdSet = 1 << 1,
+            AllFieldsSet = (IdSet | 0)};
+
+
+        StackTraceIdBuilder<STATE | IdSet>& setId(const String& value)
+        {
+            static_assert(!(STATE & IdSet), "property id should not be set yet");
+            m_result->setId(value);
+            return castState<IdSet>();
+        }
+
+        StackTraceIdBuilder<STATE>& setDebuggerId(const String& value)
+        {
+            m_result->setDebuggerId(value);
+            return *this;
+        }
+
+        std::unique_ptr<StackTraceId> build()
+        {
+            static_assert(STATE == AllFieldsSet, "state should be AllFieldsSet");
+            return std::move(m_result);
+        }
+
+    private:
+        friend class StackTraceId;
+        StackTraceIdBuilder() : m_result(new StackTraceId()) { }
+
+        template<int STEP> StackTraceIdBuilder<STATE | STEP>& castState()
+        {
+            return *reinterpret_cast<StackTraceIdBuilder<STATE | STEP>*>(this);
+        }
+
+        std::unique_ptr<protocol::Runtime::StackTraceId> m_result;
+    };
+
+    static StackTraceIdBuilder<0> create()
+    {
+        return StackTraceIdBuilder<0>();
+    }
+
+private:
+    StackTraceId()
+    {
+    }
+
+    String m_id;
+    Maybe<String> m_debuggerId;
+};
+
+
+class  BindingCalledNotification : public Serializable{
+    PROTOCOL_DISALLOW_COPY(BindingCalledNotification);
+public:
+    static std::unique_ptr<BindingCalledNotification> fromValue(protocol::Value* value, ErrorSupport* errors);
+
+    ~BindingCalledNotification() override { }
+
+    String getName() { return m_name; }
+    void setName(const String& value) { m_name = value; }
+
+    String getPayload() { return m_payload; }
+    void setPayload(const String& value) { m_payload = value; }
+
+    int getExecutionContextId() { return m_executionContextId; }
+    void setExecutionContextId(int value) { m_executionContextId = value; }
+
+    std::unique_ptr<protocol::DictionaryValue> toValue() const;
+    String serialize() override { return toValue()->serialize(); }
+    std::unique_ptr<BindingCalledNotification> clone() const;
+
+    template<int STATE>
+    class BindingCalledNotificationBuilder {
+    public:
+        enum {
+            NoFieldsSet = 0,
+            NameSet = 1 << 1,
+            PayloadSet = 1 << 2,
+            ExecutionContextIdSet = 1 << 3,
+            AllFieldsSet = (NameSet | PayloadSet | ExecutionContextIdSet | 0)};
+
+
+        BindingCalledNotificationBuilder<STATE | NameSet>& setName(const String& value)
+        {
+            static_assert(!(STATE & NameSet), "property name should not be set yet");
+            m_result->setName(value);
+            return castState<NameSet>();
+        }
+
+        BindingCalledNotificationBuilder<STATE | PayloadSet>& setPayload(const String& value)
+        {
+            static_assert(!(STATE & PayloadSet), "property payload should not be set yet");
+            m_result->setPayload(value);
+            return castState<PayloadSet>();
+        }
+
+        BindingCalledNotificationBuilder<STATE | ExecutionContextIdSet>& setExecutionContextId(int value)
+        {
+            static_assert(!(STATE & ExecutionContextIdSet), "property executionContextId should not be set yet");
+            m_result->setExecutionContextId(value);
+            return castState<ExecutionContextIdSet>();
+        }
+
+        std::unique_ptr<BindingCalledNotification> build()
+        {
+            static_assert(STATE == AllFieldsSet, "state should be AllFieldsSet");
+            return std::move(m_result);
+        }
+
+    private:
+        friend class BindingCalledNotification;
+        BindingCalledNotificationBuilder() : m_result(new BindingCalledNotification()) { }
+
+        template<int STEP> BindingCalledNotificationBuilder<STATE | STEP>& castState()
+        {
+            return *reinterpret_cast<BindingCalledNotificationBuilder<STATE | STEP>*>(this);
+        }
+
+        std::unique_ptr<protocol::Runtime::BindingCalledNotification> m_result;
+    };
+
+    static BindingCalledNotificationBuilder<0> create()
+    {
+        return BindingCalledNotificationBuilder<0>();
+    }
+
+private:
+    BindingCalledNotification()
+    {
+          m_executionContextId = 0;
+    }
+
+    String m_name;
+    String m_payload;
+    int m_executionContextId;
+};
+
+
+class  ConsoleAPICalledNotification : public Serializable{
+    PROTOCOL_DISALLOW_COPY(ConsoleAPICalledNotification);
+public:
+    static std::unique_ptr<ConsoleAPICalledNotification> fromValue(protocol::Value* value, ErrorSupport* errors);
+
+    ~ConsoleAPICalledNotification() override { }
+
+    struct  TypeEnum {
+        static const char* Log;
+        static const char* Debug;
+        static const char* Info;
+        static const char* Error;
+        static const char* Warning;
+        static const char* Dir;
+        static const char* Dirxml;
+        static const char* Table;
+        static const char* Trace;
+        static const char* Clear;
+        static const char* StartGroup;
+        static const char* StartGroupCollapsed;
+        static const char* EndGroup;
+        static const char* Assert;
+        static const char* Profile;
+        static const char* ProfileEnd;
+        static const char* Count;
+        static const char* TimeEnd;
+    }; // TypeEnum
+
+    String getType() { return m_type; }
+    void setType(const String& value) { m_type = value; }
+
+    protocol::Array<protocol::Runtime::RemoteObject>* getArgs() { return m_args.get(); }
+    void setArgs(std::unique_ptr<protocol::Array<protocol::Runtime::RemoteObject>> value) { m_args = std::move(value); }
+
+    int getExecutionContextId() { return m_executionContextId; }
+    void setExecutionContextId(int value) { m_executionContextId = value; }
+
+    double getTimestamp() { return m_timestamp; }
+    void setTimestamp(double value) { m_timestamp = value; }
+
+    bool hasStackTrace() { return m_stackTrace.isJust(); }
+    protocol::Runtime::StackTrace* getStackTrace(protocol::Runtime::StackTrace* defaultValue) { return m_stackTrace.isJust() ? m_stackTrace.fromJust() : defaultValue; }
+    void setStackTrace(std::unique_ptr<protocol::Runtime::StackTrace> value) { m_stackTrace = std::move(value); }
+
+    bool hasContext() { return m_context.isJust(); }
+    String getContext(const String& defaultValue) { return m_context.isJust() ? m_context.fromJust() : defaultValue; }
+    void setContext(const String& value) { m_context = value; }
+
+    std::unique_ptr<protocol::DictionaryValue> toValue() const;
+    String serialize() override { return toValue()->serialize(); }
+    std::unique_ptr<ConsoleAPICalledNotification> clone() const;
+
+    template<int STATE>
+    class ConsoleAPICalledNotificationBuilder {
+    public:
+        enum {
+            NoFieldsSet = 0,
+            TypeSet = 1 << 1,
+            ArgsSet = 1 << 2,
+            ExecutionContextIdSet = 1 << 3,
+            TimestampSet = 1 << 4,
+            AllFieldsSet = (TypeSet | ArgsSet | ExecutionContextIdSet | TimestampSet | 0)};
+
+
+        ConsoleAPICalledNotificationBuilder<STATE | TypeSet>& setType(const String& value)
+        {
+            static_assert(!(STATE & TypeSet), "property type should not be set yet");
+            m_result->setType(value);
+            return castState<TypeSet>();
+        }
+
+        ConsoleAPICalledNotificationBuilder<STATE | ArgsSet>& setArgs(std::unique_ptr<protocol::Array<protocol::Runtime::RemoteObject>> value)
+        {
+            static_assert(!(STATE & ArgsSet), "property args should not be set yet");
+            m_result->setArgs(std::move(value));
+            return castState<ArgsSet>();
+        }
+
+        ConsoleAPICalledNotificationBuilder<STATE | ExecutionContextIdSet>& setExecutionContextId(int value)
+        {
+            static_assert(!(STATE & ExecutionContextIdSet), "property executionContextId should not be set yet");
+            m_result->setExecutionContextId(value);
+            return castState<ExecutionContextIdSet>();
+        }
+
+        ConsoleAPICalledNotificationBuilder<STATE | TimestampSet>& setTimestamp(double value)
+        {
+            static_assert(!(STATE & TimestampSet), "property timestamp should not be set yet");
+            m_result->setTimestamp(value);
+            return castState<TimestampSet>();
+        }
+
+        ConsoleAPICalledNotificationBuilder<STATE>& setStackTrace(std::unique_ptr<protocol::Runtime::StackTrace> value)
+        {
+            m_result->setStackTrace(std::move(value));
+            return *this;
+        }
+
+        ConsoleAPICalledNotificationBuilder<STATE>& setContext(const String& value)
+        {
+            m_result->setContext(value);
+            return *this;
+        }
+
+        std::unique_ptr<ConsoleAPICalledNotification> build()
+        {
+            static_assert(STATE == AllFieldsSet, "state should be AllFieldsSet");
+            return std::move(m_result);
+        }
+
+    private:
+        friend class ConsoleAPICalledNotification;
+        ConsoleAPICalledNotificationBuilder() : m_result(new ConsoleAPICalledNotification()) { }
+
+        template<int STEP> ConsoleAPICalledNotificationBuilder<STATE | STEP>& castState()
+        {
+            return *reinterpret_cast<ConsoleAPICalledNotificationBuilder<STATE | STEP>*>(this);
+        }
+
+        std::unique_ptr<protocol::Runtime::ConsoleAPICalledNotification> m_result;
+    };
+
+    static ConsoleAPICalledNotificationBuilder<0> create()
+    {
+        return ConsoleAPICalledNotificationBuilder<0>();
+    }
+
+private:
+    ConsoleAPICalledNotification()
+    {
+          m_executionContextId = 0;
+          m_timestamp = 0;
+    }
+
+    String m_type;
+    std::unique_ptr<protocol::Array<protocol::Runtime::RemoteObject>> m_args;
+    int m_executionContextId;
+    double m_timestamp;
+    Maybe<protocol::Runtime::StackTrace> m_stackTrace;
+    Maybe<String> m_context;
+};
+
+
+class  ExceptionRevokedNotification : public Serializable{
+    PROTOCOL_DISALLOW_COPY(ExceptionRevokedNotification);
+public:
+    static std::unique_ptr<ExceptionRevokedNotification> fromValue(protocol::Value* value, ErrorSupport* errors);
+
+    ~ExceptionRevokedNotification() override { }
+
+    String getReason() { return m_reason; }
+    void setReason(const String& value) { m_reason = value; }
+
+    int getExceptionId() { return m_exceptionId; }
+    void setExceptionId(int value) { m_exceptionId = value; }
+
+    std::unique_ptr<protocol::DictionaryValue> toValue() const;
+    String serialize() override { return toValue()->serialize(); }
+    std::unique_ptr<ExceptionRevokedNotification> clone() const;
+
+    template<int STATE>
+    class ExceptionRevokedNotificationBuilder {
+    public:
+        enum {
+            NoFieldsSet = 0,
+            ReasonSet = 1 << 1,
+            ExceptionIdSet = 1 << 2,
+            AllFieldsSet = (ReasonSet | ExceptionIdSet | 0)};
+
+
+        ExceptionRevokedNotificationBuilder<STATE | ReasonSet>& setReason(const String& value)
+        {
+            static_assert(!(STATE & ReasonSet), "property reason should not be set yet");
+            m_result->setReason(value);
+            return castState<ReasonSet>();
+        }
+
+        ExceptionRevokedNotificationBuilder<STATE | ExceptionIdSet>& setExceptionId(int value)
+        {
+            static_assert(!(STATE & ExceptionIdSet), "property exceptionId should not be set yet");
+            m_result->setExceptionId(value);
+            return castState<ExceptionIdSet>();
+        }
+
+        std::unique_ptr<ExceptionRevokedNotification> build()
+        {
+            static_assert(STATE == AllFieldsSet, "state should be AllFieldsSet");
+            return std::move(m_result);
+        }
+
+    private:
+        friend class ExceptionRevokedNotification;
+        ExceptionRevokedNotificationBuilder() : m_result(new ExceptionRevokedNotification()) { }
+
+        template<int STEP> ExceptionRevokedNotificationBuilder<STATE | STEP>& castState()
+        {
+            return *reinterpret_cast<ExceptionRevokedNotificationBuilder<STATE | STEP>*>(this);
+        }
+
+        std::unique_ptr<protocol::Runtime::ExceptionRevokedNotification> m_result;
+    };
+
+    static ExceptionRevokedNotificationBuilder<0> create()
+    {
+        return ExceptionRevokedNotificationBuilder<0>();
+    }
+
+private:
+    ExceptionRevokedNotification()
+    {
+          m_exceptionId = 0;
+    }
+
+    String m_reason;
+    int m_exceptionId;
+};
+
+
+class  ExceptionThrownNotification : public Serializable{
+    PROTOCOL_DISALLOW_COPY(ExceptionThrownNotification);
+public:
+    static std::unique_ptr<ExceptionThrownNotification> fromValue(protocol::Value* value, ErrorSupport* errors);
+
+    ~ExceptionThrownNotification() override { }
+
+    double getTimestamp() { return m_timestamp; }
+    void setTimestamp(double value) { m_timestamp = value; }
+
+    protocol::Runtime::ExceptionDetails* getExceptionDetails() { return m_exceptionDetails.get(); }
+    void setExceptionDetails(std::unique_ptr<protocol::Runtime::ExceptionDetails> value) { m_exceptionDetails = std::move(value); }
+
+    std::unique_ptr<protocol::DictionaryValue> toValue() const;
+    String serialize() override { return toValue()->serialize(); }
+    std::unique_ptr<ExceptionThrownNotification> clone() const;
+
+    template<int STATE>
+    class ExceptionThrownNotificationBuilder {
+    public:
+        enum {
+            NoFieldsSet = 0,
+            TimestampSet = 1 << 1,
+            ExceptionDetailsSet = 1 << 2,
+            AllFieldsSet = (TimestampSet | ExceptionDetailsSet | 0)};
+
+
+        ExceptionThrownNotificationBuilder<STATE | TimestampSet>& setTimestamp(double value)
+        {
+            static_assert(!(STATE & TimestampSet), "property timestamp should not be set yet");
+            m_result->setTimestamp(value);
+            return castState<TimestampSet>();
+        }
+
+        ExceptionThrownNotificationBuilder<STATE | ExceptionDetailsSet>& setExceptionDetails(std::unique_ptr<protocol::Runtime::ExceptionDetails> value)
+        {
+            static_assert(!(STATE & ExceptionDetailsSet), "property exceptionDetails should not be set yet");
+            m_result->setExceptionDetails(std::move(value));
+            return castState<ExceptionDetailsSet>();
+        }
+
+        std::unique_ptr<ExceptionThrownNotification> build()
+        {
+            static_assert(STATE == AllFieldsSet, "state should be AllFieldsSet");
+            return std::move(m_result);
+        }
+
+    private:
+        friend class ExceptionThrownNotification;
+        ExceptionThrownNotificationBuilder() : m_result(new ExceptionThrownNotification()) { }
+
+        template<int STEP> ExceptionThrownNotificationBuilder<STATE | STEP>& castState()
+        {
+            return *reinterpret_cast<ExceptionThrownNotificationBuilder<STATE | STEP>*>(this);
+        }
+
+        std::unique_ptr<protocol::Runtime::ExceptionThrownNotification> m_result;
+    };
+
+    static ExceptionThrownNotificationBuilder<0> create()
+    {
+        return ExceptionThrownNotificationBuilder<0>();
+    }
+
+private:
+    ExceptionThrownNotification()
+    {
+          m_timestamp = 0;
+    }
+
+    double m_timestamp;
+    std::unique_ptr<protocol::Runtime::ExceptionDetails> m_exceptionDetails;
 };
 
 
@@ -1603,286 +2076,6 @@ private:
 };
 
 
-class  ExceptionThrownNotification : public Serializable{
-    PROTOCOL_DISALLOW_COPY(ExceptionThrownNotification);
-public:
-    static std::unique_ptr<ExceptionThrownNotification> fromValue(protocol::Value* value, ErrorSupport* errors);
-
-    ~ExceptionThrownNotification() override { }
-
-    double getTimestamp() { return m_timestamp; }
-    void setTimestamp(double value) { m_timestamp = value; }
-
-    protocol::Runtime::ExceptionDetails* getExceptionDetails() { return m_exceptionDetails.get(); }
-    void setExceptionDetails(std::unique_ptr<protocol::Runtime::ExceptionDetails> value) { m_exceptionDetails = std::move(value); }
-
-    std::unique_ptr<protocol::DictionaryValue> toValue() const;
-    String serialize() override { return toValue()->serialize(); }
-    std::unique_ptr<ExceptionThrownNotification> clone() const;
-
-    template<int STATE>
-    class ExceptionThrownNotificationBuilder {
-    public:
-        enum {
-            NoFieldsSet = 0,
-            TimestampSet = 1 << 1,
-            ExceptionDetailsSet = 1 << 2,
-            AllFieldsSet = (TimestampSet | ExceptionDetailsSet | 0)};
-
-
-        ExceptionThrownNotificationBuilder<STATE | TimestampSet>& setTimestamp(double value)
-        {
-            static_assert(!(STATE & TimestampSet), "property timestamp should not be set yet");
-            m_result->setTimestamp(value);
-            return castState<TimestampSet>();
-        }
-
-        ExceptionThrownNotificationBuilder<STATE | ExceptionDetailsSet>& setExceptionDetails(std::unique_ptr<protocol::Runtime::ExceptionDetails> value)
-        {
-            static_assert(!(STATE & ExceptionDetailsSet), "property exceptionDetails should not be set yet");
-            m_result->setExceptionDetails(std::move(value));
-            return castState<ExceptionDetailsSet>();
-        }
-
-        std::unique_ptr<ExceptionThrownNotification> build()
-        {
-            static_assert(STATE == AllFieldsSet, "state should be AllFieldsSet");
-            return std::move(m_result);
-        }
-
-    private:
-        friend class ExceptionThrownNotification;
-        ExceptionThrownNotificationBuilder() : m_result(new ExceptionThrownNotification()) { }
-
-        template<int STEP> ExceptionThrownNotificationBuilder<STATE | STEP>& castState()
-        {
-            return *reinterpret_cast<ExceptionThrownNotificationBuilder<STATE | STEP>*>(this);
-        }
-
-        std::unique_ptr<protocol::Runtime::ExceptionThrownNotification> m_result;
-    };
-
-    static ExceptionThrownNotificationBuilder<0> create()
-    {
-        return ExceptionThrownNotificationBuilder<0>();
-    }
-
-private:
-    ExceptionThrownNotification()
-    {
-          m_timestamp = 0;
-    }
-
-    double m_timestamp;
-    std::unique_ptr<protocol::Runtime::ExceptionDetails> m_exceptionDetails;
-};
-
-
-class  ExceptionRevokedNotification : public Serializable{
-    PROTOCOL_DISALLOW_COPY(ExceptionRevokedNotification);
-public:
-    static std::unique_ptr<ExceptionRevokedNotification> fromValue(protocol::Value* value, ErrorSupport* errors);
-
-    ~ExceptionRevokedNotification() override { }
-
-    String getReason() { return m_reason; }
-    void setReason(const String& value) { m_reason = value; }
-
-    int getExceptionId() { return m_exceptionId; }
-    void setExceptionId(int value) { m_exceptionId = value; }
-
-    std::unique_ptr<protocol::DictionaryValue> toValue() const;
-    String serialize() override { return toValue()->serialize(); }
-    std::unique_ptr<ExceptionRevokedNotification> clone() const;
-
-    template<int STATE>
-    class ExceptionRevokedNotificationBuilder {
-    public:
-        enum {
-            NoFieldsSet = 0,
-            ReasonSet = 1 << 1,
-            ExceptionIdSet = 1 << 2,
-            AllFieldsSet = (ReasonSet | ExceptionIdSet | 0)};
-
-
-        ExceptionRevokedNotificationBuilder<STATE | ReasonSet>& setReason(const String& value)
-        {
-            static_assert(!(STATE & ReasonSet), "property reason should not be set yet");
-            m_result->setReason(value);
-            return castState<ReasonSet>();
-        }
-
-        ExceptionRevokedNotificationBuilder<STATE | ExceptionIdSet>& setExceptionId(int value)
-        {
-            static_assert(!(STATE & ExceptionIdSet), "property exceptionId should not be set yet");
-            m_result->setExceptionId(value);
-            return castState<ExceptionIdSet>();
-        }
-
-        std::unique_ptr<ExceptionRevokedNotification> build()
-        {
-            static_assert(STATE == AllFieldsSet, "state should be AllFieldsSet");
-            return std::move(m_result);
-        }
-
-    private:
-        friend class ExceptionRevokedNotification;
-        ExceptionRevokedNotificationBuilder() : m_result(new ExceptionRevokedNotification()) { }
-
-        template<int STEP> ExceptionRevokedNotificationBuilder<STATE | STEP>& castState()
-        {
-            return *reinterpret_cast<ExceptionRevokedNotificationBuilder<STATE | STEP>*>(this);
-        }
-
-        std::unique_ptr<protocol::Runtime::ExceptionRevokedNotification> m_result;
-    };
-
-    static ExceptionRevokedNotificationBuilder<0> create()
-    {
-        return ExceptionRevokedNotificationBuilder<0>();
-    }
-
-private:
-    ExceptionRevokedNotification()
-    {
-          m_exceptionId = 0;
-    }
-
-    String m_reason;
-    int m_exceptionId;
-};
-
-
-class  ConsoleAPICalledNotification : public Serializable{
-    PROTOCOL_DISALLOW_COPY(ConsoleAPICalledNotification);
-public:
-    static std::unique_ptr<ConsoleAPICalledNotification> fromValue(protocol::Value* value, ErrorSupport* errors);
-
-    ~ConsoleAPICalledNotification() override { }
-
-    struct  TypeEnum {
-        static const char* Log;
-        static const char* Debug;
-        static const char* Info;
-        static const char* Error;
-        static const char* Warning;
-        static const char* Dir;
-        static const char* Dirxml;
-        static const char* Table;
-        static const char* Trace;
-        static const char* Clear;
-        static const char* StartGroup;
-        static const char* StartGroupCollapsed;
-        static const char* EndGroup;
-        static const char* Assert;
-        static const char* Profile;
-        static const char* ProfileEnd;
-    }; // TypeEnum
-
-    String getType() { return m_type; }
-    void setType(const String& value) { m_type = value; }
-
-    protocol::Array<protocol::Runtime::RemoteObject>* getArgs() { return m_args.get(); }
-    void setArgs(std::unique_ptr<protocol::Array<protocol::Runtime::RemoteObject>> value) { m_args = std::move(value); }
-
-    int getExecutionContextId() { return m_executionContextId; }
-    void setExecutionContextId(int value) { m_executionContextId = value; }
-
-    double getTimestamp() { return m_timestamp; }
-    void setTimestamp(double value) { m_timestamp = value; }
-
-    bool hasStackTrace() { return m_stackTrace.isJust(); }
-    protocol::Runtime::StackTrace* getStackTrace(protocol::Runtime::StackTrace* defaultValue) { return m_stackTrace.isJust() ? m_stackTrace.fromJust() : defaultValue; }
-    void setStackTrace(std::unique_ptr<protocol::Runtime::StackTrace> value) { m_stackTrace = std::move(value); }
-
-    std::unique_ptr<protocol::DictionaryValue> toValue() const;
-    String serialize() override { return toValue()->serialize(); }
-    std::unique_ptr<ConsoleAPICalledNotification> clone() const;
-
-    template<int STATE>
-    class ConsoleAPICalledNotificationBuilder {
-    public:
-        enum {
-            NoFieldsSet = 0,
-            TypeSet = 1 << 1,
-            ArgsSet = 1 << 2,
-            ExecutionContextIdSet = 1 << 3,
-            TimestampSet = 1 << 4,
-            AllFieldsSet = (TypeSet | ArgsSet | ExecutionContextIdSet | TimestampSet | 0)};
-
-
-        ConsoleAPICalledNotificationBuilder<STATE | TypeSet>& setType(const String& value)
-        {
-            static_assert(!(STATE & TypeSet), "property type should not be set yet");
-            m_result->setType(value);
-            return castState<TypeSet>();
-        }
-
-        ConsoleAPICalledNotificationBuilder<STATE | ArgsSet>& setArgs(std::unique_ptr<protocol::Array<protocol::Runtime::RemoteObject>> value)
-        {
-            static_assert(!(STATE & ArgsSet), "property args should not be set yet");
-            m_result->setArgs(std::move(value));
-            return castState<ArgsSet>();
-        }
-
-        ConsoleAPICalledNotificationBuilder<STATE | ExecutionContextIdSet>& setExecutionContextId(int value)
-        {
-            static_assert(!(STATE & ExecutionContextIdSet), "property executionContextId should not be set yet");
-            m_result->setExecutionContextId(value);
-            return castState<ExecutionContextIdSet>();
-        }
-
-        ConsoleAPICalledNotificationBuilder<STATE | TimestampSet>& setTimestamp(double value)
-        {
-            static_assert(!(STATE & TimestampSet), "property timestamp should not be set yet");
-            m_result->setTimestamp(value);
-            return castState<TimestampSet>();
-        }
-
-        ConsoleAPICalledNotificationBuilder<STATE>& setStackTrace(std::unique_ptr<protocol::Runtime::StackTrace> value)
-        {
-            m_result->setStackTrace(std::move(value));
-            return *this;
-        }
-
-        std::unique_ptr<ConsoleAPICalledNotification> build()
-        {
-            static_assert(STATE == AllFieldsSet, "state should be AllFieldsSet");
-            return std::move(m_result);
-        }
-
-    private:
-        friend class ConsoleAPICalledNotification;
-        ConsoleAPICalledNotificationBuilder() : m_result(new ConsoleAPICalledNotification()) { }
-
-        template<int STEP> ConsoleAPICalledNotificationBuilder<STATE | STEP>& castState()
-        {
-            return *reinterpret_cast<ConsoleAPICalledNotificationBuilder<STATE | STEP>*>(this);
-        }
-
-        std::unique_ptr<protocol::Runtime::ConsoleAPICalledNotification> m_result;
-    };
-
-    static ConsoleAPICalledNotificationBuilder<0> create()
-    {
-        return ConsoleAPICalledNotificationBuilder<0>();
-    }
-
-private:
-    ConsoleAPICalledNotification()
-    {
-          m_executionContextId = 0;
-          m_timestamp = 0;
-    }
-
-    String m_type;
-    std::unique_ptr<protocol::Array<protocol::Runtime::RemoteObject>> m_args;
-    int m_executionContextId;
-    double m_timestamp;
-    Maybe<protocol::Runtime::StackTrace> m_stackTrace;
-};
-
-
 class  InspectRequestedNotification : public Serializable{
     PROTOCOL_DISALLOW_COPY(InspectRequestedNotification);
 public:
@@ -1963,14 +2156,6 @@ class  Backend {
 public:
     virtual ~Backend() { }
 
-    class  EvaluateCallback {
-    public:
-        virtual void sendSuccess(std::unique_ptr<protocol::Runtime::RemoteObject> result, Maybe<protocol::Runtime::ExceptionDetails> exceptionDetails) = 0;
-        virtual void sendFailure(const DispatchResponse&) = 0;
-        virtual void fallThrough() = 0;
-        virtual ~EvaluateCallback() { }
-    };
-    virtual void evaluate(const String& in_expression, Maybe<String> in_objectGroup, Maybe<bool> in_includeCommandLineAPI, Maybe<bool> in_silent, Maybe<int> in_contextId, Maybe<bool> in_returnByValue, Maybe<bool> in_generatePreview, Maybe<bool> in_userGesture, Maybe<bool> in_awaitPromise, std::unique_ptr<EvaluateCallback> callback) = 0;
     class  AwaitPromiseCallback {
     public:
         virtual void sendSuccess(std::unique_ptr<protocol::Runtime::RemoteObject> result, Maybe<protocol::Runtime::ExceptionDetails> exceptionDetails) = 0;
@@ -1986,16 +2171,27 @@ public:
         virtual void fallThrough() = 0;
         virtual ~CallFunctionOnCallback() { }
     };
-    virtual void callFunctionOn(const String& in_objectId, const String& in_functionDeclaration, Maybe<protocol::Array<protocol::Runtime::CallArgument>> in_arguments, Maybe<bool> in_silent, Maybe<bool> in_returnByValue, Maybe<bool> in_generatePreview, Maybe<bool> in_userGesture, Maybe<bool> in_awaitPromise, std::unique_ptr<CallFunctionOnCallback> callback) = 0;
+    virtual void callFunctionOn(const String& in_functionDeclaration, Maybe<String> in_objectId, Maybe<protocol::Array<protocol::Runtime::CallArgument>> in_arguments, Maybe<bool> in_silent, Maybe<bool> in_returnByValue, Maybe<bool> in_generatePreview, Maybe<bool> in_userGesture, Maybe<bool> in_awaitPromise, Maybe<int> in_executionContextId, Maybe<String> in_objectGroup, std::unique_ptr<CallFunctionOnCallback> callback) = 0;
+    virtual DispatchResponse compileScript(const String& in_expression, const String& in_sourceURL, bool in_persistScript, Maybe<int> in_executionContextId, Maybe<String>* out_scriptId, Maybe<protocol::Runtime::ExceptionDetails>* out_exceptionDetails) = 0;
+    virtual DispatchResponse disable() = 0;
+    virtual DispatchResponse discardConsoleEntries() = 0;
+    virtual DispatchResponse enable() = 0;
+    class  EvaluateCallback {
+    public:
+        virtual void sendSuccess(std::unique_ptr<protocol::Runtime::RemoteObject> result, Maybe<protocol::Runtime::ExceptionDetails> exceptionDetails) = 0;
+        virtual void sendFailure(const DispatchResponse&) = 0;
+        virtual void fallThrough() = 0;
+        virtual ~EvaluateCallback() { }
+    };
+    virtual void evaluate(const String& in_expression, Maybe<String> in_objectGroup, Maybe<bool> in_includeCommandLineAPI, Maybe<bool> in_silent, Maybe<int> in_contextId, Maybe<bool> in_returnByValue, Maybe<bool> in_generatePreview, Maybe<bool> in_userGesture, Maybe<bool> in_awaitPromise, Maybe<bool> in_throwOnSideEffect, Maybe<double> in_timeout, std::unique_ptr<EvaluateCallback> callback) = 0;
+    virtual DispatchResponse getIsolateId(String* out_id) = 0;
+    virtual DispatchResponse getHeapUsage(double* out_usedSize, double* out_totalSize) = 0;
     virtual DispatchResponse getProperties(const String& in_objectId, Maybe<bool> in_ownProperties, Maybe<bool> in_accessorPropertiesOnly, Maybe<bool> in_generatePreview, std::unique_ptr<protocol::Array<protocol::Runtime::PropertyDescriptor>>* out_result, Maybe<protocol::Array<protocol::Runtime::InternalPropertyDescriptor>>* out_internalProperties, Maybe<protocol::Runtime::ExceptionDetails>* out_exceptionDetails) = 0;
+    virtual DispatchResponse globalLexicalScopeNames(Maybe<int> in_executionContextId, std::unique_ptr<protocol::Array<String>>* out_names) = 0;
+    virtual DispatchResponse queryObjects(const String& in_prototypeObjectId, Maybe<String> in_objectGroup, std::unique_ptr<protocol::Runtime::RemoteObject>* out_objects) = 0;
     virtual DispatchResponse releaseObject(const String& in_objectId) = 0;
     virtual DispatchResponse releaseObjectGroup(const String& in_objectGroup) = 0;
     virtual DispatchResponse runIfWaitingForDebugger() = 0;
-    virtual DispatchResponse enable() = 0;
-    virtual DispatchResponse disable() = 0;
-    virtual DispatchResponse discardConsoleEntries() = 0;
-    virtual DispatchResponse setCustomObjectFormatterEnabled(bool in_enabled) = 0;
-    virtual DispatchResponse compileScript(const String& in_expression, const String& in_sourceURL, bool in_persistScript, Maybe<int> in_executionContextId, Maybe<String>* out_scriptId, Maybe<protocol::Runtime::ExceptionDetails>* out_exceptionDetails) = 0;
     class  RunScriptCallback {
     public:
         virtual void sendSuccess(std::unique_ptr<protocol::Runtime::RemoteObject> result, Maybe<protocol::Runtime::ExceptionDetails> exceptionDetails) = 0;
@@ -2004,6 +2200,11 @@ public:
         virtual ~RunScriptCallback() { }
     };
     virtual void runScript(const String& in_scriptId, Maybe<int> in_executionContextId, Maybe<String> in_objectGroup, Maybe<bool> in_silent, Maybe<bool> in_includeCommandLineAPI, Maybe<bool> in_returnByValue, Maybe<bool> in_generatePreview, Maybe<bool> in_awaitPromise, std::unique_ptr<RunScriptCallback> callback) = 0;
+    virtual DispatchResponse setCustomObjectFormatterEnabled(bool in_enabled) = 0;
+    virtual DispatchResponse setMaxCallStackSizeToCapture(int in_size) = 0;
+    virtual DispatchResponse terminateExecution() = 0;
+    virtual DispatchResponse addBinding(const String& in_name, Maybe<int> in_executionContextId) = 0;
+    virtual DispatchResponse removeBinding(const String& in_name) = 0;
 
 };
 
@@ -2012,12 +2213,13 @@ public:
 class  Frontend {
 public:
     explicit Frontend(FrontendChannel* frontendChannel) : m_frontendChannel(frontendChannel) { }
+    void bindingCalled(const String& name, const String& payload, int executionContextId);
+    void consoleAPICalled(const String& type, std::unique_ptr<protocol::Array<protocol::Runtime::RemoteObject>> args, int executionContextId, double timestamp, Maybe<protocol::Runtime::StackTrace> stackTrace = Maybe<protocol::Runtime::StackTrace>(), Maybe<String> context = Maybe<String>());
+    void exceptionRevoked(const String& reason, int exceptionId);
+    void exceptionThrown(double timestamp, std::unique_ptr<protocol::Runtime::ExceptionDetails> exceptionDetails);
     void executionContextCreated(std::unique_ptr<protocol::Runtime::ExecutionContextDescription> context);
     void executionContextDestroyed(int executionContextId);
     void executionContextsCleared();
-    void exceptionThrown(double timestamp, std::unique_ptr<protocol::Runtime::ExceptionDetails> exceptionDetails);
-    void exceptionRevoked(const String& reason, int exceptionId);
-    void consoleAPICalled(const String& type, std::unique_ptr<protocol::Array<protocol::Runtime::RemoteObject>> args, int executionContextId, double timestamp, Maybe<protocol::Runtime::StackTrace> stackTrace = Maybe<protocol::Runtime::StackTrace>());
     void inspectRequested(std::unique_ptr<protocol::Runtime::RemoteObject> object, std::unique_ptr<protocol::DictionaryValue> hints);
 
     void flush();

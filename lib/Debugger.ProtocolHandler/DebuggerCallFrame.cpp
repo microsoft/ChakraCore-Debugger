@@ -114,6 +114,7 @@ namespace JsDebug
             .setReturnValue(GetReturnValue())
             .setScopeChain(GetScopeChain())
             .setThis(GetThis())
+            .setUrl("")
             .build();
     }
 

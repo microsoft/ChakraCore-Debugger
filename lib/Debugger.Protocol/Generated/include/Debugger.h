@@ -25,7 +25,9 @@ LIB_EXPORT extern const char* Exception;
 LIB_EXPORT extern const char* Assert;
 LIB_EXPORT extern const char* DebugCommand;
 LIB_EXPORT extern const char* PromiseRejection;
+LIB_EXPORT extern const char* OOM;
 LIB_EXPORT extern const char* Other;
+LIB_EXPORT extern const char* Ambiguous;
 } // ReasonEnum
 } // Paused
 

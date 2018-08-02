@@ -16,14 +16,7 @@ namespace Runtime {
 
 const char Metainfo::domainName[] = "Runtime";
 const char Metainfo::commandPrefix[] = "Runtime.";
-const char Metainfo::version[] = "1.2";
-
-namespace UnserializableValueEnum {
-const char Infinity[] = "Infinity";
-const char NaN[] = "NaN";
-const char NegativeInfinity[] = "-Infinity";
-const char Negative0[] = "-0";
-} // namespace UnserializableValueEnum
+const char Metainfo::version[] = "1.3";
 
 const char* RemoteObject::TypeEnum::Object = "object";
 const char* RemoteObject::TypeEnum::Function = "function";
@@ -32,6 +25,7 @@ const char* RemoteObject::TypeEnum::String = "string";
 const char* RemoteObject::TypeEnum::Number = "number";
 const char* RemoteObject::TypeEnum::Boolean = "boolean";
 const char* RemoteObject::TypeEnum::Symbol = "symbol";
+const char* RemoteObject::TypeEnum::Bigint = "bigint";
 
 const char* RemoteObject::SubtypeEnum::Array = "array";
 const char* RemoteObject::SubtypeEnum::Null = "null";
@@ -40,6 +34,8 @@ const char* RemoteObject::SubtypeEnum::Regexp = "regexp";
 const char* RemoteObject::SubtypeEnum::Date = "date";
 const char* RemoteObject::SubtypeEnum::Map = "map";
 const char* RemoteObject::SubtypeEnum::Set = "set";
+const char* RemoteObject::SubtypeEnum::Weakmap = "weakmap";
+const char* RemoteObject::SubtypeEnum::Weakset = "weakset";
 const char* RemoteObject::SubtypeEnum::Iterator = "iterator";
 const char* RemoteObject::SubtypeEnum::Generator = "generator";
 const char* RemoteObject::SubtypeEnum::Error = "error";
@@ -209,6 +205,7 @@ const char* ObjectPreview::TypeEnum::String = "string";
 const char* ObjectPreview::TypeEnum::Number = "number";
 const char* ObjectPreview::TypeEnum::Boolean = "boolean";
 const char* ObjectPreview::TypeEnum::Symbol = "symbol";
+const char* ObjectPreview::TypeEnum::Bigint = "bigint";
 
 const char* ObjectPreview::SubtypeEnum::Array = "array";
 const char* ObjectPreview::SubtypeEnum::Null = "null";
@@ -217,6 +214,8 @@ const char* ObjectPreview::SubtypeEnum::Regexp = "regexp";
 const char* ObjectPreview::SubtypeEnum::Date = "date";
 const char* ObjectPreview::SubtypeEnum::Map = "map";
 const char* ObjectPreview::SubtypeEnum::Set = "set";
+const char* ObjectPreview::SubtypeEnum::Weakmap = "weakmap";
+const char* ObjectPreview::SubtypeEnum::Weakset = "weakset";
 const char* ObjectPreview::SubtypeEnum::Iterator = "iterator";
 const char* ObjectPreview::SubtypeEnum::Generator = "generator";
 const char* ObjectPreview::SubtypeEnum::Error = "error";
@@ -290,6 +289,7 @@ const char* PropertyPreview::TypeEnum::Number = "number";
 const char* PropertyPreview::TypeEnum::Boolean = "boolean";
 const char* PropertyPreview::TypeEnum::Symbol = "symbol";
 const char* PropertyPreview::TypeEnum::Accessor = "accessor";
+const char* PropertyPreview::TypeEnum::Bigint = "bigint";
 
 const char* PropertyPreview::SubtypeEnum::Array = "array";
 const char* PropertyPreview::SubtypeEnum::Null = "null";
@@ -298,6 +298,8 @@ const char* PropertyPreview::SubtypeEnum::Regexp = "regexp";
 const char* PropertyPreview::SubtypeEnum::Date = "date";
 const char* PropertyPreview::SubtypeEnum::Map = "map";
 const char* PropertyPreview::SubtypeEnum::Set = "set";
+const char* PropertyPreview::SubtypeEnum::Weakmap = "weakmap";
+const char* PropertyPreview::SubtypeEnum::Weakset = "weakset";
 const char* PropertyPreview::SubtypeEnum::Iterator = "iterator";
 const char* PropertyPreview::SubtypeEnum::Generator = "generator";
 const char* PropertyPreview::SubtypeEnum::Error = "error";
@@ -772,6 +774,11 @@ std::unique_ptr<StackTrace> StackTrace::fromValue(protocol::Value* value, ErrorS
         errors->setName("parent");
         result->m_parent = ValueConversions<protocol::Runtime::StackTrace>::fromValue(parentValue, errors);
     }
+    protocol::Value* parentIdValue = object->get("parentId");
+    if (parentIdValue) {
+        errors->setName("parentId");
+        result->m_parentId = ValueConversions<protocol::Runtime::StackTraceId>::fromValue(parentIdValue, errors);
+    }
     errors->pop();
     if (errors->hasErrors())
         return nullptr;
@@ -786,6 +793,8 @@ std::unique_ptr<protocol::DictionaryValue> StackTrace::toValue() const
     result->setValue("callFrames", ValueConversions<protocol::Array<protocol::Runtime::CallFrame>>::toValue(m_callFrames.get()));
     if (m_parent.isJust())
         result->setValue("parent", ValueConversions<protocol::Runtime::StackTrace>::toValue(m_parent.fromJust()));
+    if (m_parentId.isJust())
+        result->setValue("parentId", ValueConversions<protocol::Runtime::StackTraceId>::toValue(m_parentId.fromJust()));
     return result;
 }
 
@@ -809,6 +818,250 @@ std::unique_ptr<API::StackTrace> API::StackTrace::fromJSONString(const StringVie
     if (!value)
         return nullptr;
     return protocol::Runtime::StackTrace::fromValue(value.get(), &errors);
+}
+
+std::unique_ptr<StackTraceId> StackTraceId::fromValue(protocol::Value* value, ErrorSupport* errors)
+{
+    if (!value || value->type() != protocol::Value::TypeObject) {
+        errors->addError("object expected");
+        return nullptr;
+    }
+
+    std::unique_ptr<StackTraceId> result(new StackTraceId());
+    protocol::DictionaryValue* object = DictionaryValue::cast(value);
+    errors->push();
+    protocol::Value* idValue = object->get("id");
+    errors->setName("id");
+    result->m_id = ValueConversions<String>::fromValue(idValue, errors);
+    protocol::Value* debuggerIdValue = object->get("debuggerId");
+    if (debuggerIdValue) {
+        errors->setName("debuggerId");
+        result->m_debuggerId = ValueConversions<String>::fromValue(debuggerIdValue, errors);
+    }
+    errors->pop();
+    if (errors->hasErrors())
+        return nullptr;
+    return result;
+}
+
+std::unique_ptr<protocol::DictionaryValue> StackTraceId::toValue() const
+{
+    std::unique_ptr<protocol::DictionaryValue> result = DictionaryValue::create();
+    result->setValue("id", ValueConversions<String>::toValue(m_id));
+    if (m_debuggerId.isJust())
+        result->setValue("debuggerId", ValueConversions<String>::toValue(m_debuggerId.fromJust()));
+    return result;
+}
+
+std::unique_ptr<StackTraceId> StackTraceId::clone() const
+{
+    ErrorSupport errors;
+    return fromValue(toValue().get(), &errors);
+}
+
+std::unique_ptr<StringBuffer> StackTraceId::toJSONString() const
+{
+    String json = toValue()->serialize();
+    return StringBufferImpl::adopt(json);
+}
+
+// static
+std::unique_ptr<API::StackTraceId> API::StackTraceId::fromJSONString(const StringView& json)
+{
+    ErrorSupport errors;
+    std::unique_ptr<Value> value = StringUtil::parseJSON(json);
+    if (!value)
+        return nullptr;
+    return protocol::Runtime::StackTraceId::fromValue(value.get(), &errors);
+}
+
+std::unique_ptr<BindingCalledNotification> BindingCalledNotification::fromValue(protocol::Value* value, ErrorSupport* errors)
+{
+    if (!value || value->type() != protocol::Value::TypeObject) {
+        errors->addError("object expected");
+        return nullptr;
+    }
+
+    std::unique_ptr<BindingCalledNotification> result(new BindingCalledNotification());
+    protocol::DictionaryValue* object = DictionaryValue::cast(value);
+    errors->push();
+    protocol::Value* nameValue = object->get("name");
+    errors->setName("name");
+    result->m_name = ValueConversions<String>::fromValue(nameValue, errors);
+    protocol::Value* payloadValue = object->get("payload");
+    errors->setName("payload");
+    result->m_payload = ValueConversions<String>::fromValue(payloadValue, errors);
+    protocol::Value* executionContextIdValue = object->get("executionContextId");
+    errors->setName("executionContextId");
+    result->m_executionContextId = ValueConversions<int>::fromValue(executionContextIdValue, errors);
+    errors->pop();
+    if (errors->hasErrors())
+        return nullptr;
+    return result;
+}
+
+std::unique_ptr<protocol::DictionaryValue> BindingCalledNotification::toValue() const
+{
+    std::unique_ptr<protocol::DictionaryValue> result = DictionaryValue::create();
+    result->setValue("name", ValueConversions<String>::toValue(m_name));
+    result->setValue("payload", ValueConversions<String>::toValue(m_payload));
+    result->setValue("executionContextId", ValueConversions<int>::toValue(m_executionContextId));
+    return result;
+}
+
+std::unique_ptr<BindingCalledNotification> BindingCalledNotification::clone() const
+{
+    ErrorSupport errors;
+    return fromValue(toValue().get(), &errors);
+}
+
+const char* ConsoleAPICalledNotification::TypeEnum::Log = "log";
+const char* ConsoleAPICalledNotification::TypeEnum::Debug = "debug";
+const char* ConsoleAPICalledNotification::TypeEnum::Info = "info";
+const char* ConsoleAPICalledNotification::TypeEnum::Error = "error";
+const char* ConsoleAPICalledNotification::TypeEnum::Warning = "warning";
+const char* ConsoleAPICalledNotification::TypeEnum::Dir = "dir";
+const char* ConsoleAPICalledNotification::TypeEnum::Dirxml = "dirxml";
+const char* ConsoleAPICalledNotification::TypeEnum::Table = "table";
+const char* ConsoleAPICalledNotification::TypeEnum::Trace = "trace";
+const char* ConsoleAPICalledNotification::TypeEnum::Clear = "clear";
+const char* ConsoleAPICalledNotification::TypeEnum::StartGroup = "startGroup";
+const char* ConsoleAPICalledNotification::TypeEnum::StartGroupCollapsed = "startGroupCollapsed";
+const char* ConsoleAPICalledNotification::TypeEnum::EndGroup = "endGroup";
+const char* ConsoleAPICalledNotification::TypeEnum::Assert = "assert";
+const char* ConsoleAPICalledNotification::TypeEnum::Profile = "profile";
+const char* ConsoleAPICalledNotification::TypeEnum::ProfileEnd = "profileEnd";
+const char* ConsoleAPICalledNotification::TypeEnum::Count = "count";
+const char* ConsoleAPICalledNotification::TypeEnum::TimeEnd = "timeEnd";
+
+std::unique_ptr<ConsoleAPICalledNotification> ConsoleAPICalledNotification::fromValue(protocol::Value* value, ErrorSupport* errors)
+{
+    if (!value || value->type() != protocol::Value::TypeObject) {
+        errors->addError("object expected");
+        return nullptr;
+    }
+
+    std::unique_ptr<ConsoleAPICalledNotification> result(new ConsoleAPICalledNotification());
+    protocol::DictionaryValue* object = DictionaryValue::cast(value);
+    errors->push();
+    protocol::Value* typeValue = object->get("type");
+    errors->setName("type");
+    result->m_type = ValueConversions<String>::fromValue(typeValue, errors);
+    protocol::Value* argsValue = object->get("args");
+    errors->setName("args");
+    result->m_args = ValueConversions<protocol::Array<protocol::Runtime::RemoteObject>>::fromValue(argsValue, errors);
+    protocol::Value* executionContextIdValue = object->get("executionContextId");
+    errors->setName("executionContextId");
+    result->m_executionContextId = ValueConversions<int>::fromValue(executionContextIdValue, errors);
+    protocol::Value* timestampValue = object->get("timestamp");
+    errors->setName("timestamp");
+    result->m_timestamp = ValueConversions<double>::fromValue(timestampValue, errors);
+    protocol::Value* stackTraceValue = object->get("stackTrace");
+    if (stackTraceValue) {
+        errors->setName("stackTrace");
+        result->m_stackTrace = ValueConversions<protocol::Runtime::StackTrace>::fromValue(stackTraceValue, errors);
+    }
+    protocol::Value* contextValue = object->get("context");
+    if (contextValue) {
+        errors->setName("context");
+        result->m_context = ValueConversions<String>::fromValue(contextValue, errors);
+    }
+    errors->pop();
+    if (errors->hasErrors())
+        return nullptr;
+    return result;
+}
+
+std::unique_ptr<protocol::DictionaryValue> ConsoleAPICalledNotification::toValue() const
+{
+    std::unique_ptr<protocol::DictionaryValue> result = DictionaryValue::create();
+    result->setValue("type", ValueConversions<String>::toValue(m_type));
+    result->setValue("args", ValueConversions<protocol::Array<protocol::Runtime::RemoteObject>>::toValue(m_args.get()));
+    result->setValue("executionContextId", ValueConversions<int>::toValue(m_executionContextId));
+    result->setValue("timestamp", ValueConversions<double>::toValue(m_timestamp));
+    if (m_stackTrace.isJust())
+        result->setValue("stackTrace", ValueConversions<protocol::Runtime::StackTrace>::toValue(m_stackTrace.fromJust()));
+    if (m_context.isJust())
+        result->setValue("context", ValueConversions<String>::toValue(m_context.fromJust()));
+    return result;
+}
+
+std::unique_ptr<ConsoleAPICalledNotification> ConsoleAPICalledNotification::clone() const
+{
+    ErrorSupport errors;
+    return fromValue(toValue().get(), &errors);
+}
+
+std::unique_ptr<ExceptionRevokedNotification> ExceptionRevokedNotification::fromValue(protocol::Value* value, ErrorSupport* errors)
+{
+    if (!value || value->type() != protocol::Value::TypeObject) {
+        errors->addError("object expected");
+        return nullptr;
+    }
+
+    std::unique_ptr<ExceptionRevokedNotification> result(new ExceptionRevokedNotification());
+    protocol::DictionaryValue* object = DictionaryValue::cast(value);
+    errors->push();
+    protocol::Value* reasonValue = object->get("reason");
+    errors->setName("reason");
+    result->m_reason = ValueConversions<String>::fromValue(reasonValue, errors);
+    protocol::Value* exceptionIdValue = object->get("exceptionId");
+    errors->setName("exceptionId");
+    result->m_exceptionId = ValueConversions<int>::fromValue(exceptionIdValue, errors);
+    errors->pop();
+    if (errors->hasErrors())
+        return nullptr;
+    return result;
+}
+
+std::unique_ptr<protocol::DictionaryValue> ExceptionRevokedNotification::toValue() const
+{
+    std::unique_ptr<protocol::DictionaryValue> result = DictionaryValue::create();
+    result->setValue("reason", ValueConversions<String>::toValue(m_reason));
+    result->setValue("exceptionId", ValueConversions<int>::toValue(m_exceptionId));
+    return result;
+}
+
+std::unique_ptr<ExceptionRevokedNotification> ExceptionRevokedNotification::clone() const
+{
+    ErrorSupport errors;
+    return fromValue(toValue().get(), &errors);
+}
+
+std::unique_ptr<ExceptionThrownNotification> ExceptionThrownNotification::fromValue(protocol::Value* value, ErrorSupport* errors)
+{
+    if (!value || value->type() != protocol::Value::TypeObject) {
+        errors->addError("object expected");
+        return nullptr;
+    }
+
+    std::unique_ptr<ExceptionThrownNotification> result(new ExceptionThrownNotification());
+    protocol::DictionaryValue* object = DictionaryValue::cast(value);
+    errors->push();
+    protocol::Value* timestampValue = object->get("timestamp");
+    errors->setName("timestamp");
+    result->m_timestamp = ValueConversions<double>::fromValue(timestampValue, errors);
+    protocol::Value* exceptionDetailsValue = object->get("exceptionDetails");
+    errors->setName("exceptionDetails");
+    result->m_exceptionDetails = ValueConversions<protocol::Runtime::ExceptionDetails>::fromValue(exceptionDetailsValue, errors);
+    errors->pop();
+    if (errors->hasErrors())
+        return nullptr;
+    return result;
+}
+
+std::unique_ptr<protocol::DictionaryValue> ExceptionThrownNotification::toValue() const
+{
+    std::unique_ptr<protocol::DictionaryValue> result = DictionaryValue::create();
+    result->setValue("timestamp", ValueConversions<double>::toValue(m_timestamp));
+    result->setValue("exceptionDetails", ValueConversions<protocol::Runtime::ExceptionDetails>::toValue(m_exceptionDetails.get()));
+    return result;
+}
+
+std::unique_ptr<ExceptionThrownNotification> ExceptionThrownNotification::clone() const
+{
+    ErrorSupport errors;
+    return fromValue(toValue().get(), &errors);
 }
 
 std::unique_ptr<ExecutionContextCreatedNotification> ExecutionContextCreatedNotification::fromValue(protocol::Value* value, ErrorSupport* errors)
@@ -875,146 +1128,6 @@ std::unique_ptr<ExecutionContextDestroyedNotification> ExecutionContextDestroyed
     return fromValue(toValue().get(), &errors);
 }
 
-std::unique_ptr<ExceptionThrownNotification> ExceptionThrownNotification::fromValue(protocol::Value* value, ErrorSupport* errors)
-{
-    if (!value || value->type() != protocol::Value::TypeObject) {
-        errors->addError("object expected");
-        return nullptr;
-    }
-
-    std::unique_ptr<ExceptionThrownNotification> result(new ExceptionThrownNotification());
-    protocol::DictionaryValue* object = DictionaryValue::cast(value);
-    errors->push();
-    protocol::Value* timestampValue = object->get("timestamp");
-    errors->setName("timestamp");
-    result->m_timestamp = ValueConversions<double>::fromValue(timestampValue, errors);
-    protocol::Value* exceptionDetailsValue = object->get("exceptionDetails");
-    errors->setName("exceptionDetails");
-    result->m_exceptionDetails = ValueConversions<protocol::Runtime::ExceptionDetails>::fromValue(exceptionDetailsValue, errors);
-    errors->pop();
-    if (errors->hasErrors())
-        return nullptr;
-    return result;
-}
-
-std::unique_ptr<protocol::DictionaryValue> ExceptionThrownNotification::toValue() const
-{
-    std::unique_ptr<protocol::DictionaryValue> result = DictionaryValue::create();
-    result->setValue("timestamp", ValueConversions<double>::toValue(m_timestamp));
-    result->setValue("exceptionDetails", ValueConversions<protocol::Runtime::ExceptionDetails>::toValue(m_exceptionDetails.get()));
-    return result;
-}
-
-std::unique_ptr<ExceptionThrownNotification> ExceptionThrownNotification::clone() const
-{
-    ErrorSupport errors;
-    return fromValue(toValue().get(), &errors);
-}
-
-std::unique_ptr<ExceptionRevokedNotification> ExceptionRevokedNotification::fromValue(protocol::Value* value, ErrorSupport* errors)
-{
-    if (!value || value->type() != protocol::Value::TypeObject) {
-        errors->addError("object expected");
-        return nullptr;
-    }
-
-    std::unique_ptr<ExceptionRevokedNotification> result(new ExceptionRevokedNotification());
-    protocol::DictionaryValue* object = DictionaryValue::cast(value);
-    errors->push();
-    protocol::Value* reasonValue = object->get("reason");
-    errors->setName("reason");
-    result->m_reason = ValueConversions<String>::fromValue(reasonValue, errors);
-    protocol::Value* exceptionIdValue = object->get("exceptionId");
-    errors->setName("exceptionId");
-    result->m_exceptionId = ValueConversions<int>::fromValue(exceptionIdValue, errors);
-    errors->pop();
-    if (errors->hasErrors())
-        return nullptr;
-    return result;
-}
-
-std::unique_ptr<protocol::DictionaryValue> ExceptionRevokedNotification::toValue() const
-{
-    std::unique_ptr<protocol::DictionaryValue> result = DictionaryValue::create();
-    result->setValue("reason", ValueConversions<String>::toValue(m_reason));
-    result->setValue("exceptionId", ValueConversions<int>::toValue(m_exceptionId));
-    return result;
-}
-
-std::unique_ptr<ExceptionRevokedNotification> ExceptionRevokedNotification::clone() const
-{
-    ErrorSupport errors;
-    return fromValue(toValue().get(), &errors);
-}
-
-const char* ConsoleAPICalledNotification::TypeEnum::Log = "log";
-const char* ConsoleAPICalledNotification::TypeEnum::Debug = "debug";
-const char* ConsoleAPICalledNotification::TypeEnum::Info = "info";
-const char* ConsoleAPICalledNotification::TypeEnum::Error = "error";
-const char* ConsoleAPICalledNotification::TypeEnum::Warning = "warning";
-const char* ConsoleAPICalledNotification::TypeEnum::Dir = "dir";
-const char* ConsoleAPICalledNotification::TypeEnum::Dirxml = "dirxml";
-const char* ConsoleAPICalledNotification::TypeEnum::Table = "table";
-const char* ConsoleAPICalledNotification::TypeEnum::Trace = "trace";
-const char* ConsoleAPICalledNotification::TypeEnum::Clear = "clear";
-const char* ConsoleAPICalledNotification::TypeEnum::StartGroup = "startGroup";
-const char* ConsoleAPICalledNotification::TypeEnum::StartGroupCollapsed = "startGroupCollapsed";
-const char* ConsoleAPICalledNotification::TypeEnum::EndGroup = "endGroup";
-const char* ConsoleAPICalledNotification::TypeEnum::Assert = "assert";
-const char* ConsoleAPICalledNotification::TypeEnum::Profile = "profile";
-const char* ConsoleAPICalledNotification::TypeEnum::ProfileEnd = "profileEnd";
-
-std::unique_ptr<ConsoleAPICalledNotification> ConsoleAPICalledNotification::fromValue(protocol::Value* value, ErrorSupport* errors)
-{
-    if (!value || value->type() != protocol::Value::TypeObject) {
-        errors->addError("object expected");
-        return nullptr;
-    }
-
-    std::unique_ptr<ConsoleAPICalledNotification> result(new ConsoleAPICalledNotification());
-    protocol::DictionaryValue* object = DictionaryValue::cast(value);
-    errors->push();
-    protocol::Value* typeValue = object->get("type");
-    errors->setName("type");
-    result->m_type = ValueConversions<String>::fromValue(typeValue, errors);
-    protocol::Value* argsValue = object->get("args");
-    errors->setName("args");
-    result->m_args = ValueConversions<protocol::Array<protocol::Runtime::RemoteObject>>::fromValue(argsValue, errors);
-    protocol::Value* executionContextIdValue = object->get("executionContextId");
-    errors->setName("executionContextId");
-    result->m_executionContextId = ValueConversions<int>::fromValue(executionContextIdValue, errors);
-    protocol::Value* timestampValue = object->get("timestamp");
-    errors->setName("timestamp");
-    result->m_timestamp = ValueConversions<double>::fromValue(timestampValue, errors);
-    protocol::Value* stackTraceValue = object->get("stackTrace");
-    if (stackTraceValue) {
-        errors->setName("stackTrace");
-        result->m_stackTrace = ValueConversions<protocol::Runtime::StackTrace>::fromValue(stackTraceValue, errors);
-    }
-    errors->pop();
-    if (errors->hasErrors())
-        return nullptr;
-    return result;
-}
-
-std::unique_ptr<protocol::DictionaryValue> ConsoleAPICalledNotification::toValue() const
-{
-    std::unique_ptr<protocol::DictionaryValue> result = DictionaryValue::create();
-    result->setValue("type", ValueConversions<String>::toValue(m_type));
-    result->setValue("args", ValueConversions<protocol::Array<protocol::Runtime::RemoteObject>>::toValue(m_args.get()));
-    result->setValue("executionContextId", ValueConversions<int>::toValue(m_executionContextId));
-    result->setValue("timestamp", ValueConversions<double>::toValue(m_timestamp));
-    if (m_stackTrace.isJust())
-        result->setValue("stackTrace", ValueConversions<protocol::Runtime::StackTrace>::toValue(m_stackTrace.fromJust()));
-    return result;
-}
-
-std::unique_ptr<ConsoleAPICalledNotification> ConsoleAPICalledNotification::clone() const
-{
-    ErrorSupport errors;
-    return fromValue(toValue().get(), &errors);
-}
-
 std::unique_ptr<InspectRequestedNotification> InspectRequestedNotification::fromValue(protocol::Value* value, ErrorSupport* errors)
 {
     if (!value || value->type() != protocol::Value::TypeObject) {
@@ -1072,10 +1185,63 @@ const char* EndGroup = "endGroup";
 const char* Assert = "assert";
 const char* Profile = "profile";
 const char* ProfileEnd = "profileEnd";
+const char* Count = "count";
+const char* TimeEnd = "timeEnd";
 } // namespace TypeEnum
 } // namespace ConsoleAPICalled
 
 // ------------- Frontend notifications.
+
+void Frontend::bindingCalled(const String& name, const String& payload, int executionContextId)
+{
+    if (!m_frontendChannel)
+        return;
+    std::unique_ptr<BindingCalledNotification> messageData = BindingCalledNotification::create()
+        .setName(name)
+        .setPayload(payload)
+        .setExecutionContextId(executionContextId)
+        .build();
+    m_frontendChannel->sendProtocolNotification(InternalResponse::createNotification("Runtime.bindingCalled", std::move(messageData)));
+}
+
+void Frontend::consoleAPICalled(const String& type, std::unique_ptr<protocol::Array<protocol::Runtime::RemoteObject>> args, int executionContextId, double timestamp, Maybe<protocol::Runtime::StackTrace> stackTrace, Maybe<String> context)
+{
+    if (!m_frontendChannel)
+        return;
+    std::unique_ptr<ConsoleAPICalledNotification> messageData = ConsoleAPICalledNotification::create()
+        .setType(type)
+        .setArgs(std::move(args))
+        .setExecutionContextId(executionContextId)
+        .setTimestamp(timestamp)
+        .build();
+    if (stackTrace.isJust())
+        messageData->setStackTrace(std::move(stackTrace).takeJust());
+    if (context.isJust())
+        messageData->setContext(std::move(context).takeJust());
+    m_frontendChannel->sendProtocolNotification(InternalResponse::createNotification("Runtime.consoleAPICalled", std::move(messageData)));
+}
+
+void Frontend::exceptionRevoked(const String& reason, int exceptionId)
+{
+    if (!m_frontendChannel)
+        return;
+    std::unique_ptr<ExceptionRevokedNotification> messageData = ExceptionRevokedNotification::create()
+        .setReason(reason)
+        .setExceptionId(exceptionId)
+        .build();
+    m_frontendChannel->sendProtocolNotification(InternalResponse::createNotification("Runtime.exceptionRevoked", std::move(messageData)));
+}
+
+void Frontend::exceptionThrown(double timestamp, std::unique_ptr<protocol::Runtime::ExceptionDetails> exceptionDetails)
+{
+    if (!m_frontendChannel)
+        return;
+    std::unique_ptr<ExceptionThrownNotification> messageData = ExceptionThrownNotification::create()
+        .setTimestamp(timestamp)
+        .setExceptionDetails(std::move(exceptionDetails))
+        .build();
+    m_frontendChannel->sendProtocolNotification(InternalResponse::createNotification("Runtime.exceptionThrown", std::move(messageData)));
+}
 
 void Frontend::executionContextCreated(std::unique_ptr<protocol::Runtime::ExecutionContextDescription> context)
 {
@@ -1104,43 +1270,6 @@ void Frontend::executionContextsCleared()
     m_frontendChannel->sendProtocolNotification(InternalResponse::createNotification("Runtime.executionContextsCleared"));
 }
 
-void Frontend::exceptionThrown(double timestamp, std::unique_ptr<protocol::Runtime::ExceptionDetails> exceptionDetails)
-{
-    if (!m_frontendChannel)
-        return;
-    std::unique_ptr<ExceptionThrownNotification> messageData = ExceptionThrownNotification::create()
-        .setTimestamp(timestamp)
-        .setExceptionDetails(std::move(exceptionDetails))
-        .build();
-    m_frontendChannel->sendProtocolNotification(InternalResponse::createNotification("Runtime.exceptionThrown", std::move(messageData)));
-}
-
-void Frontend::exceptionRevoked(const String& reason, int exceptionId)
-{
-    if (!m_frontendChannel)
-        return;
-    std::unique_ptr<ExceptionRevokedNotification> messageData = ExceptionRevokedNotification::create()
-        .setReason(reason)
-        .setExceptionId(exceptionId)
-        .build();
-    m_frontendChannel->sendProtocolNotification(InternalResponse::createNotification("Runtime.exceptionRevoked", std::move(messageData)));
-}
-
-void Frontend::consoleAPICalled(const String& type, std::unique_ptr<protocol::Array<protocol::Runtime::RemoteObject>> args, int executionContextId, double timestamp, Maybe<protocol::Runtime::StackTrace> stackTrace)
-{
-    if (!m_frontendChannel)
-        return;
-    std::unique_ptr<ConsoleAPICalledNotification> messageData = ConsoleAPICalledNotification::create()
-        .setType(type)
-        .setArgs(std::move(args))
-        .setExecutionContextId(executionContextId)
-        .setTimestamp(timestamp)
-        .build();
-    if (stackTrace.isJust())
-        messageData->setStackTrace(std::move(stackTrace).takeJust());
-    m_frontendChannel->sendProtocolNotification(InternalResponse::createNotification("Runtime.consoleAPICalled", std::move(messageData)));
-}
-
 void Frontend::inspectRequested(std::unique_ptr<protocol::Runtime::RemoteObject> object, std::unique_ptr<protocol::DictionaryValue> hints)
 {
     if (!m_frontendChannel)
@@ -1166,71 +1295,85 @@ void Frontend::sendRawNotification(const String& notification)
 
 class DispatcherImpl : public protocol::DispatcherBase {
 public:
-    DispatcherImpl(FrontendChannel* frontendChannel, Backend* backend, bool fallThroughForNotFound)
+    DispatcherImpl(FrontendChannel* frontendChannel, Backend* backend)
         : DispatcherBase(frontendChannel)
-        , m_backend(backend)
-        , m_fallThroughForNotFound(fallThroughForNotFound) {
-        m_dispatchMap["Runtime.evaluate"] = &DispatcherImpl::evaluate;
+        , m_backend(backend) {
         m_dispatchMap["Runtime.awaitPromise"] = &DispatcherImpl::awaitPromise;
         m_dispatchMap["Runtime.callFunctionOn"] = &DispatcherImpl::callFunctionOn;
+        m_dispatchMap["Runtime.compileScript"] = &DispatcherImpl::compileScript;
+        m_dispatchMap["Runtime.disable"] = &DispatcherImpl::disable;
+        m_dispatchMap["Runtime.discardConsoleEntries"] = &DispatcherImpl::discardConsoleEntries;
+        m_dispatchMap["Runtime.enable"] = &DispatcherImpl::enable;
+        m_dispatchMap["Runtime.evaluate"] = &DispatcherImpl::evaluate;
+        m_dispatchMap["Runtime.getIsolateId"] = &DispatcherImpl::getIsolateId;
+        m_dispatchMap["Runtime.getHeapUsage"] = &DispatcherImpl::getHeapUsage;
         m_dispatchMap["Runtime.getProperties"] = &DispatcherImpl::getProperties;
+        m_dispatchMap["Runtime.globalLexicalScopeNames"] = &DispatcherImpl::globalLexicalScopeNames;
+        m_dispatchMap["Runtime.queryObjects"] = &DispatcherImpl::queryObjects;
         m_dispatchMap["Runtime.releaseObject"] = &DispatcherImpl::releaseObject;
         m_dispatchMap["Runtime.releaseObjectGroup"] = &DispatcherImpl::releaseObjectGroup;
         m_dispatchMap["Runtime.runIfWaitingForDebugger"] = &DispatcherImpl::runIfWaitingForDebugger;
-        m_dispatchMap["Runtime.enable"] = &DispatcherImpl::enable;
-        m_dispatchMap["Runtime.disable"] = &DispatcherImpl::disable;
-        m_dispatchMap["Runtime.discardConsoleEntries"] = &DispatcherImpl::discardConsoleEntries;
-        m_dispatchMap["Runtime.setCustomObjectFormatterEnabled"] = &DispatcherImpl::setCustomObjectFormatterEnabled;
-        m_dispatchMap["Runtime.compileScript"] = &DispatcherImpl::compileScript;
         m_dispatchMap["Runtime.runScript"] = &DispatcherImpl::runScript;
+      m_redirects["Runtime.setAsyncCallStackDepth"] = "Debugger.setAsyncCallStackDepth";
+        m_dispatchMap["Runtime.setCustomObjectFormatterEnabled"] = &DispatcherImpl::setCustomObjectFormatterEnabled;
+        m_dispatchMap["Runtime.setMaxCallStackSizeToCapture"] = &DispatcherImpl::setMaxCallStackSizeToCapture;
+        m_dispatchMap["Runtime.terminateExecution"] = &DispatcherImpl::terminateExecution;
+        m_dispatchMap["Runtime.addBinding"] = &DispatcherImpl::addBinding;
+        m_dispatchMap["Runtime.removeBinding"] = &DispatcherImpl::removeBinding;
     }
     ~DispatcherImpl() override { }
-    DispatchResponse::Status dispatch(int callId, const String& method, std::unique_ptr<protocol::DictionaryValue> messageObject) override;
-    HashMap<String, String>& redirects() { return m_redirects; }
+    bool canDispatch(const String& method) override;
+    void dispatch(int callId, const String& method, const String& message, std::unique_ptr<protocol::DictionaryValue> messageObject) override;
+    std::unordered_map<String, String>& redirects() { return m_redirects; }
 
 protected:
-    using CallHandler = DispatchResponse::Status (DispatcherImpl::*)(int callId, std::unique_ptr<DictionaryValue> messageObject, ErrorSupport* errors);
-    using DispatchMap = protocol::HashMap<String, CallHandler>;
+    using CallHandler = void (DispatcherImpl::*)(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> messageObject, ErrorSupport* errors);
+    using DispatchMap = std::unordered_map<String, CallHandler>;
     DispatchMap m_dispatchMap;
-    HashMap<String, String> m_redirects;
+    std::unordered_map<String, String> m_redirects;
 
-    DispatchResponse::Status evaluate(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
-    DispatchResponse::Status awaitPromise(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
-    DispatchResponse::Status callFunctionOn(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
-    DispatchResponse::Status getProperties(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
-    DispatchResponse::Status releaseObject(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
-    DispatchResponse::Status releaseObjectGroup(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
-    DispatchResponse::Status runIfWaitingForDebugger(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
-    DispatchResponse::Status enable(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
-    DispatchResponse::Status disable(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
-    DispatchResponse::Status discardConsoleEntries(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
-    DispatchResponse::Status setCustomObjectFormatterEnabled(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
-    DispatchResponse::Status compileScript(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
-    DispatchResponse::Status runScript(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
+    void awaitPromise(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
+    void callFunctionOn(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
+    void compileScript(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
+    void disable(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
+    void discardConsoleEntries(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
+    void enable(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
+    void evaluate(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
+    void getIsolateId(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
+    void getHeapUsage(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
+    void getProperties(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
+    void globalLexicalScopeNames(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
+    void queryObjects(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
+    void releaseObject(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
+    void releaseObjectGroup(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
+    void runIfWaitingForDebugger(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
+    void runScript(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
+    void setCustomObjectFormatterEnabled(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
+    void setMaxCallStackSizeToCapture(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
+    void terminateExecution(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
+    void addBinding(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
+    void removeBinding(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
 
     Backend* m_backend;
-    bool m_fallThroughForNotFound;
 };
 
-DispatchResponse::Status DispatcherImpl::dispatch(int callId, const String& method, std::unique_ptr<protocol::DictionaryValue> messageObject)
-{
-    protocol::HashMap<String, CallHandler>::iterator it = m_dispatchMap.find(method);
-    if (it == m_dispatchMap.end()) {
-        if (m_fallThroughForNotFound)
-            return DispatchResponse::kFallThrough;
-        reportProtocolError(callId, DispatchResponse::kMethodNotFound, "'" + method + "' wasn't found", nullptr);
-        return DispatchResponse::kError;
-    }
+bool DispatcherImpl::canDispatch(const String& method) {
+    return m_dispatchMap.find(method) != m_dispatchMap.end();
+}
 
+void DispatcherImpl::dispatch(int callId, const String& method, const String& message, std::unique_ptr<protocol::DictionaryValue> messageObject)
+{
+    std::unordered_map<String, CallHandler>::iterator it = m_dispatchMap.find(method);
+    DCHECK(it != m_dispatchMap.end());
     protocol::ErrorSupport errors;
-    return (this->*(it->second))(callId, std::move(messageObject), &errors);
+    (this->*(it->second))(callId, method, message, std::move(messageObject), &errors);
 }
 
 
-class EvaluateCallbackImpl : public Backend::EvaluateCallback, public DispatcherBase::Callback {
+class AwaitPromiseCallbackImpl : public Backend::AwaitPromiseCallback, public DispatcherBase::Callback {
 public:
-    EvaluateCallbackImpl(std::unique_ptr<DispatcherBase::WeakPtr> backendImpl, int callId, int callbackId)
-        : DispatcherBase::Callback(std::move(backendImpl), callId, callbackId) { }
+    AwaitPromiseCallbackImpl(std::unique_ptr<DispatcherBase::WeakPtr> backendImpl, int callId, const String& method, const String& message)
+        : DispatcherBase::Callback(std::move(backendImpl), callId, method, message) { }
 
     void sendSuccess(std::unique_ptr<protocol::Runtime::RemoteObject> result, Maybe<protocol::Runtime::ExceptionDetails> exceptionDetails) override
     {
@@ -1253,7 +1396,254 @@ public:
     }
 };
 
-DispatchResponse::Status DispatcherImpl::evaluate(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
+void DispatcherImpl::awaitPromise(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
+{
+    // Prepare input parameters.
+    protocol::DictionaryValue* object = DictionaryValue::cast(requestMessageObject->get("params"));
+    errors->push();
+    protocol::Value* promiseObjectIdValue = object ? object->get("promiseObjectId") : nullptr;
+    errors->setName("promiseObjectId");
+    String in_promiseObjectId = ValueConversions<String>::fromValue(promiseObjectIdValue, errors);
+    protocol::Value* returnByValueValue = object ? object->get("returnByValue") : nullptr;
+    Maybe<bool> in_returnByValue;
+    if (returnByValueValue) {
+        errors->setName("returnByValue");
+        in_returnByValue = ValueConversions<bool>::fromValue(returnByValueValue, errors);
+    }
+    protocol::Value* generatePreviewValue = object ? object->get("generatePreview") : nullptr;
+    Maybe<bool> in_generatePreview;
+    if (generatePreviewValue) {
+        errors->setName("generatePreview");
+        in_generatePreview = ValueConversions<bool>::fromValue(generatePreviewValue, errors);
+    }
+    errors->pop();
+    if (errors->hasErrors()) {
+        reportProtocolError(callId, DispatchResponse::kInvalidParams, kInvalidParamsString, errors);
+        return;
+    }
+
+    std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
+    std::unique_ptr<AwaitPromiseCallbackImpl> callback(new AwaitPromiseCallbackImpl(weakPtr(), callId, method, message));
+    m_backend->awaitPromise(in_promiseObjectId, std::move(in_returnByValue), std::move(in_generatePreview), std::move(callback));
+    return;
+}
+
+class CallFunctionOnCallbackImpl : public Backend::CallFunctionOnCallback, public DispatcherBase::Callback {
+public:
+    CallFunctionOnCallbackImpl(std::unique_ptr<DispatcherBase::WeakPtr> backendImpl, int callId, const String& method, const String& message)
+        : DispatcherBase::Callback(std::move(backendImpl), callId, method, message) { }
+
+    void sendSuccess(std::unique_ptr<protocol::Runtime::RemoteObject> result, Maybe<protocol::Runtime::ExceptionDetails> exceptionDetails) override
+    {
+        std::unique_ptr<protocol::DictionaryValue> resultObject = DictionaryValue::create();
+        resultObject->setValue("result", ValueConversions<protocol::Runtime::RemoteObject>::toValue(result.get()));
+        if (exceptionDetails.isJust())
+            resultObject->setValue("exceptionDetails", ValueConversions<protocol::Runtime::ExceptionDetails>::toValue(exceptionDetails.fromJust()));
+        sendIfActive(std::move(resultObject), DispatchResponse::OK());
+    }
+
+    void fallThrough() override
+    {
+        fallThroughIfActive();
+    }
+
+    void sendFailure(const DispatchResponse& response) override
+    {
+        DCHECK(response.status() == DispatchResponse::kError);
+        sendIfActive(nullptr, response);
+    }
+};
+
+void DispatcherImpl::callFunctionOn(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
+{
+    // Prepare input parameters.
+    protocol::DictionaryValue* object = DictionaryValue::cast(requestMessageObject->get("params"));
+    errors->push();
+    protocol::Value* functionDeclarationValue = object ? object->get("functionDeclaration") : nullptr;
+    errors->setName("functionDeclaration");
+    String in_functionDeclaration = ValueConversions<String>::fromValue(functionDeclarationValue, errors);
+    protocol::Value* objectIdValue = object ? object->get("objectId") : nullptr;
+    Maybe<String> in_objectId;
+    if (objectIdValue) {
+        errors->setName("objectId");
+        in_objectId = ValueConversions<String>::fromValue(objectIdValue, errors);
+    }
+    protocol::Value* argumentsValue = object ? object->get("arguments") : nullptr;
+    Maybe<protocol::Array<protocol::Runtime::CallArgument>> in_arguments;
+    if (argumentsValue) {
+        errors->setName("arguments");
+        in_arguments = ValueConversions<protocol::Array<protocol::Runtime::CallArgument>>::fromValue(argumentsValue, errors);
+    }
+    protocol::Value* silentValue = object ? object->get("silent") : nullptr;
+    Maybe<bool> in_silent;
+    if (silentValue) {
+        errors->setName("silent");
+        in_silent = ValueConversions<bool>::fromValue(silentValue, errors);
+    }
+    protocol::Value* returnByValueValue = object ? object->get("returnByValue") : nullptr;
+    Maybe<bool> in_returnByValue;
+    if (returnByValueValue) {
+        errors->setName("returnByValue");
+        in_returnByValue = ValueConversions<bool>::fromValue(returnByValueValue, errors);
+    }
+    protocol::Value* generatePreviewValue = object ? object->get("generatePreview") : nullptr;
+    Maybe<bool> in_generatePreview;
+    if (generatePreviewValue) {
+        errors->setName("generatePreview");
+        in_generatePreview = ValueConversions<bool>::fromValue(generatePreviewValue, errors);
+    }
+    protocol::Value* userGestureValue = object ? object->get("userGesture") : nullptr;
+    Maybe<bool> in_userGesture;
+    if (userGestureValue) {
+        errors->setName("userGesture");
+        in_userGesture = ValueConversions<bool>::fromValue(userGestureValue, errors);
+    }
+    protocol::Value* awaitPromiseValue = object ? object->get("awaitPromise") : nullptr;
+    Maybe<bool> in_awaitPromise;
+    if (awaitPromiseValue) {
+        errors->setName("awaitPromise");
+        in_awaitPromise = ValueConversions<bool>::fromValue(awaitPromiseValue, errors);
+    }
+    protocol::Value* executionContextIdValue = object ? object->get("executionContextId") : nullptr;
+    Maybe<int> in_executionContextId;
+    if (executionContextIdValue) {
+        errors->setName("executionContextId");
+        in_executionContextId = ValueConversions<int>::fromValue(executionContextIdValue, errors);
+    }
+    protocol::Value* objectGroupValue = object ? object->get("objectGroup") : nullptr;
+    Maybe<String> in_objectGroup;
+    if (objectGroupValue) {
+        errors->setName("objectGroup");
+        in_objectGroup = ValueConversions<String>::fromValue(objectGroupValue, errors);
+    }
+    errors->pop();
+    if (errors->hasErrors()) {
+        reportProtocolError(callId, DispatchResponse::kInvalidParams, kInvalidParamsString, errors);
+        return;
+    }
+
+    std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
+    std::unique_ptr<CallFunctionOnCallbackImpl> callback(new CallFunctionOnCallbackImpl(weakPtr(), callId, method, message));
+    m_backend->callFunctionOn(in_functionDeclaration, std::move(in_objectId), std::move(in_arguments), std::move(in_silent), std::move(in_returnByValue), std::move(in_generatePreview), std::move(in_userGesture), std::move(in_awaitPromise), std::move(in_executionContextId), std::move(in_objectGroup), std::move(callback));
+    return;
+}
+
+void DispatcherImpl::compileScript(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
+{
+    // Prepare input parameters.
+    protocol::DictionaryValue* object = DictionaryValue::cast(requestMessageObject->get("params"));
+    errors->push();
+    protocol::Value* expressionValue = object ? object->get("expression") : nullptr;
+    errors->setName("expression");
+    String in_expression = ValueConversions<String>::fromValue(expressionValue, errors);
+    protocol::Value* sourceURLValue = object ? object->get("sourceURL") : nullptr;
+    errors->setName("sourceURL");
+    String in_sourceURL = ValueConversions<String>::fromValue(sourceURLValue, errors);
+    protocol::Value* persistScriptValue = object ? object->get("persistScript") : nullptr;
+    errors->setName("persistScript");
+    bool in_persistScript = ValueConversions<bool>::fromValue(persistScriptValue, errors);
+    protocol::Value* executionContextIdValue = object ? object->get("executionContextId") : nullptr;
+    Maybe<int> in_executionContextId;
+    if (executionContextIdValue) {
+        errors->setName("executionContextId");
+        in_executionContextId = ValueConversions<int>::fromValue(executionContextIdValue, errors);
+    }
+    errors->pop();
+    if (errors->hasErrors()) {
+        reportProtocolError(callId, DispatchResponse::kInvalidParams, kInvalidParamsString, errors);
+        return;
+    }
+    // Declare output parameters.
+    Maybe<String> out_scriptId;
+    Maybe<protocol::Runtime::ExceptionDetails> out_exceptionDetails;
+
+    std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
+    DispatchResponse response = m_backend->compileScript(in_expression, in_sourceURL, in_persistScript, std::move(in_executionContextId), &out_scriptId, &out_exceptionDetails);
+    if (response.status() == DispatchResponse::kFallThrough) {
+        channel()->fallThrough(callId, method, message);
+        return;
+    }
+    std::unique_ptr<protocol::DictionaryValue> result = DictionaryValue::create();
+    if (response.status() == DispatchResponse::kSuccess) {
+        if (out_scriptId.isJust())
+            result->setValue("scriptId", ValueConversions<String>::toValue(out_scriptId.fromJust()));
+        if (out_exceptionDetails.isJust())
+            result->setValue("exceptionDetails", ValueConversions<protocol::Runtime::ExceptionDetails>::toValue(out_exceptionDetails.fromJust()));
+    }
+    if (weak->get())
+        weak->get()->sendResponse(callId, response, std::move(result));
+    return;
+}
+
+void DispatcherImpl::disable(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
+{
+
+    std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
+    DispatchResponse response = m_backend->disable();
+    if (response.status() == DispatchResponse::kFallThrough) {
+        channel()->fallThrough(callId, method, message);
+        return;
+    }
+    if (weak->get())
+        weak->get()->sendResponse(callId, response);
+    return;
+}
+
+void DispatcherImpl::discardConsoleEntries(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
+{
+
+    std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
+    DispatchResponse response = m_backend->discardConsoleEntries();
+    if (response.status() == DispatchResponse::kFallThrough) {
+        channel()->fallThrough(callId, method, message);
+        return;
+    }
+    if (weak->get())
+        weak->get()->sendResponse(callId, response);
+    return;
+}
+
+void DispatcherImpl::enable(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
+{
+
+    std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
+    DispatchResponse response = m_backend->enable();
+    if (response.status() == DispatchResponse::kFallThrough) {
+        channel()->fallThrough(callId, method, message);
+        return;
+    }
+    if (weak->get())
+        weak->get()->sendResponse(callId, response);
+    return;
+}
+
+class EvaluateCallbackImpl : public Backend::EvaluateCallback, public DispatcherBase::Callback {
+public:
+    EvaluateCallbackImpl(std::unique_ptr<DispatcherBase::WeakPtr> backendImpl, int callId, const String& method, const String& message)
+        : DispatcherBase::Callback(std::move(backendImpl), callId, method, message) { }
+
+    void sendSuccess(std::unique_ptr<protocol::Runtime::RemoteObject> result, Maybe<protocol::Runtime::ExceptionDetails> exceptionDetails) override
+    {
+        std::unique_ptr<protocol::DictionaryValue> resultObject = DictionaryValue::create();
+        resultObject->setValue("result", ValueConversions<protocol::Runtime::RemoteObject>::toValue(result.get()));
+        if (exceptionDetails.isJust())
+            resultObject->setValue("exceptionDetails", ValueConversions<protocol::Runtime::ExceptionDetails>::toValue(exceptionDetails.fromJust()));
+        sendIfActive(std::move(resultObject), DispatchResponse::OK());
+    }
+
+    void fallThrough() override
+    {
+        fallThroughIfActive();
+    }
+
+    void sendFailure(const DispatchResponse& response) override
+    {
+        DCHECK(response.status() == DispatchResponse::kError);
+        sendIfActive(nullptr, response);
+    }
+};
+
+void DispatcherImpl::evaluate(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
 {
     // Prepare input parameters.
     protocol::DictionaryValue* object = DictionaryValue::cast(requestMessageObject->get("params"));
@@ -1309,162 +1699,73 @@ DispatchResponse::Status DispatcherImpl::evaluate(int callId, std::unique_ptr<Di
         errors->setName("awaitPromise");
         in_awaitPromise = ValueConversions<bool>::fromValue(awaitPromiseValue, errors);
     }
+    protocol::Value* throwOnSideEffectValue = object ? object->get("throwOnSideEffect") : nullptr;
+    Maybe<bool> in_throwOnSideEffect;
+    if (throwOnSideEffectValue) {
+        errors->setName("throwOnSideEffect");
+        in_throwOnSideEffect = ValueConversions<bool>::fromValue(throwOnSideEffectValue, errors);
+    }
+    protocol::Value* timeoutValue = object ? object->get("timeout") : nullptr;
+    Maybe<double> in_timeout;
+    if (timeoutValue) {
+        errors->setName("timeout");
+        in_timeout = ValueConversions<double>::fromValue(timeoutValue, errors);
+    }
     errors->pop();
     if (errors->hasErrors()) {
         reportProtocolError(callId, DispatchResponse::kInvalidParams, kInvalidParamsString, errors);
-        return DispatchResponse::kError;
+        return;
     }
 
     std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
-    std::unique_ptr<EvaluateCallbackImpl> callback(new EvaluateCallbackImpl(weakPtr(), callId, nextCallbackId()));
-    m_backend->evaluate(in_expression, std::move(in_objectGroup), std::move(in_includeCommandLineAPI), std::move(in_silent), std::move(in_contextId), std::move(in_returnByValue), std::move(in_generatePreview), std::move(in_userGesture), std::move(in_awaitPromise), std::move(callback));
-    return (weak->get() && weak->get()->lastCallbackFallThrough()) ? DispatchResponse::kFallThrough : DispatchResponse::kAsync;
+    std::unique_ptr<EvaluateCallbackImpl> callback(new EvaluateCallbackImpl(weakPtr(), callId, method, message));
+    m_backend->evaluate(in_expression, std::move(in_objectGroup), std::move(in_includeCommandLineAPI), std::move(in_silent), std::move(in_contextId), std::move(in_returnByValue), std::move(in_generatePreview), std::move(in_userGesture), std::move(in_awaitPromise), std::move(in_throwOnSideEffect), std::move(in_timeout), std::move(callback));
+    return;
 }
 
-class AwaitPromiseCallbackImpl : public Backend::AwaitPromiseCallback, public DispatcherBase::Callback {
-public:
-    AwaitPromiseCallbackImpl(std::unique_ptr<DispatcherBase::WeakPtr> backendImpl, int callId, int callbackId)
-        : DispatcherBase::Callback(std::move(backendImpl), callId, callbackId) { }
-
-    void sendSuccess(std::unique_ptr<protocol::Runtime::RemoteObject> result, Maybe<protocol::Runtime::ExceptionDetails> exceptionDetails) override
-    {
-        std::unique_ptr<protocol::DictionaryValue> resultObject = DictionaryValue::create();
-        resultObject->setValue("result", ValueConversions<protocol::Runtime::RemoteObject>::toValue(result.get()));
-        if (exceptionDetails.isJust())
-            resultObject->setValue("exceptionDetails", ValueConversions<protocol::Runtime::ExceptionDetails>::toValue(exceptionDetails.fromJust()));
-        sendIfActive(std::move(resultObject), DispatchResponse::OK());
-    }
-
-    void fallThrough() override
-    {
-        fallThroughIfActive();
-    }
-
-    void sendFailure(const DispatchResponse& response) override
-    {
-        DCHECK(response.status() == DispatchResponse::kError);
-        sendIfActive(nullptr, response);
-    }
-};
-
-DispatchResponse::Status DispatcherImpl::awaitPromise(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
+void DispatcherImpl::getIsolateId(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
 {
-    // Prepare input parameters.
-    protocol::DictionaryValue* object = DictionaryValue::cast(requestMessageObject->get("params"));
-    errors->push();
-    protocol::Value* promiseObjectIdValue = object ? object->get("promiseObjectId") : nullptr;
-    errors->setName("promiseObjectId");
-    String in_promiseObjectId = ValueConversions<String>::fromValue(promiseObjectIdValue, errors);
-    protocol::Value* returnByValueValue = object ? object->get("returnByValue") : nullptr;
-    Maybe<bool> in_returnByValue;
-    if (returnByValueValue) {
-        errors->setName("returnByValue");
-        in_returnByValue = ValueConversions<bool>::fromValue(returnByValueValue, errors);
-    }
-    protocol::Value* generatePreviewValue = object ? object->get("generatePreview") : nullptr;
-    Maybe<bool> in_generatePreview;
-    if (generatePreviewValue) {
-        errors->setName("generatePreview");
-        in_generatePreview = ValueConversions<bool>::fromValue(generatePreviewValue, errors);
-    }
-    errors->pop();
-    if (errors->hasErrors()) {
-        reportProtocolError(callId, DispatchResponse::kInvalidParams, kInvalidParamsString, errors);
-        return DispatchResponse::kError;
-    }
+    // Declare output parameters.
+    String out_id;
 
     std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
-    std::unique_ptr<AwaitPromiseCallbackImpl> callback(new AwaitPromiseCallbackImpl(weakPtr(), callId, nextCallbackId()));
-    m_backend->awaitPromise(in_promiseObjectId, std::move(in_returnByValue), std::move(in_generatePreview), std::move(callback));
-    return (weak->get() && weak->get()->lastCallbackFallThrough()) ? DispatchResponse::kFallThrough : DispatchResponse::kAsync;
+    DispatchResponse response = m_backend->getIsolateId(&out_id);
+    if (response.status() == DispatchResponse::kFallThrough) {
+        channel()->fallThrough(callId, method, message);
+        return;
+    }
+    std::unique_ptr<protocol::DictionaryValue> result = DictionaryValue::create();
+    if (response.status() == DispatchResponse::kSuccess) {
+        result->setValue("id", ValueConversions<String>::toValue(out_id));
+    }
+    if (weak->get())
+        weak->get()->sendResponse(callId, response, std::move(result));
+    return;
 }
 
-class CallFunctionOnCallbackImpl : public Backend::CallFunctionOnCallback, public DispatcherBase::Callback {
-public:
-    CallFunctionOnCallbackImpl(std::unique_ptr<DispatcherBase::WeakPtr> backendImpl, int callId, int callbackId)
-        : DispatcherBase::Callback(std::move(backendImpl), callId, callbackId) { }
-
-    void sendSuccess(std::unique_ptr<protocol::Runtime::RemoteObject> result, Maybe<protocol::Runtime::ExceptionDetails> exceptionDetails) override
-    {
-        std::unique_ptr<protocol::DictionaryValue> resultObject = DictionaryValue::create();
-        resultObject->setValue("result", ValueConversions<protocol::Runtime::RemoteObject>::toValue(result.get()));
-        if (exceptionDetails.isJust())
-            resultObject->setValue("exceptionDetails", ValueConversions<protocol::Runtime::ExceptionDetails>::toValue(exceptionDetails.fromJust()));
-        sendIfActive(std::move(resultObject), DispatchResponse::OK());
-    }
-
-    void fallThrough() override
-    {
-        fallThroughIfActive();
-    }
-
-    void sendFailure(const DispatchResponse& response) override
-    {
-        DCHECK(response.status() == DispatchResponse::kError);
-        sendIfActive(nullptr, response);
-    }
-};
-
-DispatchResponse::Status DispatcherImpl::callFunctionOn(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
+void DispatcherImpl::getHeapUsage(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
 {
-    // Prepare input parameters.
-    protocol::DictionaryValue* object = DictionaryValue::cast(requestMessageObject->get("params"));
-    errors->push();
-    protocol::Value* objectIdValue = object ? object->get("objectId") : nullptr;
-    errors->setName("objectId");
-    String in_objectId = ValueConversions<String>::fromValue(objectIdValue, errors);
-    protocol::Value* functionDeclarationValue = object ? object->get("functionDeclaration") : nullptr;
-    errors->setName("functionDeclaration");
-    String in_functionDeclaration = ValueConversions<String>::fromValue(functionDeclarationValue, errors);
-    protocol::Value* argumentsValue = object ? object->get("arguments") : nullptr;
-    Maybe<protocol::Array<protocol::Runtime::CallArgument>> in_arguments;
-    if (argumentsValue) {
-        errors->setName("arguments");
-        in_arguments = ValueConversions<protocol::Array<protocol::Runtime::CallArgument>>::fromValue(argumentsValue, errors);
-    }
-    protocol::Value* silentValue = object ? object->get("silent") : nullptr;
-    Maybe<bool> in_silent;
-    if (silentValue) {
-        errors->setName("silent");
-        in_silent = ValueConversions<bool>::fromValue(silentValue, errors);
-    }
-    protocol::Value* returnByValueValue = object ? object->get("returnByValue") : nullptr;
-    Maybe<bool> in_returnByValue;
-    if (returnByValueValue) {
-        errors->setName("returnByValue");
-        in_returnByValue = ValueConversions<bool>::fromValue(returnByValueValue, errors);
-    }
-    protocol::Value* generatePreviewValue = object ? object->get("generatePreview") : nullptr;
-    Maybe<bool> in_generatePreview;
-    if (generatePreviewValue) {
-        errors->setName("generatePreview");
-        in_generatePreview = ValueConversions<bool>::fromValue(generatePreviewValue, errors);
-    }
-    protocol::Value* userGestureValue = object ? object->get("userGesture") : nullptr;
-    Maybe<bool> in_userGesture;
-    if (userGestureValue) {
-        errors->setName("userGesture");
-        in_userGesture = ValueConversions<bool>::fromValue(userGestureValue, errors);
-    }
-    protocol::Value* awaitPromiseValue = object ? object->get("awaitPromise") : nullptr;
-    Maybe<bool> in_awaitPromise;
-    if (awaitPromiseValue) {
-        errors->setName("awaitPromise");
-        in_awaitPromise = ValueConversions<bool>::fromValue(awaitPromiseValue, errors);
-    }
-    errors->pop();
-    if (errors->hasErrors()) {
-        reportProtocolError(callId, DispatchResponse::kInvalidParams, kInvalidParamsString, errors);
-        return DispatchResponse::kError;
-    }
+    // Declare output parameters.
+    double out_usedSize;
+    double out_totalSize;
 
     std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
-    std::unique_ptr<CallFunctionOnCallbackImpl> callback(new CallFunctionOnCallbackImpl(weakPtr(), callId, nextCallbackId()));
-    m_backend->callFunctionOn(in_objectId, in_functionDeclaration, std::move(in_arguments), std::move(in_silent), std::move(in_returnByValue), std::move(in_generatePreview), std::move(in_userGesture), std::move(in_awaitPromise), std::move(callback));
-    return (weak->get() && weak->get()->lastCallbackFallThrough()) ? DispatchResponse::kFallThrough : DispatchResponse::kAsync;
+    DispatchResponse response = m_backend->getHeapUsage(&out_usedSize, &out_totalSize);
+    if (response.status() == DispatchResponse::kFallThrough) {
+        channel()->fallThrough(callId, method, message);
+        return;
+    }
+    std::unique_ptr<protocol::DictionaryValue> result = DictionaryValue::create();
+    if (response.status() == DispatchResponse::kSuccess) {
+        result->setValue("usedSize", ValueConversions<double>::toValue(out_usedSize));
+        result->setValue("totalSize", ValueConversions<double>::toValue(out_totalSize));
+    }
+    if (weak->get())
+        weak->get()->sendResponse(callId, response, std::move(result));
+    return;
 }
 
-DispatchResponse::Status DispatcherImpl::getProperties(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
+void DispatcherImpl::getProperties(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
 {
     // Prepare input parameters.
     protocol::DictionaryValue* object = DictionaryValue::cast(requestMessageObject->get("params"));
@@ -1493,7 +1794,7 @@ DispatchResponse::Status DispatcherImpl::getProperties(int callId, std::unique_p
     errors->pop();
     if (errors->hasErrors()) {
         reportProtocolError(callId, DispatchResponse::kInvalidParams, kInvalidParamsString, errors);
-        return DispatchResponse::kError;
+        return;
     }
     // Declare output parameters.
     std::unique_ptr<protocol::Array<protocol::Runtime::PropertyDescriptor>> out_result;
@@ -1502,8 +1803,10 @@ DispatchResponse::Status DispatcherImpl::getProperties(int callId, std::unique_p
 
     std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
     DispatchResponse response = m_backend->getProperties(in_objectId, std::move(in_ownProperties), std::move(in_accessorPropertiesOnly), std::move(in_generatePreview), &out_result, &out_internalProperties, &out_exceptionDetails);
-    if (response.status() == DispatchResponse::kFallThrough)
-        return response.status();
+    if (response.status() == DispatchResponse::kFallThrough) {
+        channel()->fallThrough(callId, method, message);
+        return;
+    }
     std::unique_ptr<protocol::DictionaryValue> result = DictionaryValue::create();
     if (response.status() == DispatchResponse::kSuccess) {
         result->setValue("result", ValueConversions<protocol::Array<protocol::Runtime::PropertyDescriptor>>::toValue(out_result.get()));
@@ -1514,10 +1817,81 @@ DispatchResponse::Status DispatcherImpl::getProperties(int callId, std::unique_p
     }
     if (weak->get())
         weak->get()->sendResponse(callId, response, std::move(result));
-    return response.status();
+    return;
 }
 
-DispatchResponse::Status DispatcherImpl::releaseObject(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
+void DispatcherImpl::globalLexicalScopeNames(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
+{
+    // Prepare input parameters.
+    protocol::DictionaryValue* object = DictionaryValue::cast(requestMessageObject->get("params"));
+    errors->push();
+    protocol::Value* executionContextIdValue = object ? object->get("executionContextId") : nullptr;
+    Maybe<int> in_executionContextId;
+    if (executionContextIdValue) {
+        errors->setName("executionContextId");
+        in_executionContextId = ValueConversions<int>::fromValue(executionContextIdValue, errors);
+    }
+    errors->pop();
+    if (errors->hasErrors()) {
+        reportProtocolError(callId, DispatchResponse::kInvalidParams, kInvalidParamsString, errors);
+        return;
+    }
+    // Declare output parameters.
+    std::unique_ptr<protocol::Array<String>> out_names;
+
+    std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
+    DispatchResponse response = m_backend->globalLexicalScopeNames(std::move(in_executionContextId), &out_names);
+    if (response.status() == DispatchResponse::kFallThrough) {
+        channel()->fallThrough(callId, method, message);
+        return;
+    }
+    std::unique_ptr<protocol::DictionaryValue> result = DictionaryValue::create();
+    if (response.status() == DispatchResponse::kSuccess) {
+        result->setValue("names", ValueConversions<protocol::Array<String>>::toValue(out_names.get()));
+    }
+    if (weak->get())
+        weak->get()->sendResponse(callId, response, std::move(result));
+    return;
+}
+
+void DispatcherImpl::queryObjects(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
+{
+    // Prepare input parameters.
+    protocol::DictionaryValue* object = DictionaryValue::cast(requestMessageObject->get("params"));
+    errors->push();
+    protocol::Value* prototypeObjectIdValue = object ? object->get("prototypeObjectId") : nullptr;
+    errors->setName("prototypeObjectId");
+    String in_prototypeObjectId = ValueConversions<String>::fromValue(prototypeObjectIdValue, errors);
+    protocol::Value* objectGroupValue = object ? object->get("objectGroup") : nullptr;
+    Maybe<String> in_objectGroup;
+    if (objectGroupValue) {
+        errors->setName("objectGroup");
+        in_objectGroup = ValueConversions<String>::fromValue(objectGroupValue, errors);
+    }
+    errors->pop();
+    if (errors->hasErrors()) {
+        reportProtocolError(callId, DispatchResponse::kInvalidParams, kInvalidParamsString, errors);
+        return;
+    }
+    // Declare output parameters.
+    std::unique_ptr<protocol::Runtime::RemoteObject> out_objects;
+
+    std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
+    DispatchResponse response = m_backend->queryObjects(in_prototypeObjectId, std::move(in_objectGroup), &out_objects);
+    if (response.status() == DispatchResponse::kFallThrough) {
+        channel()->fallThrough(callId, method, message);
+        return;
+    }
+    std::unique_ptr<protocol::DictionaryValue> result = DictionaryValue::create();
+    if (response.status() == DispatchResponse::kSuccess) {
+        result->setValue("objects", ValueConversions<protocol::Runtime::RemoteObject>::toValue(out_objects.get()));
+    }
+    if (weak->get())
+        weak->get()->sendResponse(callId, response, std::move(result));
+    return;
+}
+
+void DispatcherImpl::releaseObject(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
 {
     // Prepare input parameters.
     protocol::DictionaryValue* object = DictionaryValue::cast(requestMessageObject->get("params"));
@@ -1528,19 +1902,21 @@ DispatchResponse::Status DispatcherImpl::releaseObject(int callId, std::unique_p
     errors->pop();
     if (errors->hasErrors()) {
         reportProtocolError(callId, DispatchResponse::kInvalidParams, kInvalidParamsString, errors);
-        return DispatchResponse::kError;
+        return;
     }
 
     std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
     DispatchResponse response = m_backend->releaseObject(in_objectId);
-    if (response.status() == DispatchResponse::kFallThrough)
-        return response.status();
+    if (response.status() == DispatchResponse::kFallThrough) {
+        channel()->fallThrough(callId, method, message);
+        return;
+    }
     if (weak->get())
         weak->get()->sendResponse(callId, response);
-    return response.status();
+    return;
 }
 
-DispatchResponse::Status DispatcherImpl::releaseObjectGroup(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
+void DispatcherImpl::releaseObjectGroup(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
 {
     // Prepare input parameters.
     protocol::DictionaryValue* object = DictionaryValue::cast(requestMessageObject->get("params"));
@@ -1551,138 +1927,38 @@ DispatchResponse::Status DispatcherImpl::releaseObjectGroup(int callId, std::uni
     errors->pop();
     if (errors->hasErrors()) {
         reportProtocolError(callId, DispatchResponse::kInvalidParams, kInvalidParamsString, errors);
-        return DispatchResponse::kError;
+        return;
     }
 
     std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
     DispatchResponse response = m_backend->releaseObjectGroup(in_objectGroup);
-    if (response.status() == DispatchResponse::kFallThrough)
-        return response.status();
+    if (response.status() == DispatchResponse::kFallThrough) {
+        channel()->fallThrough(callId, method, message);
+        return;
+    }
     if (weak->get())
         weak->get()->sendResponse(callId, response);
-    return response.status();
+    return;
 }
 
-DispatchResponse::Status DispatcherImpl::runIfWaitingForDebugger(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
+void DispatcherImpl::runIfWaitingForDebugger(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
 {
 
     std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
     DispatchResponse response = m_backend->runIfWaitingForDebugger();
-    if (response.status() == DispatchResponse::kFallThrough)
-        return response.status();
-    if (weak->get())
-        weak->get()->sendResponse(callId, response);
-    return response.status();
-}
-
-DispatchResponse::Status DispatcherImpl::enable(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
-{
-
-    std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
-    DispatchResponse response = m_backend->enable();
-    if (response.status() == DispatchResponse::kFallThrough)
-        return response.status();
-    if (weak->get())
-        weak->get()->sendResponse(callId, response);
-    return response.status();
-}
-
-DispatchResponse::Status DispatcherImpl::disable(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
-{
-
-    std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
-    DispatchResponse response = m_backend->disable();
-    if (response.status() == DispatchResponse::kFallThrough)
-        return response.status();
-    if (weak->get())
-        weak->get()->sendResponse(callId, response);
-    return response.status();
-}
-
-DispatchResponse::Status DispatcherImpl::discardConsoleEntries(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
-{
-
-    std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
-    DispatchResponse response = m_backend->discardConsoleEntries();
-    if (response.status() == DispatchResponse::kFallThrough)
-        return response.status();
-    if (weak->get())
-        weak->get()->sendResponse(callId, response);
-    return response.status();
-}
-
-DispatchResponse::Status DispatcherImpl::setCustomObjectFormatterEnabled(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
-{
-    // Prepare input parameters.
-    protocol::DictionaryValue* object = DictionaryValue::cast(requestMessageObject->get("params"));
-    errors->push();
-    protocol::Value* enabledValue = object ? object->get("enabled") : nullptr;
-    errors->setName("enabled");
-    bool in_enabled = ValueConversions<bool>::fromValue(enabledValue, errors);
-    errors->pop();
-    if (errors->hasErrors()) {
-        reportProtocolError(callId, DispatchResponse::kInvalidParams, kInvalidParamsString, errors);
-        return DispatchResponse::kError;
-    }
-
-    std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
-    DispatchResponse response = m_backend->setCustomObjectFormatterEnabled(in_enabled);
-    if (response.status() == DispatchResponse::kFallThrough)
-        return response.status();
-    if (weak->get())
-        weak->get()->sendResponse(callId, response);
-    return response.status();
-}
-
-DispatchResponse::Status DispatcherImpl::compileScript(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
-{
-    // Prepare input parameters.
-    protocol::DictionaryValue* object = DictionaryValue::cast(requestMessageObject->get("params"));
-    errors->push();
-    protocol::Value* expressionValue = object ? object->get("expression") : nullptr;
-    errors->setName("expression");
-    String in_expression = ValueConversions<String>::fromValue(expressionValue, errors);
-    protocol::Value* sourceURLValue = object ? object->get("sourceURL") : nullptr;
-    errors->setName("sourceURL");
-    String in_sourceURL = ValueConversions<String>::fromValue(sourceURLValue, errors);
-    protocol::Value* persistScriptValue = object ? object->get("persistScript") : nullptr;
-    errors->setName("persistScript");
-    bool in_persistScript = ValueConversions<bool>::fromValue(persistScriptValue, errors);
-    protocol::Value* executionContextIdValue = object ? object->get("executionContextId") : nullptr;
-    Maybe<int> in_executionContextId;
-    if (executionContextIdValue) {
-        errors->setName("executionContextId");
-        in_executionContextId = ValueConversions<int>::fromValue(executionContextIdValue, errors);
-    }
-    errors->pop();
-    if (errors->hasErrors()) {
-        reportProtocolError(callId, DispatchResponse::kInvalidParams, kInvalidParamsString, errors);
-        return DispatchResponse::kError;
-    }
-    // Declare output parameters.
-    Maybe<String> out_scriptId;
-    Maybe<protocol::Runtime::ExceptionDetails> out_exceptionDetails;
-
-    std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
-    DispatchResponse response = m_backend->compileScript(in_expression, in_sourceURL, in_persistScript, std::move(in_executionContextId), &out_scriptId, &out_exceptionDetails);
-    if (response.status() == DispatchResponse::kFallThrough)
-        return response.status();
-    std::unique_ptr<protocol::DictionaryValue> result = DictionaryValue::create();
-    if (response.status() == DispatchResponse::kSuccess) {
-        if (out_scriptId.isJust())
-            result->setValue("scriptId", ValueConversions<String>::toValue(out_scriptId.fromJust()));
-        if (out_exceptionDetails.isJust())
-            result->setValue("exceptionDetails", ValueConversions<protocol::Runtime::ExceptionDetails>::toValue(out_exceptionDetails.fromJust()));
+    if (response.status() == DispatchResponse::kFallThrough) {
+        channel()->fallThrough(callId, method, message);
+        return;
     }
     if (weak->get())
-        weak->get()->sendResponse(callId, response, std::move(result));
-    return response.status();
+        weak->get()->sendResponse(callId, response);
+    return;
 }
 
 class RunScriptCallbackImpl : public Backend::RunScriptCallback, public DispatcherBase::Callback {
 public:
-    RunScriptCallbackImpl(std::unique_ptr<DispatcherBase::WeakPtr> backendImpl, int callId, int callbackId)
-        : DispatcherBase::Callback(std::move(backendImpl), callId, callbackId) { }
+    RunScriptCallbackImpl(std::unique_ptr<DispatcherBase::WeakPtr> backendImpl, int callId, const String& method, const String& message)
+        : DispatcherBase::Callback(std::move(backendImpl), callId, method, message) { }
 
     void sendSuccess(std::unique_ptr<protocol::Runtime::RemoteObject> result, Maybe<protocol::Runtime::ExceptionDetails> exceptionDetails) override
     {
@@ -1705,7 +1981,7 @@ public:
     }
 };
 
-DispatchResponse::Status DispatcherImpl::runScript(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
+void DispatcherImpl::runScript(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
 {
     // Prepare input parameters.
     protocol::DictionaryValue* object = DictionaryValue::cast(requestMessageObject->get("params"));
@@ -1758,19 +2034,139 @@ DispatchResponse::Status DispatcherImpl::runScript(int callId, std::unique_ptr<D
     errors->pop();
     if (errors->hasErrors()) {
         reportProtocolError(callId, DispatchResponse::kInvalidParams, kInvalidParamsString, errors);
-        return DispatchResponse::kError;
+        return;
     }
 
     std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
-    std::unique_ptr<RunScriptCallbackImpl> callback(new RunScriptCallbackImpl(weakPtr(), callId, nextCallbackId()));
+    std::unique_ptr<RunScriptCallbackImpl> callback(new RunScriptCallbackImpl(weakPtr(), callId, method, message));
     m_backend->runScript(in_scriptId, std::move(in_executionContextId), std::move(in_objectGroup), std::move(in_silent), std::move(in_includeCommandLineAPI), std::move(in_returnByValue), std::move(in_generatePreview), std::move(in_awaitPromise), std::move(callback));
-    return (weak->get() && weak->get()->lastCallbackFallThrough()) ? DispatchResponse::kFallThrough : DispatchResponse::kAsync;
+    return;
+}
+
+void DispatcherImpl::setCustomObjectFormatterEnabled(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
+{
+    // Prepare input parameters.
+    protocol::DictionaryValue* object = DictionaryValue::cast(requestMessageObject->get("params"));
+    errors->push();
+    protocol::Value* enabledValue = object ? object->get("enabled") : nullptr;
+    errors->setName("enabled");
+    bool in_enabled = ValueConversions<bool>::fromValue(enabledValue, errors);
+    errors->pop();
+    if (errors->hasErrors()) {
+        reportProtocolError(callId, DispatchResponse::kInvalidParams, kInvalidParamsString, errors);
+        return;
+    }
+
+    std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
+    DispatchResponse response = m_backend->setCustomObjectFormatterEnabled(in_enabled);
+    if (response.status() == DispatchResponse::kFallThrough) {
+        channel()->fallThrough(callId, method, message);
+        return;
+    }
+    if (weak->get())
+        weak->get()->sendResponse(callId, response);
+    return;
+}
+
+void DispatcherImpl::setMaxCallStackSizeToCapture(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
+{
+    // Prepare input parameters.
+    protocol::DictionaryValue* object = DictionaryValue::cast(requestMessageObject->get("params"));
+    errors->push();
+    protocol::Value* sizeValue = object ? object->get("size") : nullptr;
+    errors->setName("size");
+    int in_size = ValueConversions<int>::fromValue(sizeValue, errors);
+    errors->pop();
+    if (errors->hasErrors()) {
+        reportProtocolError(callId, DispatchResponse::kInvalidParams, kInvalidParamsString, errors);
+        return;
+    }
+
+    std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
+    DispatchResponse response = m_backend->setMaxCallStackSizeToCapture(in_size);
+    if (response.status() == DispatchResponse::kFallThrough) {
+        channel()->fallThrough(callId, method, message);
+        return;
+    }
+    if (weak->get())
+        weak->get()->sendResponse(callId, response);
+    return;
+}
+
+void DispatcherImpl::terminateExecution(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
+{
+
+    std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
+    DispatchResponse response = m_backend->terminateExecution();
+    if (response.status() == DispatchResponse::kFallThrough) {
+        channel()->fallThrough(callId, method, message);
+        return;
+    }
+    if (weak->get())
+        weak->get()->sendResponse(callId, response);
+    return;
+}
+
+void DispatcherImpl::addBinding(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
+{
+    // Prepare input parameters.
+    protocol::DictionaryValue* object = DictionaryValue::cast(requestMessageObject->get("params"));
+    errors->push();
+    protocol::Value* nameValue = object ? object->get("name") : nullptr;
+    errors->setName("name");
+    String in_name = ValueConversions<String>::fromValue(nameValue, errors);
+    protocol::Value* executionContextIdValue = object ? object->get("executionContextId") : nullptr;
+    Maybe<int> in_executionContextId;
+    if (executionContextIdValue) {
+        errors->setName("executionContextId");
+        in_executionContextId = ValueConversions<int>::fromValue(executionContextIdValue, errors);
+    }
+    errors->pop();
+    if (errors->hasErrors()) {
+        reportProtocolError(callId, DispatchResponse::kInvalidParams, kInvalidParamsString, errors);
+        return;
+    }
+
+    std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
+    DispatchResponse response = m_backend->addBinding(in_name, std::move(in_executionContextId));
+    if (response.status() == DispatchResponse::kFallThrough) {
+        channel()->fallThrough(callId, method, message);
+        return;
+    }
+    if (weak->get())
+        weak->get()->sendResponse(callId, response);
+    return;
+}
+
+void DispatcherImpl::removeBinding(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
+{
+    // Prepare input parameters.
+    protocol::DictionaryValue* object = DictionaryValue::cast(requestMessageObject->get("params"));
+    errors->push();
+    protocol::Value* nameValue = object ? object->get("name") : nullptr;
+    errors->setName("name");
+    String in_name = ValueConversions<String>::fromValue(nameValue, errors);
+    errors->pop();
+    if (errors->hasErrors()) {
+        reportProtocolError(callId, DispatchResponse::kInvalidParams, kInvalidParamsString, errors);
+        return;
+    }
+
+    std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
+    DispatchResponse response = m_backend->removeBinding(in_name);
+    if (response.status() == DispatchResponse::kFallThrough) {
+        channel()->fallThrough(callId, method, message);
+        return;
+    }
+    if (weak->get())
+        weak->get()->sendResponse(callId, response);
+    return;
 }
 
 // static
 void Dispatcher::wire(UberDispatcher* uber, Backend* backend)
 {
-    std::unique_ptr<DispatcherImpl> dispatcher(new DispatcherImpl(uber->channel(), backend, uber->fallThroughForNotFound()));
+    std::unique_ptr<DispatcherImpl> dispatcher(new DispatcherImpl(uber->channel(), backend));
     uber->setupRedirects(dispatcher->redirects());
     uber->registerBackend("Runtime", std::move(dispatcher));
 }

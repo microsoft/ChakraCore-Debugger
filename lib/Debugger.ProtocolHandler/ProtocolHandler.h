@@ -44,6 +44,7 @@ namespace JsDebug
         // protocol::FrontendChannel implementation
         void sendProtocolResponse(int callId, std::unique_ptr<protocol::Serializable> message) override;
         void sendProtocolNotification(std::unique_ptr<protocol::Serializable> message) override;
+        void fallThrough(int callId, const protocol::String& method, const protocol::String& message) override;
         void flushProtocolNotifications() override;
 
     private:

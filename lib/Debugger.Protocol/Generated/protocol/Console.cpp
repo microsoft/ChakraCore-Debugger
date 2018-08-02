@@ -16,7 +16,7 @@ namespace Console {
 
 const char Metainfo::domainName[] = "Console";
 const char Metainfo::commandPrefix[] = "Console.";
-const char Metainfo::version[] = "1.2";
+const char Metainfo::version[] = "1.3";
 
 const char* ConsoleMessage::SourceEnum::Xml = "xml";
 const char* ConsoleMessage::SourceEnum::Javascript = "javascript";
@@ -158,87 +158,90 @@ void Frontend::sendRawNotification(const String& notification)
 
 class DispatcherImpl : public protocol::DispatcherBase {
 public:
-    DispatcherImpl(FrontendChannel* frontendChannel, Backend* backend, bool fallThroughForNotFound)
+    DispatcherImpl(FrontendChannel* frontendChannel, Backend* backend)
         : DispatcherBase(frontendChannel)
-        , m_backend(backend)
-        , m_fallThroughForNotFound(fallThroughForNotFound) {
-        m_dispatchMap["Console.enable"] = &DispatcherImpl::enable;
-        m_dispatchMap["Console.disable"] = &DispatcherImpl::disable;
+        , m_backend(backend) {
         m_dispatchMap["Console.clearMessages"] = &DispatcherImpl::clearMessages;
+        m_dispatchMap["Console.disable"] = &DispatcherImpl::disable;
+        m_dispatchMap["Console.enable"] = &DispatcherImpl::enable;
     }
     ~DispatcherImpl() override { }
-    DispatchResponse::Status dispatch(int callId, const String& method, std::unique_ptr<protocol::DictionaryValue> messageObject) override;
-    HashMap<String, String>& redirects() { return m_redirects; }
+    bool canDispatch(const String& method) override;
+    void dispatch(int callId, const String& method, const String& message, std::unique_ptr<protocol::DictionaryValue> messageObject) override;
+    std::unordered_map<String, String>& redirects() { return m_redirects; }
 
 protected:
-    using CallHandler = DispatchResponse::Status (DispatcherImpl::*)(int callId, std::unique_ptr<DictionaryValue> messageObject, ErrorSupport* errors);
-    using DispatchMap = protocol::HashMap<String, CallHandler>;
+    using CallHandler = void (DispatcherImpl::*)(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> messageObject, ErrorSupport* errors);
+    using DispatchMap = std::unordered_map<String, CallHandler>;
     DispatchMap m_dispatchMap;
-    HashMap<String, String> m_redirects;
+    std::unordered_map<String, String> m_redirects;
 
-    DispatchResponse::Status enable(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
-    DispatchResponse::Status disable(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
-    DispatchResponse::Status clearMessages(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
+    void clearMessages(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
+    void disable(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
+    void enable(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport*);
 
     Backend* m_backend;
-    bool m_fallThroughForNotFound;
 };
 
-DispatchResponse::Status DispatcherImpl::dispatch(int callId, const String& method, std::unique_ptr<protocol::DictionaryValue> messageObject)
-{
-    protocol::HashMap<String, CallHandler>::iterator it = m_dispatchMap.find(method);
-    if (it == m_dispatchMap.end()) {
-        if (m_fallThroughForNotFound)
-            return DispatchResponse::kFallThrough;
-        reportProtocolError(callId, DispatchResponse::kMethodNotFound, "'" + method + "' wasn't found", nullptr);
-        return DispatchResponse::kError;
-    }
+bool DispatcherImpl::canDispatch(const String& method) {
+    return m_dispatchMap.find(method) != m_dispatchMap.end();
+}
 
+void DispatcherImpl::dispatch(int callId, const String& method, const String& message, std::unique_ptr<protocol::DictionaryValue> messageObject)
+{
+    std::unordered_map<String, CallHandler>::iterator it = m_dispatchMap.find(method);
+    DCHECK(it != m_dispatchMap.end());
     protocol::ErrorSupport errors;
-    return (this->*(it->second))(callId, std::move(messageObject), &errors);
+    (this->*(it->second))(callId, method, message, std::move(messageObject), &errors);
 }
 
 
-DispatchResponse::Status DispatcherImpl::enable(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
-{
-
-    std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
-    DispatchResponse response = m_backend->enable();
-    if (response.status() == DispatchResponse::kFallThrough)
-        return response.status();
-    if (weak->get())
-        weak->get()->sendResponse(callId, response);
-    return response.status();
-}
-
-DispatchResponse::Status DispatcherImpl::disable(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
-{
-
-    std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
-    DispatchResponse response = m_backend->disable();
-    if (response.status() == DispatchResponse::kFallThrough)
-        return response.status();
-    if (weak->get())
-        weak->get()->sendResponse(callId, response);
-    return response.status();
-}
-
-DispatchResponse::Status DispatcherImpl::clearMessages(int callId, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
+void DispatcherImpl::clearMessages(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
 {
 
     std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
     DispatchResponse response = m_backend->clearMessages();
-    if (response.status() == DispatchResponse::kFallThrough)
-        return response.status();
+    if (response.status() == DispatchResponse::kFallThrough) {
+        channel()->fallThrough(callId, method, message);
+        return;
+    }
     if (weak->get())
         weak->get()->sendResponse(callId, response);
-    return response.status();
+    return;
+}
+
+void DispatcherImpl::disable(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
+{
+
+    std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
+    DispatchResponse response = m_backend->disable();
+    if (response.status() == DispatchResponse::kFallThrough) {
+        channel()->fallThrough(callId, method, message);
+        return;
+    }
+    if (weak->get())
+        weak->get()->sendResponse(callId, response);
+    return;
+}
+
+void DispatcherImpl::enable(int callId, const String& method, const String& message, std::unique_ptr<DictionaryValue> requestMessageObject, ErrorSupport* errors)
+{
+
+    std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
+    DispatchResponse response = m_backend->enable();
+    if (response.status() == DispatchResponse::kFallThrough) {
+        channel()->fallThrough(callId, method, message);
+        return;
+    }
+    if (weak->get())
+        weak->get()->sendResponse(callId, response);
+    return;
 }
 
 // static
 void Dispatcher::wire(UberDispatcher* uber, Backend* backend)
 {
-    std::unique_ptr<DispatcherImpl> dispatcher(new DispatcherImpl(uber->channel(), backend, uber->fallThroughForNotFound()));
+    std::unique_ptr<DispatcherImpl> dispatcher(new DispatcherImpl(uber->channel(), backend));
     uber->setupRedirects(dispatcher->redirects());
     uber->registerBackend("Console", std::move(dispatcher));
 }

@@ -21,6 +21,7 @@ namespace JsDebug
     using protocol::Runtime::ExceptionDetails;
     using protocol::Runtime::InternalPropertyDescriptor;
     using protocol::Runtime::PropertyDescriptor;
+    using protocol::Runtime::RemoteObject;
     using protocol::String;
     using protocol::StringUtil;
     using protocol::Value;
@@ -54,6 +55,8 @@ namespace JsDebug
         Maybe<bool> /*in_generatePreview*/,
         Maybe<bool> /*in_userGesture*/,
         Maybe<bool> /*in_awaitPromise*/,
+        Maybe<bool> /*in_throwOnSideEffect*/,
+        Maybe<double> /*in_timeout*/,
         std::unique_ptr<EvaluateCallback> callback)
     {
         callback->sendFailure(Response::Error(c_ErrorNotImplemented));
@@ -69,14 +72,16 @@ namespace JsDebug
     }
 
     void RuntimeImpl::callFunctionOn(
-        const String& /*in_objectId*/,
         const String& /*in_functionDeclaration*/,
+        Maybe<String> /*in_objectId*/,
         Maybe<Array<CallArgument>> /*in_arguments*/,
         Maybe<bool> /*in_silent*/,
         Maybe<bool> /*in_returnByValue*/,
         Maybe<bool> /*in_generatePreview*/,
         Maybe<bool> /*in_userGesture*/,
         Maybe<bool> /*in_awaitPromise*/,
+        Maybe<int> /*in_executionContextId*/,
+        Maybe<String> /*in_objectGroup*/,
         std::unique_ptr<CallFunctionOnCallback> callback)
     {
         callback->sendFailure(Response::Error(c_ErrorNotImplemented));
@@ -218,6 +223,51 @@ namespace JsDebug
         std::unique_ptr<RunScriptCallback> callback)
     {
         callback->sendFailure(Response::Error(c_ErrorNotImplemented));
+    }
+
+    Response RuntimeImpl::getIsolateId(String* /*out_id*/)
+    {
+        return Response::Error(c_ErrorNotImplemented);
+    }
+
+    Response RuntimeImpl::getHeapUsage(double* /*out_usedSize*/, double* /*out_totalSize*/)
+    {
+        return Response::Error(c_ErrorNotImplemented);
+    }
+
+    Response RuntimeImpl::globalLexicalScopeNames(
+        Maybe<int> /*in_executionContextId*/,
+        std::unique_ptr<Array<String>>* /*out_names*/)
+    {
+        return Response::Error(c_ErrorNotImplemented);
+    }
+
+    Response RuntimeImpl::queryObjects(
+        const String& /*in_prototypeObjectId*/,
+        Maybe<String> /*in_objectGroup*/,
+        std::unique_ptr<RemoteObject>* /*out_objects*/)
+    {
+        return Response::Error(c_ErrorNotImplemented);
+    }
+
+    Response RuntimeImpl::terminateExecution()
+    {
+        return Response::Error(c_ErrorNotImplemented);
+    }
+
+    Response RuntimeImpl::setMaxCallStackSizeToCapture(int /*in_size*/)
+    {
+        return Response::Error(c_ErrorNotImplemented);
+    }
+
+    protocol::Response RuntimeImpl::addBinding(const String& /*in_name*/, Maybe<int> /*in_executionContextId*/)
+    {
+        return Response::Error(c_ErrorNotImplemented);
+    }
+
+    protocol::Response RuntimeImpl::removeBinding(const String& /*in_name*/)
+    {
+        return Response::Error(c_ErrorNotImplemented);
     }
 
     bool RuntimeImpl::IsEnabled()
