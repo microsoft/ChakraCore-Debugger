@@ -307,12 +307,8 @@ namespace JsDebug
 
     void Debugger::ClearBreakpoints()
     {
-        // Work around an issue where getting breakpoints requires a current context.
-        JsContextRef currentContext = JS_INVALID_REFERENCE;
-        if (JsGetCurrentContext(&currentContext) != JsNoError || currentContext == JS_INVALID_REFERENCE)
-        {
-            return;
-        }
+        // Ensure that there's an active context before trying to remove breakpoints.
+        DebuggerContext::Scope debuggerScope(m_debugContext);
 
         JsValueRef breakpoints = JS_INVALID_REFERENCE;
         if (JsDiagGetBreakpoints(&breakpoints) == JsNoError)
