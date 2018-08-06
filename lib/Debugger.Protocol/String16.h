@@ -39,7 +39,7 @@ namespace JsDebug
         bool empty() const;
         size_t hash() const;
 
-        size_t find(String16 str) const;
+        size_t find(const String16& str) const;
         String16 substring(size_t pos, size_t len) const;
 
         std::string toAscii() const;

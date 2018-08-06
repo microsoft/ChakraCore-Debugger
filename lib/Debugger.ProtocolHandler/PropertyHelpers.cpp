@@ -7,7 +7,7 @@
 
 namespace JsDebug
 {
-    namespace
+    namespace 
     {
         inline bool IsUndefined(JsValueRef object)
         {
