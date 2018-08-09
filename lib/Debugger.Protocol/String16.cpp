@@ -111,7 +111,7 @@ namespace JsDebug
         return hash(m_impl);
     }
 
-    size_t String16::find(String16 str) const
+    size_t String16::find(const String16& str) const
     {
         return m_impl.find(str.m_impl);
     }
