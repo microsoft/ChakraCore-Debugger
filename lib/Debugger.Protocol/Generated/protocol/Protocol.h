@@ -561,7 +561,7 @@ public:
     MaybeBase() : m_isJust(false) { }
     MaybeBase(T value) : m_isJust(true), m_value(value) { }
     MaybeBase(MaybeBase&& other) : m_isJust(other.m_isJust), m_value(std::move(other.m_value)) { }
-    void operator=(const T& value) { m_value = value; m_isJust = true; }
+    void operator=(T value) { m_value = value; m_isJust = true; }
     T fromJust() const { DCHECK(m_isJust); return m_value; }
     T fromMaybe(const T& defaultValue) const { return m_isJust ? m_value : defaultValue; }
     bool isJust() const { return m_isJust; }
