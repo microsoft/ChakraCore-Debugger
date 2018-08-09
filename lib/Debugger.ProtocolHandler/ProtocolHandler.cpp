@@ -183,7 +183,7 @@ namespace JsDebug
         } while (m_waitingForDebugger || !current.empty());
     }
 
-    void ProtocolHandler::EnqueueCommand(ProtocolHandler::CommandType type, std::string const& message)
+    void ProtocolHandler::EnqueueCommand(ProtocolHandler::CommandType type, const std::string& message)
     {
         m_commandQueue.emplace_back(type, message);
         m_commandWaiting.notify_all();

@@ -56,7 +56,7 @@ namespace JsDebug
         };
 
         void SendResponse(const char* response);
-        void EnqueueCommand(CommandType type, std::string const& message = "");
+        void EnqueueCommand(CommandType type, const std::string& message = "");
         void HandleConnect();
         void HandleDisconnect();
         void HandleMessageReceived(const std::string& message);
