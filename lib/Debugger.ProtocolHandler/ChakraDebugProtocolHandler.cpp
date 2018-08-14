@@ -77,3 +77,26 @@ CHAKRA_API JsDebugProtocolHandlerWaitForDebugger(JsDebugProtocolHandler protocol
             instance->WaitForDebugger();
         });
 }
+
+CHAKRA_API JsDebugProtocolHandlerProcessCommandQueue(JsDebugProtocolHandler protocolHandler)
+{
+    return JsDebug::TranslateExceptionToJsErrorCode<JsDebug::ProtocolHandler*>(
+        protocolHandler,
+        [&](JsDebug::ProtocolHandler* instance) -> void
+        {
+            instance->ProcessCommandQueue();
+        });
+}
+
+CHAKRA_API JsDebugProtocolHandlerSetCommandQueueCallback(
+    JsDebugProtocolHandler protocolHandler,
+    JsDebugProtocolHandlerCommandQueueCallback callback,
+    void* callbackState)
+{
+    return JsDebug::TranslateExceptionToJsErrorCode<JsDebug::ProtocolHandler*>(
+        protocolHandler,
+        [&](JsDebug::ProtocolHandler* instance) -> void
+        {
+            instance->SetCommandQueueCallback(callback, callbackState);
+        });
+}
