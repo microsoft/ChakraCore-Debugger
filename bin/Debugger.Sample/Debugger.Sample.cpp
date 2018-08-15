@@ -95,66 +95,31 @@ public:
 unsigned currentSourceContext = 0;
 
 //
-// This "throws" an exception in the Chakra space. Useful routine for callbacks
-// that need to throw a JS error to indicate failure.
-//
-void ThrowJsError(std::wstring errorString)
-{
-    // We ignore error since we're already in an error state.
-    JsValueRef errorValue = JS_INVALID_REFERENCE;
-    JsValueRef errorObject = JS_INVALID_REFERENCE;
-    JsPointerToString(errorString.c_str(), errorString.length(), &errorValue);
-    JsCreateError(errorValue, &errorObject);
-    JsSetException(errorObject);
-}
-
-//
 // Helper to load a script from disk.
 //
 std::wstring LoadScript(const wchar_t* filename)
 {
-    FILE* file;
-    if (_wfopen_s(&file, filename, L"rb"))
+    std::ifstream ifs(filename, std::ifstream::in | std::ifstream::binary);
+
+    if (!ifs.good())
     {
         fwprintf(stderr, L"chakrahost: unable to open file: %s.\n", filename);
         return std::wstring();
     }
 
-    unsigned int current = ftell(file);
-    fseek(file, 0, SEEK_END);
-    unsigned int end = ftell(file);
-    fseek(file, current, SEEK_SET);
-    unsigned int lengthBytes = end - current;
-    char* rawBytes = (char*)calloc(lengthBytes + 1, sizeof(char));
+    std::vector<char> rawBytes(
+        (std::istreambuf_iterator<char>(ifs)),
+        std::istreambuf_iterator<char>());
 
-    if (rawBytes == nullptr)
+    std::vector<wchar_t> contents(rawBytes.size());
+
+    if (MultiByteToWideChar(CP_UTF8, 0, rawBytes.data(), static_cast<int>(rawBytes.size()), contents.data(), static_cast<int>(contents.size())) == 0)
     {
         fwprintf(stderr, L"chakrahost: fatal error.\n");
         return std::wstring();
     }
 
-    fread((void*)rawBytes, sizeof(char), lengthBytes, file);
-
-    wchar_t* contents = (wchar_t*)calloc(lengthBytes + 1, sizeof(wchar_t));
-    if (contents == nullptr)
-    {
-        free(rawBytes);
-        fwprintf(stderr, L"chakrahost: fatal error.\n");
-        return std::wstring();
-    }
-
-    if (MultiByteToWideChar(CP_UTF8, 0, rawBytes, lengthBytes + 1, contents, lengthBytes + 1) == 0)
-    {
-        free(rawBytes);
-        free(contents);
-        fwprintf(stderr, L"chakrahost: fatal error.\n");
-        return std::wstring();
-    }
-
-    std::wstring result = contents;
-    free(rawBytes);
-    free(contents);
-    return result;
+    return std::wstring(begin(contents), end(contents));
 }
 
 JsErrorCode RunScript(const wchar_t* filename, JsValueRef* result)
