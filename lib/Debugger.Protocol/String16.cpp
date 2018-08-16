@@ -5,6 +5,12 @@
 
 #include <sstream>
 
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
+#endif
+
+#include <Windows.h>
+
 //
 // This file contains interfaces required by the `inspector_protocol` generated code.
 //
@@ -119,6 +125,79 @@ namespace JsDebug
     String16 String16::substring(size_t pos, size_t len) const
     {
         return String16(m_impl.substr(pos, len));
+    }
+
+    std::string String16::toUtf8() const
+    {
+        if (m_impl.length() == 0)
+        {
+            return std::string();
+        }
+
+        static_assert(sizeof(wchar_t) == sizeof(UChar));
+
+        int requiredLength = WideCharToMultiByte(
+            CP_UTF8, 
+            0, 
+            reinterpret_cast<const wchar_t*>(m_impl.data()), 
+            static_cast<int>(m_impl.size()), 
+            nullptr, 
+            0, 
+            nullptr, 
+            nullptr);
+
+        if (requiredLength <= 0)
+        {
+            return std::string();
+        }
+
+        std::vector<char> utf8Chars(requiredLength);
+
+        if (WideCharToMultiByte(
+                CP_UTF8, 
+                0, 
+                reinterpret_cast<const wchar_t*>(m_impl.data()), 
+                static_cast<int>(m_impl.size()), 
+                utf8Chars.data(), 
+                static_cast<int>(utf8Chars.size()), 
+                nullptr, 
+                nullptr) == 0)
+        {
+            return std::string();
+        }
+
+        return std::string(begin(utf8Chars), end(utf8Chars));
+    }
+
+    String16 String16::fromUtf8(const char* str, size_t length)
+    {
+        if (length == 0)
+        {
+            return String16();
+        }
+
+        int requiredLength = MultiByteToWideChar(CP_UTF8, 0, str, static_cast<int>(length), nullptr, 0);
+
+        if (requiredLength <= 0)
+        {
+            return String16();
+        }
+
+        std::vector<wchar_t> utf16Chars(requiredLength);
+
+        if (MultiByteToWideChar(
+                CP_UTF8, 
+                0, 
+                str, 
+                static_cast<int>(length), 
+                utf16Chars.data(), 
+                static_cast<int>(utf16Chars.size())) == 0)
+        {
+            return String16();
+        }
+
+        static_assert(sizeof(wchar_t) == sizeof(UChar));
+        return String16(reinterpret_cast<UChar*>(utf16Chars.data()), utf16Chars.size());
     }
 
     std::string String16::toAscii() const

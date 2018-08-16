@@ -125,16 +125,16 @@ namespace JsDebug
     void ProtocolHandler::sendProtocolNotification(std::unique_ptr<Serializable> message)
     {
         protocol::String str = message->serialize();
-        std::string asciiStr = str.toAscii();
-        const char* response = asciiStr.c_str();
 
 #ifdef _DEBUG
+        static_assert(sizeof(wchar_t) == sizeof(uint16_t));
         OutputDebugStringA("{\"type\":\"response\",\"payload\":");
-        OutputDebugStringA(response);
+        OutputDebugStringW(reinterpret_cast<const wchar_t*>(str.characters16()));
         OutputDebugStringA("},\r\n");
 #endif
 
-        SendResponse(response);
+        std::string utf8Str = str.toUtf8();
+        SendResponse(utf8Str.c_str());
     }
 
     void ProtocolHandler::flushProtocolNotifications()
@@ -242,8 +242,7 @@ namespace JsDebug
 
     void ProtocolHandler::HandleMessageReceived(const std::string& message)
     {
-        m_dispatcher.dispatch(protocol::parseJSONCharacters(
-            reinterpret_cast<const uint8_t*>(message.c_str()),
-            static_cast<unsigned int>(message.length())));
+        protocol::String messageStr = protocol::String::fromUtf8(message.c_str(), message.length());
+        m_dispatcher.dispatch(protocol::StringUtil::parseJSON(messageStr));
     }
 }
