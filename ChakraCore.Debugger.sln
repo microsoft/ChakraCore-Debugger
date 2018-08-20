@@ -31,14 +31,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{F0BB2163
 		NuGet\Microsoft.ChakraCore.Debugger.targets = NuGet\Microsoft.ChakraCore.Debugger.targets
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{AAF5848E-B8BE-4A5F-96B5-39AEAFFB66DC}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChakraCore.Debugger.UnitTests", "test\Debugger.UnitTests\ChakraCore.Debugger.UnitTests.vcxproj", "{31A9E08C-8DCA-4B59-B79F-E3CB686495EA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM = Debug|ARM
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
-		Debug|ARM = Debug|ARM
+		Release|ARM = Release|ARM
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
-		Release|ARM = Release|ARM
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{AC43259C-97CB-43C1-9B56-983CA31ED5D2}.Debug|ARM.ActiveCfg = Debug|ARM
@@ -89,6 +93,18 @@ Global
 		{D9714E79-129C-4ED7-BEBE-7F2E8DC4E2A5}.Release|x64.Build.0 = Release|x64
 		{D9714E79-129C-4ED7-BEBE-7F2E8DC4E2A5}.Release|x86.ActiveCfg = Release|Win32
 		{D9714E79-129C-4ED7-BEBE-7F2E8DC4E2A5}.Release|x86.Build.0 = Release|Win32
+		{31A9E08C-8DCA-4B59-B79F-E3CB686495EA}.Debug|ARM.ActiveCfg = Debug|ARM
+		{31A9E08C-8DCA-4B59-B79F-E3CB686495EA}.Debug|ARM.Build.0 = Debug|ARM
+		{31A9E08C-8DCA-4B59-B79F-E3CB686495EA}.Debug|x64.ActiveCfg = Debug|x64
+		{31A9E08C-8DCA-4B59-B79F-E3CB686495EA}.Debug|x64.Build.0 = Debug|x64
+		{31A9E08C-8DCA-4B59-B79F-E3CB686495EA}.Debug|x86.ActiveCfg = Debug|Win32
+		{31A9E08C-8DCA-4B59-B79F-E3CB686495EA}.Debug|x86.Build.0 = Debug|Win32
+		{31A9E08C-8DCA-4B59-B79F-E3CB686495EA}.Release|ARM.ActiveCfg = Release|ARM
+		{31A9E08C-8DCA-4B59-B79F-E3CB686495EA}.Release|ARM.Build.0 = Release|ARM
+		{31A9E08C-8DCA-4B59-B79F-E3CB686495EA}.Release|x64.ActiveCfg = Release|x64
+		{31A9E08C-8DCA-4B59-B79F-E3CB686495EA}.Release|x64.Build.0 = Release|x64
+		{31A9E08C-8DCA-4B59-B79F-E3CB686495EA}.Release|x86.ActiveCfg = Release|Win32
+		{31A9E08C-8DCA-4B59-B79F-E3CB686495EA}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -98,6 +114,7 @@ Global
 		{00DCEE8F-721A-4C93-89CB-F5A79E387912} = {2ACDA3C4-5AD5-4ABB-AB69-2530AC403613}
 		{FD3AAF0F-CCF2-4D7B-AF34-1AD7D87944DC} = {5D5A0A19-B133-49F3-9ABB-A0943D81BF45}
 		{D9714E79-129C-4ED7-BEBE-7F2E8DC4E2A5} = {2ACDA3C4-5AD5-4ABB-AB69-2530AC403613}
+		{31A9E08C-8DCA-4B59-B79F-E3CB686495EA} = {AAF5848E-B8BE-4A5F-96B5-39AEAFFB66DC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3A8402B2-70BA-4536-A879-04BB703D3D34}

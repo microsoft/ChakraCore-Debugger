@@ -12,7 +12,10 @@ namespace JsDebug
 
     namespace
     {
+        const char c_ErrorCallbackRequired[] = "'callback' is required";
+        const char c_ErrorCommandRequired[] = "'command' is required";
         const char c_ErrorHandlerAlreadyConnected[] = "Handler is already connected";
+        const char c_ErrorNoHandlerConnected[] = "No handler is currently connected";
     }
 
     ProtocolHandler::ProtocolHandler(JsRuntimeHandle runtime)
@@ -35,6 +38,11 @@ namespace JsDebug
         ProtocolHandlerSendResponseCallback callback,
         void* callbackState)
     {
+        if (callback == nullptr)
+        {
+            throw JsErrorException(JsErrorInvalidArgument, c_ErrorCallbackRequired);
+        }
+
         {
             std::unique_lock<std::mutex> lock(m_lock);
 
@@ -58,6 +66,11 @@ namespace JsDebug
         {
             std::unique_lock<std::mutex> lock(m_lock);
 
+            if (m_callback == nullptr)
+            {
+                throw std::runtime_error(c_ErrorNoHandlerConnected);
+            }
+
             m_callback = nullptr;
             m_callbackState = nullptr;
             m_breakOnNextLine = false;
@@ -70,6 +83,11 @@ namespace JsDebug
 
     void ProtocolHandler::SendCommand(const char* command)
     {
+        if (command == nullptr)
+        {
+            throw JsErrorException(JsErrorInvalidArgument, c_ErrorCommandRequired);
+        }
+
 #ifdef _DEBUG
         OutputDebugStringA("{\"type\":\"request\",\"payload\":");
         OutputDebugStringA(command);

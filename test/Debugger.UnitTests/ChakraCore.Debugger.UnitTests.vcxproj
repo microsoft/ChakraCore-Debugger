@@ -27,8 +27,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{FD3AAF0F-CCF2-4D7B-AF34-1AD7D87944DC}</ProjectGuid>
-    <RootNamespace>DebugSample</RootNamespace>
+    <ProjectGuid>{31A9E08C-8DCA-4B59-B79F-E3CB686495EA}</ProjectGuid>
+    <RootNamespace>DebugUnitTests</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -48,21 +48,18 @@
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PreprocessorDefinitions>_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)lib\Debugger.ProtocolHandler;$(SolutionDir)lib\Debugger.Service;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)lib\Debugger.ProtocolHandler;$(DepsDirectoryPath)Catch2\single_include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="DebugProtocolHandler.h" />
-    <ClInclude Include="DebugService.h" />
-    <ClInclude Include="ErrorHelpers.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Debugger.Sample.cpp" />
+    <ClCompile Include="ProtocolHandler.UnitTests.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
@@ -71,34 +68,18 @@
     <ProjectReference Include="..\..\lib\Debugger.ProtocolHandler\ChakraCore.Debugger.ProtocolHandler.vcxproj">
       <Project>{ac43259c-97cb-43c1-9b56-983ca31ed5d2}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\lib\Debugger.Protocol\ChakraCore.Debugger.Protocol.vcxproj">
-      <Project>{d9714e79-129c-4ed7-bebe-7f2e8dc4e2a5}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\lib\Debugger.Service\ChakraCore.Debugger.Service.vcxproj">
-      <Project>{00dcee8f-721a-4c93-89cb-f5a79e387912}</Project>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="test.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <DeploymentContent>true</DeploymentContent>
-    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\..\packages\Microsoft.ChakraCore.vc140.1.10.2\build\native\Microsoft.ChakraCore.vc140.targets" Condition="Exists('..\..\packages\Microsoft.ChakraCore.vc140.1.10.2\build\native\Microsoft.ChakraCore.vc140.targets')" />
-    <Import Project="..\..\packages\boost.1.66.0.0\build\native\boost.targets" Condition="Exists('..\..\packages\boost.1.66.0.0\build\native\boost.targets')" />
-    <Import Project="..\..\packages\boost_date_time-vc141.1.66.0.0\build\native\boost_date_time-vc141.targets" Condition="Exists('..\..\packages\boost_date_time-vc141.1.66.0.0\build\native\boost_date_time-vc141.targets')" />
-    <Import Project="..\..\packages\boost_system-vc141.1.66.0.0\build\native\boost_system-vc141.targets" Condition="Exists('..\..\packages\boost_system-vc141.1.66.0.0\build\native\boost_system-vc141.targets')" />
+    <Import Project="..\..\packages\Microsoft.ChakraCore.vc140.1.10.1\build\native\Microsoft.ChakraCore.vc140.targets" Condition="Exists('..\..\packages\Microsoft.ChakraCore.vc140.1.10.1\build\native\Microsoft.ChakraCore.vc140.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\..\packages\Microsoft.ChakraCore.vc140.1.10.2\build\native\Microsoft.ChakraCore.vc140.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.ChakraCore.vc140.1.10.2\build\native\Microsoft.ChakraCore.vc140.targets'))" />
-    <Error Condition="!Exists('..\..\packages\boost.1.66.0.0\build\native\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\boost.1.66.0.0\build\native\boost.targets'))" />
-    <Error Condition="!Exists('..\..\packages\boost_date_time-vc141.1.66.0.0\build\native\boost_date_time-vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\boost_date_time-vc141.1.66.0.0\build\native\boost_date_time-vc141.targets'))" />
-    <Error Condition="!Exists('..\..\packages\boost_system-vc141.1.66.0.0\build\native\boost_system-vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\boost_system-vc141.1.66.0.0\build\native\boost_system-vc141.targets'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.ChakraCore.vc140.1.10.1\build\native\Microsoft.ChakraCore.vc140.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.ChakraCore.vc140.1.10.1\build\native\Microsoft.ChakraCore.vc140.targets'))" />
   </Target>
 </Project>
