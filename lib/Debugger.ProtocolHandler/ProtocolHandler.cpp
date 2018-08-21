@@ -15,6 +15,7 @@ namespace JsDebug
         const char c_ErrorCallbackRequired[] = "'callback' is required";
         const char c_ErrorCommandRequired[] = "'command' is required";
         const char c_ErrorHandlerAlreadyConnected[] = "Handler is already connected";
+        const char c_ErrorInvalidCallbackState[] = "'callbackState' can only be provided with a valid callback";
         const char c_ErrorNoHandlerConnected[] = "No handler is currently connected";
     }
 
@@ -281,6 +282,11 @@ namespace JsDebug
 
     void ProtocolHandler::SetCommandQueueCallback(ProtocolHandlerCommandQueueCallback callback, void* callbackState)
     {
+        if (callback == nullptr && callbackState != nullptr)
+        {
+            throw JsErrorException(JsErrorInvalidArgument, c_ErrorInvalidCallbackState);
+        }
+
         {
             std::unique_lock<std::mutex> lock(m_lock);
 
