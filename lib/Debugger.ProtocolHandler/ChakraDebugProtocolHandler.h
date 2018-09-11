@@ -16,7 +16,7 @@ typedef void(CHAKRA_CALLBACK* JsDebugProtocolHandlerSendResponseCallback)(const 
 /// <param name="runtime">The runtime to debug.</param>
 /// <param name="protocolHandler">The newly created instance.</param>
 /// <returns>The code <c>JsNoError</c> if the operation succeeded, a failure code otherwise.</returns>
-CHAKRA_API JsDebugProtocolHandlerCreate(JsRuntimeHandle runtime, JsDebugProtocolHandler* protocolHandler);
+CHAKRA_API JsDebugProtocolHandlerCreate(_In_ JsRuntimeHandle runtime, _Out_ JsDebugProtocolHandler* protocolHandler);
 
 /// <summary>Destroys the instance object.</summary>
 /// <remarks>
@@ -25,7 +25,7 @@ CHAKRA_API JsDebugProtocolHandlerCreate(JsRuntimeHandle runtime, JsDebugProtocol
 /// </remarks>
 /// <param name="protocolHandler">The instance to destroy.</param>
 /// <returns>The code <c>JsNoError</c> if the operation succeeded, a failure code otherwise.</returns>
-CHAKRA_API JsDebugProtocolHandlerDestroy(JsDebugProtocolHandler protocolHandler);
+CHAKRA_API JsDebugProtocolHandlerDestroy(_In_ JsDebugProtocolHandler protocolHandler);
 
 /// <summary>Connect a callback to the protocol handler.</summary>
 /// <remarks>
@@ -37,15 +37,15 @@ CHAKRA_API JsDebugProtocolHandlerDestroy(JsDebugProtocolHandler protocolHandler)
 /// <param name="callbackState">The state object to return on each invocation of the callback.</param>
 /// <returns>The code <c>JsNoError</c> if the operation succeeded, a failure code otherwise.</returns>
 CHAKRA_API JsDebugProtocolHandlerConnect(
-    JsDebugProtocolHandler protocolHandler,
-    bool breakOnNextLine,
-    JsDebugProtocolHandlerSendResponseCallback callback,
-    void* callbackState);
+    _In_ JsDebugProtocolHandler protocolHandler,
+    _In_ bool breakOnNextLine,
+    _In_ JsDebugProtocolHandlerSendResponseCallback callback,
+    _In_opt_ void* callbackState);
 
 /// <summary>Disconnect from the protocol handler and clear any breakpoints.</summary>
 /// <param name="protocolHandler">The instance to disconnect from.</param>
 /// <returns>The code <c>JsNoError</c> if the operation succeeded, a failure code otherwise.</returns>
-CHAKRA_API JsDebugProtocolHandlerDisconnect(JsDebugProtocolHandler protocolHandler);
+CHAKRA_API JsDebugProtocolHandlerDisconnect(_In_ JsDebugProtocolHandler protocolHandler);
 
 /// <summary>Send an incoming JSON-formatted command to the protocol handler.</summary>
 /// <remarks>
@@ -54,7 +54,7 @@ CHAKRA_API JsDebugProtocolHandlerDisconnect(JsDebugProtocolHandler protocolHandl
 /// <param name="protocolHandler">The receiving protocol handler.</param>
 /// <param name="command">The JSON-formatted command to send.</param>
 /// <returns>The code <c>JsNoError</c> if the operation succeeded, a failure code otherwise.</returns>
-CHAKRA_API JsDebugProtocolHandlerSendCommand(JsDebugProtocolHandler protocolHandler, const char* command);
+CHAKRA_API JsDebugProtocolHandlerSendCommand(_In_ JsDebugProtocolHandler protocolHandler, _In_z_ const char* command);
 
 /// <summary>Blocks the current thread until the debugger has connected.</summary>
 /// <remarks>

@@ -5,29 +5,16 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Helpers">
-      <UniqueIdentifier>{7dfa9cbe-38f6-4c08-b5c2-8cfa90ee236e}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="DebugProtocolHandler.h">
-      <Filter>Helpers</Filter>
-    </ClInclude>
-    <ClInclude Include="DebugService.h">
-      <Filter>Helpers</Filter>
-    </ClInclude>
-    <ClInclude Include="ErrorHelpers.h">
-      <Filter>Helpers</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Debugger.Sample.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="ProtocolHandler.UnitTests.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="test.js" />
     <None Include="packages.config" />
   </ItemGroup>
 </Project>
