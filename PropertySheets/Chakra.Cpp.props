@@ -21,7 +21,11 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <!--
+        BOOST_SYSTEM_SOURCE           - Build boost::system symbols from sources (drop dependency on boost_system.lib).
+        BOOST_ERROR_CODE_HEADER_ONLY  - Compile Boost error_code members inline. Requires BOOST_SYSTEM_SOURCE.
+      -->
+      <PreprocessorDefinitions>BOOST_ERROR_CODE_HEADER_ONLY;BOOST_SYSTEM_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <TreatWarningAsError>true</TreatWarningAsError>
       <LanguageStandard>stdcpp17</LanguageStandard>
