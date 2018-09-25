@@ -22,6 +22,7 @@
 namespace JsDebug
 {
     typedef void(CHAKRA_CALLBACK* ProtocolHandlerSendResponseCallback)(const char* response, void* callbackState);
+    typedef void(CHAKRA_CALLBACK* ProtocolHandlerCommandQueueCallback)(void* callbackState);
 
     class ProtocolHandler : public protocol::FrontendChannel
     {
@@ -35,6 +36,7 @@ namespace JsDebug
         void Disconnect();
 
         void SendCommand(const char* command);
+        void SetCommandQueueCallback(ProtocolHandlerCommandQueueCallback callback, void* callbackState);
         void ProcessCommandQueue();
         void WaitForDebugger();
         void RunIfWaitingForDebugger();
@@ -62,8 +64,10 @@ namespace JsDebug
         void HandleMessageReceived(const std::string& message);
 
         std::unique_ptr<Debugger> m_debugger;
-        ProtocolHandlerSendResponseCallback m_callback;
-        void* m_callbackState;
+        ProtocolHandlerSendResponseCallback m_sendResponseCallback;
+        void* m_sendResponseCallbackState;
+        ProtocolHandlerCommandQueueCallback m_commandQueueCallback;
+        void* m_commandQueueCallbackState;
 
         std::mutex m_lock;
         std::condition_variable m_commandWaiting;

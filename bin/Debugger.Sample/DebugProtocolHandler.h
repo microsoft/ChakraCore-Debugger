@@ -71,4 +71,14 @@ public:
 
         return result;
     }
+
+    JsErrorCode ProcessCommandQueue()
+    {
+        return JsDebugProtocolHandlerProcessCommandQueue(m_protocolHandler);
+    }
+
+    JsErrorCode SetCommandQueueCallback(JsDebugProtocolHandlerCommandQueueCallback callback, void* callbackState)
+    {
+        return JsDebugProtocolHandlerSetCommandQueueCallback(m_protocolHandler, callback, callbackState);
+    }
 };

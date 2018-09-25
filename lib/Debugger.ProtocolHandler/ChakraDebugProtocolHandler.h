@@ -6,7 +6,10 @@
 #include <ChakraCore.h>
 
 typedef struct JsDebugProtocolHandler__* JsDebugProtocolHandler;
-typedef void(CHAKRA_CALLBACK* JsDebugProtocolHandlerSendResponseCallback)(const char* response, void* callbackState);
+typedef void(CHAKRA_CALLBACK* JsDebugProtocolHandlerSendResponseCallback)(
+    _In_z_ const char* response, 
+    _In_opt_ void* callbackState);
+typedef void(CHAKRA_CALLBACK* JsDebugProtocolHandlerCommandQueueCallback)(_In_opt_ void* callbackState);
 
 /// <summary>Creates a <seealso cref="JsDebugProtocolHandler" /> instance for a given runtime.</summary>
 /// <remarks>
@@ -62,4 +65,25 @@ CHAKRA_API JsDebugProtocolHandlerSendCommand(_In_ JsDebugProtocolHandler protoco
 /// </remarks>
 /// <param name="protocolHandler">The instance to wait on.</param>
 /// <returns>The code <c>JsNoError</c> if the operation succeeded, a failure code otherwise.</returns>
-CHAKRA_API JsDebugProtocolHandlerWaitForDebugger(JsDebugProtocolHandler protocolHandler);
+CHAKRA_API JsDebugProtocolHandlerWaitForDebugger(_In_ JsDebugProtocolHandler protocolHandler);
+
+/// <summary>Processes any commands in the queue.</summary>
+/// <remarks>
+///     This must be called from the script thread.
+/// </remarks>
+/// <param name="protocolHandler">The instance to process.</param>
+/// <returns>The code <c>JsNoError</c> if the operation succeeded, a failure code otherwise.</returns>
+CHAKRA_API JsDebugProtocolHandlerProcessCommandQueue(_In_ JsDebugProtocolHandler protocolHandler);
+
+/// <summary>Registers a callback that notifies the host of any commands added to the queue.</summary>
+/// <remarks>
+///     This must be called from the script thread, but the callback can be called from any thread.
+/// </remarks>
+/// <param name="protocolHandler">The instance to register the callback on.</param>
+/// <param name="callback">The command enqueued callback function pointer.</param>
+/// <param name="callbackState">The state object to return on each invocation of the callback.</param>
+/// <returns>The code <c>JsNoError</c> if the operation succeeded, a failure code otherwise.</returns>
+CHAKRA_API JsDebugProtocolHandlerSetCommandQueueCallback(
+    _In_ JsDebugProtocolHandler protocolHandler,
+    _In_ JsDebugProtocolHandlerCommandQueueCallback callback,
+    _In_opt_ void* callbackState);
