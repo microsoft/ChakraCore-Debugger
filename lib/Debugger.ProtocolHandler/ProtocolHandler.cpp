@@ -15,12 +15,15 @@ namespace JsDebug
         const char c_ErrorCallbackRequired[] = "'callback' is required";
         const char c_ErrorCommandRequired[] = "'command' is required";
         const char c_ErrorHandlerAlreadyConnected[] = "Handler is already connected";
+        const char c_ErrorInvalidCallbackState[] = "'callbackState' can only be provided with a valid callback";
         const char c_ErrorNoHandlerConnected[] = "No handler is currently connected";
     }
 
     ProtocolHandler::ProtocolHandler(JsRuntimeHandle runtime)
-        : m_callback(nullptr)
-        , m_callbackState(nullptr)
+        : m_sendResponseCallback(nullptr)
+        , m_sendResponseCallbackState(nullptr)
+        , m_commandQueueCallback(nullptr)
+        , m_commandQueueCallbackState(nullptr)
         , m_isConnected(false)
         , m_waitingForDebugger(false)
         , m_breakOnNextLine(false)
@@ -46,13 +49,13 @@ namespace JsDebug
         {
             std::unique_lock<std::mutex> lock(m_lock);
 
-            if (m_callback != nullptr)
+            if (m_sendResponseCallback != nullptr)
             {
                 throw std::runtime_error(c_ErrorHandlerAlreadyConnected);
             }
 
-            m_callback = callback;
-            m_callbackState = callbackState;
+            m_sendResponseCallback = callback;
+            m_sendResponseCallbackState = callbackState;
             m_breakOnNextLine = breakOnNextLine;
 
             EnqueueCommand(CommandType::Connect);
@@ -66,13 +69,13 @@ namespace JsDebug
         {
             std::unique_lock<std::mutex> lock(m_lock);
 
-            if (m_callback == nullptr)
+            if (m_sendResponseCallback == nullptr)
             {
                 throw std::runtime_error(c_ErrorNoHandlerConnected);
             }
 
-            m_callback = nullptr;
-            m_callbackState = nullptr;
+            m_sendResponseCallback = nullptr;
+            m_sendResponseCallbackState = nullptr;
             m_breakOnNextLine = false;
 
             EnqueueCommand(CommandType::Disconnect);
@@ -94,12 +97,25 @@ namespace JsDebug
         OutputDebugStringA("},\r\n");
 #endif
 
+        ProtocolHandlerCommandQueueCallback callback = nullptr;
+        void* state = nullptr;
+
         {
             std::unique_lock<std::mutex> lock(m_lock);
             EnqueueCommand(CommandType::MessageReceived, command);
-        }
 
+            callback = m_commandQueueCallback;
+            state = m_commandQueueCallbackState;
+        }
+        
+        // Trigger a debugger break
         m_debugger->RequestAsyncBreak();
+
+        if (callback != nullptr)
+        {
+            // Notify the host
+            callback(state);
+        }
     }
 
     void ProtocolHandler::WaitForDebugger()
@@ -209,9 +225,9 @@ namespace JsDebug
 
     void ProtocolHandler::SendResponse(const char* response)
     {
-        if (m_callback != nullptr)
+        if (m_sendResponseCallback != nullptr)
         {
-            m_callback(response, m_callbackState);
+            m_sendResponseCallback(response, m_sendResponseCallbackState);
         }
     }
 
@@ -262,5 +278,20 @@ namespace JsDebug
     {
         protocol::String messageStr = protocol::String::fromUtf8(message.c_str(), message.length());
         m_dispatcher.dispatch(protocol::StringUtil::parseJSON(messageStr));
+    }
+
+    void ProtocolHandler::SetCommandQueueCallback(ProtocolHandlerCommandQueueCallback callback, void* callbackState)
+    {
+        if (callback == nullptr && callbackState != nullptr)
+        {
+            throw JsErrorException(JsErrorInvalidArgument, c_ErrorInvalidCallbackState);
+        }
+
+        {
+            std::unique_lock<std::mutex> lock(m_lock);
+
+            m_commandQueueCallback = callback;
+            m_commandQueueCallbackState = callbackState;
+        }
     }
 }
