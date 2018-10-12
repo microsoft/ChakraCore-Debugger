@@ -38,6 +38,7 @@ public:
         return JsRun(scriptContentValue, 0, scriptNameValue, JsParseScriptAttributeNone, result);
     }
 
+protected:
     JsRuntimeHandle GetRuntime()
     {
         return this->runtime;
