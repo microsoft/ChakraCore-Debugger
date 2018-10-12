@@ -98,6 +98,9 @@ namespace JsDebug
 
     std::vector<DebuggerScript> Debugger::GetScripts()
     {
+        // Ensure that there's an active context before trying to get scripts.
+        DebuggerContext::Scope debuggerScope(m_debugContext);
+        
         std::vector<DebuggerScript> scripts;
         JsValueRef scriptsArray = JS_INVALID_REFERENCE;
         JsErrorCode result = JsDiagGetScripts(&scriptsArray);
