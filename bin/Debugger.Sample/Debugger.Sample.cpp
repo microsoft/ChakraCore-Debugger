@@ -49,7 +49,7 @@ public:
                 else if (!arg.compare(L"--port") || !arg.compare(L"-p"))
                 {
                     ++index;
-                    if (argc > index)
+                    if (index < argc)
                     {
                         // This will return zero if no number was found.
                         this->port = std::stoi(std::wstring(argv[index]));
@@ -58,8 +58,11 @@ public:
                 else if (!arg.compare(L"--script"))
                 {
                     ++index;
-                    std::wstring script(argv[index]);
-                    this->scripts.emplace_back(std::move(script));
+                    if (index < argc)
+                    {
+                        std::wstring script(argv[index]);
+                        this->scripts.emplace_back(std::move(script));
+                    }
                 }
                 else if (!arg.compare(L"--buffer"))
                 {
@@ -110,7 +113,7 @@ std::wstring ConvertStringFromUtf8ToUtf16(const std::string& string)
 
     if (MultiByteToWideChar(CP_UTF8, 0, string.c_str(), static_cast<int>(string.length()), contents.data(), static_cast<int>(contents.size())) == 0)
     {
-        const char* message = "chakrahost: unable to convert string from UTF - 8 to UTF - 16.";
+        const char* message = "chakrahost: unable to convert string from UTF-8 to UTF-16.";
         fprintf(stderr, message);
         fprintf(stderr, "\n");
         throw new std::runtime_error(message);
@@ -173,7 +176,7 @@ JsErrorCode RunScript(bool loadScriptUsingBuffer, const wchar_t* filename, JsVal
         }
 
         IfFailRet(JsPointerToString(fullPath, wcslen(fullPath), &sourceUrl));
-        IfFailRet(JsCreateExternalArrayBuffer((void*) script.c_str(), (unsigned int) script.length(), NULL, NULL, &scriptValueRef));
+        IfFailRet(JsCreateExternalArrayBuffer(const_cast<char*>(script.c_str()), static_cast<unsigned int>(script.length()), NULL, NULL, &scriptValueRef));
         IfFailRet(JsRun(scriptValueRef, GetNextSourceContext(), sourceUrl, JsParseScriptAttributeNone, result));
     }
     else
