@@ -11,16 +11,18 @@ class CommandLineArguments
 public:
     bool breakOnNextLine;
     bool enableDebugging;
-    int port;
     bool help;
-
+    bool loadScriptUsingBuffer;
+    int port;
+    std::vector<std::wstring> scripts;
     std::vector<std::wstring> scriptArgs;
 
     CommandLineArguments()
         : breakOnNextLine(false)
         , enableDebugging(false)
-        , port(9229)
         , help(false)
+        , loadScriptUsingBuffer(false)
+        , port(9229)
     {
     }
 
@@ -53,6 +55,16 @@ public:
                         this->port = std::stoi(std::wstring(argv[index]));
                     }
                 }
+                else if (!arg.compare(L"--script"))
+                {
+                    ++index;
+                    std::wstring script(argv[index]);
+                    this->scripts.emplace_back(std::move(script));
+                }
+                else if (!arg.compare(L"--buffer"))
+                {
+                    this->loadScriptUsingBuffer = true;
+                }
                 else
                 {
                     // Handle everything else including `-?` and `--help`
@@ -81,48 +93,65 @@ public:
             L"Usage: ChakraCore.Debugger.Sample.exe [host-options] <script> [script-arguments]\n"
             L"\n"
             L"Options: \n"
+            L"      --buffer           Load script using JsCreateExternalArrayBuffer/JsRun\n"
             L"      --inspect          Enable debugging\n"
             L"      --inspect-brk      Enable debugging and break\n"
             L"  -p, --port <number>    Specify the port number\n"
+            L"      --script <script>  Additional script to load\n"
             L"  -?  --help             Show this help info\n"
             L"\n");
     }
 };
 
-//
-// Source context counter.
-//
-unsigned currentSourceContext = 0;
+
+std::wstring ConvertStringFromUtf8ToUtf16(const std::string& string)
+{
+    std::vector<wchar_t> contents(string.length());
+
+    if (MultiByteToWideChar(CP_UTF8, 0, string.c_str(), static_cast<int>(string.length()), contents.data(), static_cast<int>(contents.size())) == 0)
+    {
+        const char* message = "chakrahost: unable to convert string from UTF - 8 to UTF - 16.";
+        fprintf(stderr, message);
+        fprintf(stderr, "\n");
+        throw new std::runtime_error(message);
+    }
+
+    return std::wstring(begin(contents), end(contents));
+}
+
+unsigned GetNextSourceContext()
+{
+    static unsigned sourceContext = 0;
+    
+    return sourceContext++;
+}
 
 //
 // Helper to load a script from disk.
 //
-std::wstring LoadScript(const wchar_t* filename)
+
+std::string LoadScriptUtf8(const wchar_t* filename)
 {
     std::ifstream ifs(filename, std::ifstream::in | std::ifstream::binary);
 
     if (!ifs.good())
     {
         fwprintf(stderr, L"chakrahost: unable to open file: %s.\n", filename);
-        return std::wstring();
+        return std::string();
     }
 
-    std::vector<char> rawBytes(
+    return std::string(
         (std::istreambuf_iterator<char>(ifs)),
         std::istreambuf_iterator<char>());
-
-    std::vector<wchar_t> contents(rawBytes.size());
-
-    if (MultiByteToWideChar(CP_UTF8, 0, rawBytes.data(), static_cast<int>(rawBytes.size()), contents.data(), static_cast<int>(contents.size())) == 0)
-    {
-        fwprintf(stderr, L"chakrahost: fatal error.\n");
-        return std::wstring();
-    }
-
-    return std::wstring(begin(contents), end(contents));
 }
 
-JsErrorCode RunScript(const wchar_t* filename, JsValueRef* result)
+std::wstring LoadScriptUtf16(const wchar_t* filename)
+{
+    std::string scriptUtf8 = LoadScriptUtf8(filename);
+    return ConvertStringFromUtf8ToUtf16(scriptUtf8);
+}
+
+JsErrorCode RunScript(bool loadScriptUsingBuffer, const wchar_t* filename, JsValueRef* result)
 {
     wchar_t fullPath[MAX_PATH];
     DWORD pathLength = GetFullPathName(filename, MAX_PATH, fullPath, nullptr);
@@ -131,15 +160,32 @@ JsErrorCode RunScript(const wchar_t* filename, JsValueRef* result)
         return JsErrorInvalidArgument;
     }
 
-    // Load the script from the disk.
-    std::wstring script = LoadScript(fullPath);
-    if (script.empty())
+    if (loadScriptUsingBuffer)
     {
-        return JsErrorInvalidArgument;
-    }
+        JsValueRef sourceUrl;
+        JsValueRef scriptValueRef;
 
-    // Run the script.
-    IfFailRet(JsRunScript(script.c_str(), currentSourceContext++, fullPath, result));
+        // Load script from the file
+        std::string script = LoadScriptUtf8(fullPath);
+        if (script.empty())
+        {
+            return JsErrorInvalidArgument;
+        }
+
+        IfFailRet(JsPointerToString(fullPath, wcslen(fullPath), &sourceUrl));
+        IfFailRet(JsCreateExternalArrayBuffer((void*) script.c_str(), (unsigned int) script.length(), NULL, NULL, &scriptValueRef));
+        IfFailRet(JsRun(scriptValueRef, GetNextSourceContext(), sourceUrl, JsParseScriptAttributeNone, result));
+    }
+    else
+    {
+        std::wstring script = LoadScriptUtf16(fullPath);
+        if (script.empty())
+        {
+            return JsErrorInvalidArgument;
+        }
+
+        IfFailRet(JsRunScript(script.c_str(), GetNextSourceContext(), fullPath, result));
+    }
 
     return JsNoError;
 }
@@ -232,7 +278,7 @@ JsValueRef CALLBACK HostRunScript(
     size_t length = 0;
 
     IfFailThrowJsError(JsStringToPointer(arguments[1], &filename, &length), L"invalid filename argument");
-    IfFailThrowJsError(RunScript(filename, &result), L"failed to run script");
+    IfFailThrowJsError(RunScript(false, filename, &result), L"failed to run script");
 
     return result;
 }
@@ -279,11 +325,14 @@ JsErrorCode CreateHostContext(JsRuntimeHandle runtime, std::vector<std::wstring>
     JsValueRef globalObject = JS_INVALID_REFERENCE;
     IfFailRet(JsGetGlobalObject(&globalObject));
 
+    // Set the global object property name
+    JsPropertyIdRef globalPropertyId = JS_INVALID_REFERENCE;
+    IfFailRet(JsGetPropertyIdFromName(L"global", &globalPropertyId));
+    IfFailRet(JsSetProperty(globalObject, globalPropertyId, globalObject, true));
+
     // Get the name of the property ("host") that we're going to set on the global object.
     JsPropertyIdRef hostPropertyId = JS_INVALID_REFERENCE;
     IfFailRet(JsGetPropertyIdFromName(L"host", &hostPropertyId));
-
-    // Set the property.
     IfFailRet(JsSetProperty(globalObject, hostPropertyId, hostObject, true));
 
     // Now create the host callbacks that we're going to expose to the script.
@@ -430,27 +479,37 @@ int _cdecl wmain(int argc, wchar_t* argv[])
             std::cout << "Debugger connected" << std::endl;
         }
 
-        // Run the script.
-        JsValueRef result = JS_INVALID_REFERENCE;
-        JsErrorCode errorCode = RunScript(arguments.scriptArgs[0].c_str(), &result);
-
-        if (errorCode == JsErrorScriptException)
+        if (arguments.scriptArgs.size() > 0)
         {
-            IfFailError(PrintScriptException(), L"failed to print exception");
-            return EXIT_FAILURE;
-        }
-        else
-        {
-            IfFailError(errorCode, L"failed to run script.");
+            arguments.scripts.emplace_back(arguments.scriptArgs[0]);
         }
 
-        // Convert the return value.
-        JsValueRef numberResult = JS_INVALID_REFERENCE;
-        double doubleResult;
-        IfFailError(JsConvertValueToNumber(result, &numberResult), L"failed to convert return value.");
-        IfFailError(JsNumberToDouble(numberResult, &doubleResult), L"failed to convert return value.");
-        returnValue = (int)doubleResult;
-        std::cout << returnValue << std::endl;
+        // for each script
+        for (int index = 0; index < arguments.scripts.size(); ++index)
+        {
+            // Run the script.
+            const std::wstring& script = arguments.scripts[index];
+            JsValueRef result = JS_INVALID_REFERENCE;
+            JsErrorCode errorCode = RunScript(arguments.loadScriptUsingBuffer, script.c_str(), &result);
+
+            if (errorCode == JsErrorScriptException)
+            {
+                IfFailError(PrintScriptException(), L"failed to print exception");
+                return EXIT_FAILURE;
+            }
+            else
+            {
+                IfFailError(errorCode, L"failed to run script.");
+            }
+
+            // Convert the return value.
+            JsValueRef numberResult = JS_INVALID_REFERENCE;
+            double doubleResult;
+            IfFailError(JsConvertValueToNumber(result, &numberResult), L"failed to convert return value.");
+            IfFailError(JsNumberToDouble(numberResult, &doubleResult), L"failed to convert return value.");
+            returnValue = (int) doubleResult;
+            std::cout << returnValue << std::endl;
+        }
 
         // Clean up the current execution context.
         IfFailError(JsSetCurrentContext(JS_INVALID_REFERENCE), L"failed to cleanup current context.");
