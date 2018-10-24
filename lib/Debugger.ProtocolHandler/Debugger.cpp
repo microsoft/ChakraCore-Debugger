@@ -236,6 +236,9 @@ namespace JsDebug
             return;
         }
 
+        // Ensure that there's an active context before trying to handle events.
+        DebuggerContext::Scope debuggerScope(m_debugContext);
+
         switch (debugEvent) {
         case JsDiagDebugEventSourceCompile:
         case JsDiagDebugEventCompileError:
