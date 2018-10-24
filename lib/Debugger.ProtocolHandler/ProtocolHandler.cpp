@@ -14,6 +14,7 @@ namespace JsDebug
     {
         const char c_ErrorCallbackRequired[] = "'callback' is required";
         const char c_ErrorCommandRequired[] = "'command' is required";
+        const char c_ErrorRuntimeRequired[] = "'runtime' is required";
         const char c_ErrorHandlerAlreadyConnected[] = "Handler is already connected";
         const char c_ErrorInvalidCallbackState[] = "'callbackState' can only be provided with a valid callback";
         const char c_ErrorNoHandlerConnected[] = "No handler is currently connected";
@@ -29,6 +30,10 @@ namespace JsDebug
         , m_breakOnNextLine(false)
         , m_dispatcher(this)
     {
+        if (runtime == nullptr) {
+            throw JsErrorException(JsErrorInvalidArgument, c_ErrorCallbackRequired);
+        }
+
         m_debugger = std::make_unique<Debugger>(this, runtime);
     }
 
@@ -177,6 +182,9 @@ namespace JsDebug
 
     void ProtocolHandler::ProcessCommandQueue()
     {
+        // Ensure that there's an active context before trying to process the queue.
+        DebuggerContext::Scope debuggerScope(*m_debugger->GetDebugContext());
+
         std::vector<std::pair<CommandType, std::string>> current;
 
         do
