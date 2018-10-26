@@ -31,7 +31,7 @@ namespace JsDebug
         , m_dispatcher(this)
     {
         if (runtime == nullptr) {
-            throw JsErrorException(JsErrorInvalidArgument, c_ErrorCallbackRequired);
+            throw JsErrorException(JsErrorInvalidArgument, c_ErrorRuntimeRequired);
         }
 
         m_debugger = std::make_unique<Debugger>(this, runtime);
