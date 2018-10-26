@@ -106,6 +106,32 @@ public:
     }
 };
 
+class ScriptData
+{
+private:
+    std::string m_script;
+
+public:
+    ScriptData(std::string const&& script)
+    {
+        m_script = std::move(script);
+    }
+
+    const char* c_str() const
+    {
+        return m_script.c_str();
+    }
+
+    static std::unique_ptr<ScriptData> Create(std::string const&& script)
+    {
+        return std::make_unique<ScriptData>(std::move(script));
+    }
+
+    static void CALLBACK Finalize(void* callbackState)
+    {
+        auto instance = std::unique_ptr<ScriptData>(reinterpret_cast<ScriptData*>(callbackState));
+    }
+};
 
 std::wstring ConvertStringFromUtf8ToUtf16(const std::string& string)
 {
@@ -174,9 +200,11 @@ JsErrorCode RunScript(bool loadScriptUsingBuffer, const wchar_t* filename, JsVal
         {
             return JsErrorInvalidArgument;
         }
+        auto scriptData = ScriptData::Create(std::move(script));
 
         IfFailRet(JsPointerToString(fullPath, wcslen(fullPath), &sourceUrl));
-        IfFailRet(JsCreateExternalArrayBuffer(const_cast<char*>(script.c_str()), static_cast<unsigned int>(script.length()), NULL, NULL, &scriptValueRef));
+        IfFailRet(JsCreateExternalArrayBuffer(const_cast<char*>(scriptData->c_str()), static_cast<unsigned int>(script.length()), 
+            ScriptData::Finalize, scriptData.release(), &scriptValueRef));
         IfFailRet(JsRun(scriptValueRef, GetNextSourceContext(), sourceUrl, JsParseScriptAttributeNone, result));
     }
     else
