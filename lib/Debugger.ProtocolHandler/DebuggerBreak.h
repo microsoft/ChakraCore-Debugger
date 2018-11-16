@@ -23,6 +23,9 @@ namespace JsDebug
         protocol::Maybe<protocol::Array<protocol::String>> GetHitBreakpoints() const;
         protocol::Maybe<protocol::Runtime::StackTrace> GetAsyncStackTrace() const;
 
+        // Returns -1 if no breakpoint hit.
+        int GetHitBreakpoint() const;
+
     private:
         std::unique_ptr<protocol::Runtime::RemoteObject> GetException() const;
 
