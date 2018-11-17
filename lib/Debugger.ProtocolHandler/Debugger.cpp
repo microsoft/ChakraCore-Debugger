@@ -177,7 +177,7 @@ namespace JsDebug
 
     void Debugger::RemoveBreakpoint(DebuggerBreakpoint& breakpoint)
     {
-        IfJsErrorThrow(JsDiagRemoveBreakpoint(breakpoint.GetActualId()));
+        JsDiagRemoveBreakpoint(breakpoint.GetActualId());
     }
 
     JsDiagBreakOnExceptionAttributes Debugger::GetBreakOnException()
@@ -322,7 +322,7 @@ namespace JsDebug
             {
                 JsValueRef breakpoint = PropertyHelpers::GetIndexedProperty(breakpoints, index);
                 int breakpointId = PropertyHelpers::GetPropertyInt(breakpoint, PropertyHelpers::Names::BreakpointId);
-                IfJsErrorThrow(JsDiagRemoveBreakpoint(breakpointId));
+                JsDiagRemoveBreakpoint(breakpointId);
             }
         }
     }

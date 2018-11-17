@@ -107,7 +107,7 @@ namespace JsDebug
         Maybe<String> in_urlRegex,
         Maybe<int> in_columnNumber,
         Maybe<String> in_condition,
-        String  *out_breakpointId,
+        protocol::Maybe<String> *out_breakpointId,
         std::unique_ptr<Array<Location>>* out_locations)
     {
         String url;
@@ -172,9 +172,16 @@ namespace JsDebug
             return Response::Error(e.what());
         }
 
-        m_breakpointMap.emplace(breakpointId, breakpoint);
+        // Check if the breakpoint exists.  If so, add it to our map and pass back
+        // the breakpoint ID to the client.  Omit the breakpoint ID in the result
+        // message for a pre-existing breakpoint; VS Code depends upon this to
+        // keep in sync with engine breakpoints in this case.
+        if (!ActualBreakpointIdExists(breakpoint))
+        {
+            m_breakpointMap.emplace(breakpointId, breakpoint);
+            *out_breakpointId = breakpointId;
+        }
 
-        *out_breakpointId = breakpointId;
         *out_locations = std::move(locations);
         return Response::OK();
     }
@@ -182,7 +189,7 @@ namespace JsDebug
     Response DebuggerImpl::setBreakpoint(
         std::unique_ptr<Location> in_location,
         Maybe<String> in_condition,
-        String  *out_breakpointId,
+        protocol::Maybe<String> *out_breakpointId,
         std::unique_ptr<Location>* out_actualLocation)
     {
         DebuggerBreakpoint breakpoint = DebuggerBreakpoint::FromLocation(
@@ -200,10 +207,18 @@ namespace JsDebug
 
         if (TryResolveBreakpoint(breakpoint))
         {
-            *out_breakpointId = breakpointId;
             *out_actualLocation = breakpoint.GetActualLocation();
 
-            m_breakpointMap.emplace(breakpointId, breakpoint);
+            // Check if the breakpoint exists.  If so, add it to our map and pass back
+            // the breakpoint ID to the client.  Omit the breakpoint ID in the result
+            // message for a pre-existing breakpoint; VS Code depends upon this to
+            // keep in sync with engine breakpoints in this case.
+            if (!ActualBreakpointIdExists(breakpoint))
+            {
+                *out_breakpointId = breakpointId;
+                m_breakpointMap.emplace(breakpointId, breakpoint);
+            }
+
             return Response::OK();
         }
 
@@ -517,4 +532,15 @@ namespace JsDebug
 
         return true;
     }
+
+    bool DebuggerImpl::ActualBreakpointIdExists(DebuggerBreakpoint& breakpoint)
+    {
+        for (auto &it : m_breakpointMap)
+        {
+            if (it.second.GetActualId() == breakpoint.GetActualId())
+                return true;
+        }
+        return false;
+    }
 }
+

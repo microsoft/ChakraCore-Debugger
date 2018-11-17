@@ -874,7 +874,7 @@ DispatchResponse::Status DispatcherImpl::setBreakpointByUrl(int callId, std::uni
         return DispatchResponse::kError;
     }
     // Declare output parameters.
-    String out_breakpointId;
+    Maybe<String> out_breakpointId;
     std::unique_ptr<protocol::Array<protocol::Debugger::Location>> out_locations;
 
     std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
@@ -883,7 +883,8 @@ DispatchResponse::Status DispatcherImpl::setBreakpointByUrl(int callId, std::uni
         return response.status();
     std::unique_ptr<protocol::DictionaryValue> result = DictionaryValue::create();
     if (response.status() == DispatchResponse::kSuccess) {
-        result->setValue("breakpointId", ValueConversions<String>::toValue(out_breakpointId));
+        if (out_breakpointId.isJust())
+            result->setValue("breakpointId", ValueConversions<String>::toValue(out_breakpointId.fromJust()));
         result->setValue("locations", ValueConversions<protocol::Array<protocol::Debugger::Location>>::toValue(out_locations.get()));
     }
     if (weak->get())
@@ -911,7 +912,7 @@ DispatchResponse::Status DispatcherImpl::setBreakpoint(int callId, std::unique_p
         return DispatchResponse::kError;
     }
     // Declare output parameters.
-    String out_breakpointId;
+    Maybe<String> out_breakpointId;
     std::unique_ptr<protocol::Debugger::Location> out_actualLocation;
 
     std::unique_ptr<DispatcherBase::WeakPtr> weak = weakPtr();
@@ -920,7 +921,8 @@ DispatchResponse::Status DispatcherImpl::setBreakpoint(int callId, std::unique_p
         return response.status();
     std::unique_ptr<protocol::DictionaryValue> result = DictionaryValue::create();
     if (response.status() == DispatchResponse::kSuccess) {
-        result->setValue("breakpointId", ValueConversions<String>::toValue(out_breakpointId));
+        if (out_breakpointId.isJust())
+            result->setValue("breakpointId", ValueConversions<String>::toValue(out_breakpointId.fromJust()));
         result->setValue("actualLocation", ValueConversions<protocol::Debugger::Location>::toValue(out_actualLocation.get()));
     }
     if (weak->get())

@@ -1122,8 +1122,8 @@ public:
     virtual DispatchResponse disable() = 0;
     virtual DispatchResponse setBreakpointsActive(bool in_active) = 0;
     virtual DispatchResponse setSkipAllPauses(bool in_skip) = 0;
-    virtual DispatchResponse setBreakpointByUrl(int in_lineNumber, Maybe<String> in_url, Maybe<String> in_urlRegex, Maybe<int> in_columnNumber, Maybe<String> in_condition, String* out_breakpointId, std::unique_ptr<protocol::Array<protocol::Debugger::Location>>* out_locations) = 0;
-    virtual DispatchResponse setBreakpoint(std::unique_ptr<protocol::Debugger::Location> in_location, Maybe<String> in_condition, String* out_breakpointId, std::unique_ptr<protocol::Debugger::Location>* out_actualLocation) = 0;
+    virtual DispatchResponse setBreakpointByUrl(int in_lineNumber, Maybe<String> in_url, Maybe<String> in_urlRegex, Maybe<int> in_columnNumber, Maybe<String> in_condition, Maybe<String>* out_breakpointId, std::unique_ptr<protocol::Array<protocol::Debugger::Location>>* out_locations) = 0;
+    virtual DispatchResponse setBreakpoint(std::unique_ptr<protocol::Debugger::Location> in_location, Maybe<String> in_condition, Maybe<String>* out_breakpointId, std::unique_ptr<protocol::Debugger::Location>* out_actualLocation) = 0;
     virtual DispatchResponse removeBreakpoint(const String& in_breakpointId) = 0;
     virtual DispatchResponse continueToLocation(std::unique_ptr<protocol::Debugger::Location> in_location) = 0;
     virtual DispatchResponse stepOver() = 0;

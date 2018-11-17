@@ -35,12 +35,12 @@ namespace JsDebug
             protocol::Maybe<protocol::String> in_urlRegex,
             protocol::Maybe<int> in_columnNumber,
             protocol::Maybe<protocol::String> in_condition,
-            protocol::String* out_breakpointId,
+            protocol::Maybe<protocol::String>* out_breakpointId,
             std::unique_ptr<protocol::Array<protocol::Debugger::Location>>* out_locations) override;
         protocol::Response setBreakpoint(
             std::unique_ptr<protocol::Debugger::Location> in_location,
             protocol::Maybe<protocol::String> in_condition,
-            protocol::String* out_breakpointId,
+            protocol::Maybe<protocol::String>* out_breakpointId,
             std::unique_ptr<protocol::Debugger::Location>* out_actualLocation) override;
         protocol::Response removeBreakpoint(const protocol::String& in_breakpointId) override;
         protocol::Response continueToLocation(std::unique_ptr<protocol::Debugger::Location> in_location) override;
@@ -102,6 +102,7 @@ namespace JsDebug
         SkipPauseRequest HandleBreakEvent(const DebuggerBreak& breakInfo);
 
         bool TryResolveBreakpoint(DebuggerBreakpoint& breakpoint);
+        bool ActualBreakpointIdExists(DebuggerBreakpoint& breakpoint);
 
         ProtocolHandler* m_handler;
         protocol::Debugger::Frontend m_frontend;
