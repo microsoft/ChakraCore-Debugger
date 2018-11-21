@@ -8,6 +8,7 @@
 #include "ProtocolHandler.h"
 #include "ProtocolHelpers.h"
 
+#include <cassert>
 #include <StringUtil.h>
 
 namespace JsDebug
@@ -33,9 +34,11 @@ namespace JsDebug
     }
 
     RuntimeImpl::RuntimeImpl(ProtocolHandler* handler, FrontendChannel* frontendChannel, Debugger* debugger)
-        : m_handler(handler)
+        : m_timestamp(1)
+        , m_handler(handler)
         , m_frontend(frontendChannel)
         , m_debugger(debugger)
+        , m_contextId(1)
         , m_isEnabled(false)
     {
     }
@@ -224,4 +227,118 @@ namespace JsDebug
     {
         return m_isEnabled;
     }
+
+    JsValueRef RuntimeImpl::GetTypeString(JsValueRef object)
+    {
+        JsValueType type;
+        if (JsGetValueType(object, &type) != JsNoError)
+        {
+            return nullptr;
+        }
+
+        const wchar_t* typeString = nullptr;
+        switch (type)
+        {
+        case JsValueType::JsUndefined:
+            typeString = L"undefined";
+            break;
+        case JsValueType::JsNull:
+            typeString = L"null";
+            break;
+        case JsValueType::JsNumber:
+            typeString = L"number";
+            break;
+        case JsValueType::JsString:
+            typeString = L"string";
+            break;
+        case JsValueType::JsBoolean:
+            typeString = L"boolean";
+            break;
+        case JsValueType::JsObject:
+            typeString = L"object";
+            break;
+        case JsValueType::JsFunction:
+            typeString = L"function";
+            break;
+        case JsValueType::JsError:
+            typeString = L"error";
+            break;
+        case JsValueType::JsArray:
+            typeString = L"array";
+            break;
+        case JsValueType::JsSymbol:
+            typeString = L"symbol";
+            break;
+        case JsValueType::JsArrayBuffer:
+            typeString = L"arraybuffer";
+            break;
+        case JsValueType::JsTypedArray:
+        case JsValueType::JsDataView:
+            typeString = L"typedarray";
+            break;
+        }
+
+        if (typeString != nullptr)
+        {
+            JsValueRef typeStringObject = JS_INVALID_REFERENCE;
+            if (JsPointerToString(typeString, wcslen(typeString), &typeStringObject) == JsNoError)
+            {
+                return typeStringObject;
+            }
+        }
+
+        return nullptr;
+    }
+
+    bool RuntimeImpl::GetTypeStringAndValue(JsValueRef object, JsValueRef *typeString, JsValueRef *value)
+    {
+        assert(typeString != nullptr);
+        assert(value != nullptr);
+
+        JsValueRef type = GetTypeString(object);
+        JsValueRef objectValue = object;
+        if (type == nullptr)
+        {
+            if (JsConvertValueToString(object, &objectValue) != JsNoError
+                || JsPointerToString(L"string", 6, &type) != JsNoError)
+            {
+                assert(false);
+                return false;
+            }
+        }
+
+        *typeString = type;
+        *value = objectValue;
+        return true;
+    }
+
+    void RuntimeImpl::consoleAPICalled(protocol::String type, JsValueRef *arguments, size_t argumentCount)
+    {
+        assert(argumentCount > 0);
+
+        JsValueRef remoteObject = JS_INVALID_REFERENCE;
+        if (JsCreateObject(&remoteObject) == JsNoError)
+        {
+            std::unique_ptr<protocol::Array<protocol::Runtime::RemoteObject>> args = 
+                Array<protocol::Runtime::RemoteObject>::create();
+
+            for (size_t i = 1; i < argumentCount; i++)
+            {
+                JsValueRef typeString = JS_INVALID_REFERENCE;
+                JsValueRef objectValue = JS_INVALID_REFERENCE;
+
+                if (GetTypeStringAndValue(arguments[i], &typeString, &objectValue))
+                {
+                    PropertyHelpers::SetProperty(remoteObject, PropertyHelpers::Names::Type, typeString);
+                    PropertyHelpers::SetProperty(remoteObject, PropertyHelpers::Names::Value, objectValue);
+
+                    args->addItem(ProtocolHelpers::WrapObject(remoteObject));
+                }
+            }
+
+            // TODO : to get the correct context id and timestamp.
+            m_frontend.consoleAPICalled(type, std::move(args), m_contextId, m_timestamp++);
+        }
+    }
+
 }

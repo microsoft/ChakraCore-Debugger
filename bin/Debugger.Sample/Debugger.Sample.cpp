@@ -340,7 +340,7 @@ JsErrorCode DefineHostCallback(
 //
 // Creates a host execution context and sets up the host object in it.
 //
-JsErrorCode CreateHostContext(JsRuntimeHandle runtime, std::vector<std::wstring>& scriptArgs, JsContextRef* context)
+JsErrorCode CreateHostContext(JsRuntimeHandle runtime, std::vector<std::wstring>& scriptArgs, DebugProtocolHandler *handler, JsContextRef* context)
 {
     // Create the context.
     IfFailRet(JsCreateContext(runtime, context));
@@ -364,7 +364,15 @@ JsErrorCode CreateHostContext(JsRuntimeHandle runtime, std::vector<std::wstring>
     // Get the name of the property ("host") that we're going to set on the global object.
     JsPropertyIdRef hostPropertyId = JS_INVALID_REFERENCE;
     IfFailRet(JsGetPropertyIdFromName(L"host", &hostPropertyId));
+
+    JsPropertyIdRef consolePropertyId = JS_INVALID_REFERENCE;
+    IfFailRet(JsGetPropertyIdFromName(L"console", &consolePropertyId));
+
+    // Set the property.
     IfFailRet(JsSetProperty(globalObject, hostPropertyId, hostObject, true));
+
+    // Set the property.
+    IfFailRet(JsSetProperty(globalObject, consolePropertyId, consoleObject, true));
 
     // Now create the host callbacks that we're going to expose to the script.
     IfFailRet(DefineHostCallback(hostObject, L"echo", HostEcho, nullptr));
@@ -498,7 +506,7 @@ int _cdecl wmain(int argc, wchar_t* argv[])
 
         // Similarly, create a single execution context. Note that we're putting it on the stack here,
         // so it will stay alive through the entire run.
-        IfFailError(CreateHostContext(runtime, arguments.scriptArgs, &context), L"failed to create execution context.");
+        IfFailError(CreateHostContext(runtime, arguments.scriptArgs, debugProtocolHandler.get(), &context), L"failed to create execution context.");
 
         // Now set the execution context as being the current one on this thread.
         IfFailError(JsSetCurrentContext(context), L"failed to set current context.");

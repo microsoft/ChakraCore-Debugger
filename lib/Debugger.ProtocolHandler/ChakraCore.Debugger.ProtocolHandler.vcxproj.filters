@@ -74,6 +74,7 @@
     <ClInclude Include="TranslateExceptionToJsErrorCode.h">
       <Filter>Helpers</Filter>
     </ClInclude>
+    <ClInclude Include="ConsoleHandler.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Debugger.cpp">
@@ -130,6 +131,7 @@
     <ClCompile Include="JsPersistent.cpp">
       <Filter>Helpers</Filter>
     </ClCompile>
+    <ClCompile Include="ConsoleHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

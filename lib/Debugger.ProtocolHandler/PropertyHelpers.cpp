@@ -62,6 +62,14 @@ namespace JsDebug
         }
     }
 
+    bool PropertyHelpers::SetProperty(JsValueRef object, const char* propertyName, JsValueRef value)
+    {
+        JsPropertyIdRef propertyId = JS_INVALID_REFERENCE;
+        IfJsErrorThrow(JsCreatePropertyId(propertyName, std::strlen(propertyName), &propertyId));
+
+        return JsSetProperty(object, propertyId, value, false) == JsNoError;
+    }
+
     JsValueRef PropertyHelpers::GetProperty(JsValueRef object, const char* name)
     {
         JsPropertyIdRef propertyId = JS_INVALID_REFERENCE;

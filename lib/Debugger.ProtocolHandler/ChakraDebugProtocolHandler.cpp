@@ -100,3 +100,16 @@ CHAKRA_API JsDebugProtocolHandlerSetCommandQueueCallback(
             instance->SetCommandQueueCallback(callback, callbackState);
         });
 }
+
+CHAKRA_API JsDebugProtocolHandlerCreateConsoleObject(
+    _In_ JsDebugProtocolHandler protocolHandler,
+    _Out_ JsValueRef *consoleObject
+)
+{
+    return JsDebug::TranslateExceptionToJsErrorCode<JsDebug::ProtocolHandler*>(
+        protocolHandler,
+        [&](JsDebug::ProtocolHandler* instance) -> void
+    {
+        *consoleObject = instance->CreateConsoleObject();
+    });
+}
