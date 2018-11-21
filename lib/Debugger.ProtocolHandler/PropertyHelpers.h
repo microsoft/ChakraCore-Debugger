@@ -48,6 +48,7 @@ namespace JsDebug
         }
 
         JsValueRef GetProperty(JsValueRef object, const char* name);
+        bool SetProperty(JsValueRef object, const char* propertyName, JsValueRef value);
 
         bool GetPropertyBool(JsValueRef object, const char* name);
         int GetPropertyInt(JsValueRef object, const char* name);

@@ -80,12 +80,18 @@ namespace JsDebug
             protocol::Maybe<bool> in_awaitPromise,
             std::unique_ptr<RunScriptCallback> callback) override;
 
+        void consoleAPICalled(protocol::String type, JsValueRef *arguments, size_t argumentCount);
+
     private:
         bool IsEnabled();
+        JsValueRef GetTypeString(JsValueRef object);
+        bool GetTypeStringAndValue(JsValueRef object, JsValueRef *typeString, JsValueRef *value);
 
+        double m_timestamp;
         ProtocolHandler* m_handler;
         protocol::Runtime::Frontend m_frontend;
         Debugger* m_debugger;
+        int m_contextId;
         bool m_isEnabled;
     };
 }

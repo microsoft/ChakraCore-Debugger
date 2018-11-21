@@ -81,4 +81,10 @@ public:
     {
         return JsDebugProtocolHandlerSetCommandQueueCallback(m_protocolHandler, callback, callbackState);
     }
+
+    JsErrorCode GetConsoleObject(JsValueRef *consoleObject)
+    {
+        return JsDebugProtocolHandlerCreateConsoleObject(m_protocolHandler, consoleObject);
+    }
+
 };
