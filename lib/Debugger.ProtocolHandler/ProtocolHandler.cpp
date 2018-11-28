@@ -143,6 +143,12 @@ namespace JsDebug
 
     JsValueRef ProtocolHandler::CreateConsoleObject()
     {
+        JsContextRef currentContext = JS_INVALID_REFERENCE;
+        IfJsErrorThrow(JsGetCurrentContext(&currentContext));
+        if (currentContext == JS_INVALID_REFERENCE)
+        {
+            throw JsErrorException(JsErrorNoCurrentContext);
+        }
 #if DBG
         m_consoleObjectCount++;
 #endif

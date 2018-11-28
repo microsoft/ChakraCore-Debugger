@@ -315,6 +315,10 @@ namespace JsDebug
     void RuntimeImpl::consoleAPICalled(protocol::String type, JsValueRef *arguments, size_t argumentCount)
     {
         assert(argumentCount > 0);
+        if (!IsEnabled())
+        {
+            return;
+        }
 
         JsValueRef remoteObject = JS_INVALID_REFERENCE;
         if (JsCreateObject(&remoteObject) == JsNoError)
