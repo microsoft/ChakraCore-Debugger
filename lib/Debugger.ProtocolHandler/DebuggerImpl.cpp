@@ -501,25 +501,29 @@ namespace JsDebug
             {
                 DebuggerCallFrame callFrame = m_debugger->GetCallFrame(0);
                 std::unique_ptr<ExceptionDetails> exceptionDetails;
-                auto exprReturned = callFrame.Evaluate(condition, true, &exceptionDetails);
-                // Ignoring the exception information.
-
-                // If the condition is provided, the debugger will stop only when the expression is evaluated to true
-                String defaultValue("");
-                if (exprReturned->getType() == String("boolean") 
-                    && exprReturned->hasDescription() 
-                    && exprReturned->getDescription(defaultValue) == String("true"))
+                JsValueRef expressionStr = JS_INVALID_REFERENCE;
+                if (JsCreateStringUtf16(condition.characters16(), condition.length(), &expressionStr) == JsNoError)
                 {
-                    return SkipPauseRequest::RequestNoSkip;
-                }
+                    JsValueRef evalResult = JS_INVALID_REFERENCE;
+                    JsErrorCode err = JsDiagEvaluate(
+                        expressionStr,
+                        0,
+                        JsParseScriptAttributeNone,
+                        true,
+                        &evalResult);
 
+                    // If the condition is provided, the debugger will stop only when the expression is evaluated to true
+                    if (err == JsNoError && PropertyHelpers::GetPropertyBoolConvert(evalResult, PropertyHelpers::Names::Value))
+                    {
+                        return SkipPauseRequest::RequestNoSkip;
+                    }
+                }
                 return SkipPauseRequest::RequestContinue;
             }
         }
-        catch (const JsErrorException& e)
+        catch (const JsErrorException&)
         {
             // Ignoring the exception occurred on condition expression evaluation. May be there is a way to express this on debugger.
-            e;
         }
 
         return SkipPauseRequest::RequestNoSkip;
