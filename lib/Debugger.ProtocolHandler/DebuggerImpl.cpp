@@ -505,12 +505,7 @@ namespace JsDebug
                 if (JsCreateStringUtf16(condition.characters16(), condition.length(), &expressionStr) == JsNoError)
                 {
                     JsValueRef evalResult = JS_INVALID_REFERENCE;
-                    JsErrorCode err = JsDiagEvaluate(
-                        expressionStr,
-                        0,
-                        JsParseScriptAttributeNone,
-                        true,
-                        &evalResult);
+                    JsErrorCode err = JsDiagEvaluate(expressionStr, 0, JsParseScriptAttributeNone, true, &evalResult);
 
                     // If the condition is provided, the debugger will stop only when the expression is evaluated to true
                     if (err == JsNoError && PropertyHelpers::GetPropertyBoolConvert(evalResult, PropertyHelpers::Names::Value))
