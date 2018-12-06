@@ -470,6 +470,60 @@ namespace JsDebug
         }
     }
 
+    SkipPauseRequest DebuggerImpl::EvaluateConditionOnBreakpoint(int bpId)
+    {
+        if (bpId < 0)
+        {
+            return SkipPauseRequest::RequestNoSkip;
+        }
+
+        DebuggerBreakpoint *bp = nullptr;
+        auto it = m_breakpointMap.begin();
+        while (it != m_breakpointMap.end())
+        {
+            if (it->second.GetActualId() == bpId)
+            {
+                bp = &it->second;
+                break;
+            }
+            it++;
+        }
+
+        if (bp == nullptr)
+        {
+            return SkipPauseRequest::RequestNoSkip;
+        }
+
+        try
+        {
+            String condition = bp->GetCondition();
+            if (condition.length() != 0)
+            {
+                DebuggerCallFrame callFrame = m_debugger->GetCallFrame(0);
+                std::unique_ptr<ExceptionDetails> exceptionDetails;
+                JsValueRef expressionStr = JS_INVALID_REFERENCE;
+                if (JsCreateStringUtf16(condition.characters16(), condition.length(), &expressionStr) == JsNoError)
+                {
+                    JsValueRef evalResult = JS_INVALID_REFERENCE;
+                    JsErrorCode err = JsDiagEvaluate(expressionStr, 0, JsParseScriptAttributeNone, true, &evalResult);
+
+                    // If the condition is provided, the debugger will stop only when the expression is evaluated to true
+                    if (err == JsNoError && PropertyHelpers::GetPropertyBoolConvert(evalResult, PropertyHelpers::Names::Value))
+                    {
+                        return SkipPauseRequest::RequestNoSkip;
+                    }
+                }
+                return SkipPauseRequest::RequestContinue;
+            }
+        }
+        catch (const JsErrorException&)
+        {
+            // Ignoring the exception occurred on condition expression evaluation. May be there is a way to express this on debugger.
+        }
+
+        return SkipPauseRequest::RequestNoSkip;
+    }
+
     SkipPauseRequest DebuggerImpl::HandleBreakEvent(const DebuggerBreak& breakInfo)
     {
         SkipPauseRequest request = SkipPauseRequest::RequestNoSkip;
@@ -477,6 +531,10 @@ namespace JsDebug
         if (m_shouldSkipAllPauses)
         {
             request = SkipPauseRequest::RequestContinue;
+        }
+        else
+        {
+            request = EvaluateConditionOnBreakpoint(breakInfo.GetHitBreakpoint());
         }
 
         if (request != SkipPauseRequest::RequestNoSkip)
