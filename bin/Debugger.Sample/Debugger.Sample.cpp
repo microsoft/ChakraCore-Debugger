@@ -337,11 +337,31 @@ JsErrorCode DefineHostCallback(
     return JsNoError;
 }
 
-JsErrorCode PatchConsoleObject(JsValueRef hostObject, DebugProtocolHandler *handler)
+JsErrorCode RedirectConsoleToDebugger(DebugProtocolHandler *handler)
 {
-    std::string script = "";
+    // Get global.console object. If that is not defined just return, otherwise get the debugger.console and patch with global.console object
+
+    JsValueRef globalObject = JS_INVALID_REFERENCE;
+    IfFailRet(JsGetGlobalObject(&globalObject));
+
+    JsPropertyIdRef consolePropertyId = JS_INVALID_REFERENCE;
+    IfFailRet(JsGetPropertyIdFromName(L"console", &consolePropertyId));
+
     JsValueRef consoleObject = JS_INVALID_REFERENCE;
-    IfFailRet(handler->GetConsoleObject(&consoleObject));
+    IfFailRet(JsGetProperty(globalObject, consolePropertyId, &consoleObject));
+
+    JsValueRef undefinedValue = JS_INVALID_REFERENCE;
+    IfFailRet(JsGetUndefinedValue(&undefinedValue));
+
+    if (consoleObject == JS_INVALID_REFERENCE || consoleObject == undefinedValue)
+    {
+        return JsNoError;
+    }
+
+    JsValueRef debuggerConsoleObject = JS_INVALID_REFERENCE;
+    IfFailRet(handler->GetConsoleObject(&debuggerConsoleObject));
+
+    std::string script = "";
 
     script = script + "function patchConsoleObject$$1(global, hostConsole, debugConsole) {\n";
     script = script + "var obj = {};\n";
@@ -360,6 +380,7 @@ JsErrorCode PatchConsoleObject(JsValueRef hostObject, DebugProtocolHandler *hand
     script = script + "global.console = obj;\n";
     script = script + "}\n";
     script = script + "patchConsoleObject$$1;\n";
+
     JsValueRef patchFunction = JS_INVALID_REFERENCE;
 
     JsValueRef scriptUrl = JS_INVALID_REFERENCE;
@@ -369,14 +390,8 @@ JsErrorCode PatchConsoleObject(JsValueRef hostObject, DebugProtocolHandler *hand
     IfFailRet(JsCreateString(script.c_str(), script.length(), &scriptContentValue));
     IfFailRet(JsRun(scriptContentValue, JS_SOURCE_CONTEXT_NONE, scriptUrl, JsParseScriptAttributeLibraryCode, &patchFunction));
 
-    JsValueRef globalObject = JS_INVALID_REFERENCE;
-    IfFailRet(JsGetGlobalObject(&globalObject));
-
-    JsValueRef undefinedValue = JS_INVALID_REFERENCE;
-    IfFailRet(JsGetUndefinedValue(&undefinedValue));
-
-    JsValueRef args[4] = { undefinedValue, globalObject, hostObject, consoleObject };
-    IfFailRet(JsCallFunction(patchFunction, args, _countof(args), nullptr));
+    JsValueRef args[4] = { undefinedValue, globalObject, consoleObject, debuggerConsoleObject };
+    IfFailRet(JsCallFunction(patchFunction, args, _countof(args), nullptr /*no return value*/));
 
     return JsNoError;
 }
@@ -384,7 +399,7 @@ JsErrorCode PatchConsoleObject(JsValueRef hostObject, DebugProtocolHandler *hand
 //
 // Creates a host execution context and sets up the host object in it.
 //
-JsErrorCode CreateHostContext(JsRuntimeHandle runtime, std::vector<std::wstring>& scriptArgs, DebugProtocolHandler *handler, JsContextRef* context)
+JsErrorCode CreateHostContext(JsRuntimeHandle runtime, std::vector<std::wstring>& scriptArgs, JsContextRef* context)
 {
     // Create the context.
     IfFailRet(JsCreateContext(runtime, context));
@@ -409,14 +424,19 @@ JsErrorCode CreateHostContext(JsRuntimeHandle runtime, std::vector<std::wstring>
     JsPropertyIdRef hostPropertyId = JS_INVALID_REFERENCE;
     IfFailRet(JsGetPropertyIdFromName(L"host", &hostPropertyId));
 
+    JsPropertyIdRef consolePropertyId = JS_INVALID_REFERENCE;
+    IfFailRet(JsGetPropertyIdFromName(L"console", &consolePropertyId));
+
     // Set the property.
     IfFailRet(JsSetProperty(globalObject, hostPropertyId, hostObject, true));
+    IfFailRet(JsSetProperty(globalObject, consolePropertyId, consoleObject, true));
 
     // Now create the host callbacks that we're going to expose to the script.
     IfFailRet(DefineHostCallback(hostObject, L"echo", HostEcho, nullptr));
-    IfFailRet(DefineHostCallback(hostObject, L"log", HostEcho, nullptr));
     IfFailRet(DefineHostCallback(hostObject, L"runScript", HostRunScript, nullptr));
     IfFailRet(DefineHostCallback(hostObject, L"throw", HostThrow, nullptr));
+
+    IfFailRet(DefineHostCallback(consoleObject, L"log", HostEcho, nullptr));
 
     // Create an array for arguments.
     JsValueRef arguments = JS_INVALID_REFERENCE;
@@ -445,8 +465,6 @@ JsErrorCode CreateHostContext(JsRuntimeHandle runtime, std::vector<std::wstring>
 
     // Set the arguments property.
     IfFailRet(JsSetProperty(hostObject, argumentsPropertyId, arguments, true));
-
-    IfFailRet(PatchConsoleObject(hostObject, handler));
 
     // Clean up the current execution context.
     IfFailRet(JsSetCurrentContext(JS_INVALID_REFERENCE));
@@ -547,10 +565,12 @@ int _cdecl wmain(int argc, wchar_t* argv[])
 
         // Similarly, create a single execution context. Note that we're putting it on the stack here,
         // so it will stay alive through the entire run.
-        IfFailError(CreateHostContext(runtime, arguments.scriptArgs, debugProtocolHandler.get(), &context), L"failed to create execution context.");
+        IfFailError(CreateHostContext(runtime, arguments.scriptArgs, &context), L"failed to create execution context.");
 
         // Now set the execution context as being the current one on this thread.
         IfFailError(JsSetCurrentContext(context), L"failed to set current context.");
+
+        IfFailError(RedirectConsoleToDebugger(debugProtocolHandler.get()), L"Failed to redirect to debugger's console");
 
         if (debugProtocolHandler && arguments.breakOnNextLine)
         {
