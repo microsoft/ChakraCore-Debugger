@@ -337,6 +337,50 @@ JsErrorCode DefineHostCallback(
     return JsNoError;
 }
 
+JsErrorCode PatchConsoleObject(JsValueRef hostObject, DebugProtocolHandler *handler)
+{
+    std::string script = "";
+    JsValueRef consoleObject = JS_INVALID_REFERENCE;
+    IfFailRet(handler->GetConsoleObject(&consoleObject));
+
+    script = script + "function patchConsoleObject$$1(global, hostConsole, debugConsole) {\n";
+    script = script + "var obj = {};\n";
+    script = script + "for (var fn in hostConsole) {\n";
+    script = script + "if (typeof hostConsole[fn] === \"function\") {\n";
+    script = script + "(function(name) {\n";
+    script = script + "obj[name] = function(...rest) {\n";
+    script = script + "hostConsole[name](rest);\n";
+    script = script + "if (name in debugConsole) {\n";
+    script = script + "debugConsole[name](rest);\n";
+    script = script + "}\n";
+    script = script + "}\n";
+    script = script + "})(fn);\n";
+    script = script + "}\n";
+    script = script + "}\n";
+    script = script + "global.console = obj;\n";
+    script = script + "}\n";
+    script = script + "patchConsoleObject$$1;\n";
+    JsValueRef patchFunction = JS_INVALID_REFERENCE;
+
+    JsValueRef scriptUrl = JS_INVALID_REFERENCE;
+    IfFailRet(JsCreateString("", 0, &scriptUrl));
+
+    JsValueRef scriptContentValue = JS_INVALID_REFERENCE;
+    IfFailRet(JsCreateString(script.c_str(), script.length(), &scriptContentValue));
+    IfFailRet(JsRun(scriptContentValue, JS_SOURCE_CONTEXT_NONE, scriptUrl, JsParseScriptAttributeLibraryCode, &patchFunction));
+
+    JsValueRef globalObject = JS_INVALID_REFERENCE;
+    IfFailRet(JsGetGlobalObject(&globalObject));
+
+    JsValueRef undefinedValue = JS_INVALID_REFERENCE;
+    IfFailRet(JsGetUndefinedValue(&undefinedValue));
+
+    JsValueRef args[4] = { undefinedValue, globalObject, hostObject, consoleObject };
+    IfFailRet(JsCallFunction(patchFunction, args, _countof(args), nullptr));
+
+    return JsNoError;
+}
+
 //
 // Creates a host execution context and sets up the host object in it.
 //
@@ -365,17 +409,12 @@ JsErrorCode CreateHostContext(JsRuntimeHandle runtime, std::vector<std::wstring>
     JsPropertyIdRef hostPropertyId = JS_INVALID_REFERENCE;
     IfFailRet(JsGetPropertyIdFromName(L"host", &hostPropertyId));
 
-    JsPropertyIdRef consolePropertyId = JS_INVALID_REFERENCE;
-    IfFailRet(JsGetPropertyIdFromName(L"console", &consolePropertyId));
-
     // Set the property.
     IfFailRet(JsSetProperty(globalObject, hostPropertyId, hostObject, true));
 
-    // Set the property.
-    IfFailRet(JsSetProperty(globalObject, consolePropertyId, consoleObject, true));
-
     // Now create the host callbacks that we're going to expose to the script.
     IfFailRet(DefineHostCallback(hostObject, L"echo", HostEcho, nullptr));
+    IfFailRet(DefineHostCallback(hostObject, L"log", HostEcho, nullptr));
     IfFailRet(DefineHostCallback(hostObject, L"runScript", HostRunScript, nullptr));
     IfFailRet(DefineHostCallback(hostObject, L"throw", HostThrow, nullptr));
 
@@ -406,6 +445,8 @@ JsErrorCode CreateHostContext(JsRuntimeHandle runtime, std::vector<std::wstring>
 
     // Set the arguments property.
     IfFailRet(JsSetProperty(hostObject, argumentsPropertyId, arguments, true));
+
+    IfFailRet(PatchConsoleObject(hostObject, handler));
 
     // Clean up the current execution context.
     IfFailRet(JsSetCurrentContext(JS_INVALID_REFERENCE));
