@@ -11,16 +11,18 @@ class CommandLineArguments
 public:
     bool breakOnNextLine;
     bool enableDebugging;
-    int port;
     bool help;
+    bool disableConsoleRedirect;
+    int port;
 
     std::vector<std::wstring> scriptArgs;
 
     CommandLineArguments()
         : breakOnNextLine(false)
         , enableDebugging(false)
-        , port(9229)
         , help(false)
+        , disableConsoleRedirect(false)
+        , port(9229)
     {
     }
 
@@ -53,6 +55,10 @@ public:
                         this->port = std::stoi(std::wstring(argv[index]));
                     }
                 }
+                else if (!arg.compare(L"--disableConsoleRedirect"))
+                {
+                    this->disableConsoleRedirect = true;
+                }
                 else
                 {
                     // Handle everything else including `-?` and `--help`
@@ -84,6 +90,7 @@ public:
             L"      --inspect          Enable debugging\n"
             L"      --inspect-brk      Enable debugging and break\n"
             L"  -p, --port <number>    Specify the port number\n"
+            L"      --disableConsoleRedirect    Disable console's messages to debugger's console\n"
             L"  -?  --help             Show this help info\n"
             L"\n");
     }
@@ -491,7 +498,10 @@ int _cdecl wmain(int argc, wchar_t* argv[])
         // Now set the execution context as being the current one on this thread.
         IfFailError(JsSetCurrentContext(context), L"failed to set current context.");
 
-        IfFailError(RedirectConsoleToDebugger(debugProtocolHandler.get()), L"Failed to redirect to debugger's console");
+        if (!arguments.disableConsoleRedirect)
+        {
+            IfFailError(RedirectConsoleToDebugger(debugProtocolHandler.get()), L"Failed to redirect to debugger's console");
+        }
 
         if (debugProtocolHandler && arguments.breakOnNextLine)
         {
