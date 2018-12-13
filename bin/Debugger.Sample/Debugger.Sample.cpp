@@ -12,7 +12,11 @@ public:
     bool breakOnNextLine;
     bool enableDebugging;
     bool help;
+<<<<<<< HEAD
     bool loadScriptUsingBuffer;
+=======
+    bool enableConsoleRedirect;
+>>>>>>> Address review comment
     int port;
     std::vector<std::wstring> scripts;
     std::vector<std::wstring> scriptArgs;
@@ -21,7 +25,11 @@ public:
         : breakOnNextLine(false)
         , enableDebugging(false)
         , help(false)
+<<<<<<< HEAD
         , loadScriptUsingBuffer(false)
+=======
+        , enableConsoleRedirect(true)
+>>>>>>> Address review comment
         , port(9229)
     {
     }
@@ -55,6 +63,7 @@ public:
                         this->port = std::stoi(std::wstring(argv[index]));
                     }
                 }
+<<<<<<< HEAD
                 else if (!arg.compare(L"--script"))
                 {
                     ++index;
@@ -67,6 +76,11 @@ public:
                 else if (!arg.compare(L"--buffer"))
                 {
                     this->loadScriptUsingBuffer = true;
+=======
+                else if (!arg.compare(L"--no-console-redirect"))
+                {
+                    this->enableConsoleRedirect = false;
+>>>>>>> Address review comment
                 }
                 else
                 {
@@ -96,12 +110,20 @@ public:
             L"Usage: ChakraCore.Debugger.Sample.exe [host-options] <script> [script-arguments]\n"
             L"\n"
             L"Options: \n"
+<<<<<<< HEAD
             L"      --buffer           Load script using JsCreateExternalArrayBuffer/JsRun\n"
             L"      --inspect          Enable debugging\n"
             L"      --inspect-brk      Enable debugging and break\n"
             L"  -p, --port <number>    Specify the port number\n"
             L"      --script <script>  Additional script to load\n"
             L"  -?  --help             Show this help info\n"
+=======
+            L"      --inspect              Enable debugging\n"
+            L"      --inspect-brk          Enable debugging and break\n"
+            L"  -p, --port <number>        Specify the port number\n"
+            L"      --no-console-redirect  Do not send console output to the debugger\n"
+            L"  -?  --help                 Show this help info\n"
+>>>>>>> Address review comment
             L"\n");
     }
 };
@@ -570,7 +592,14 @@ int _cdecl wmain(int argc, wchar_t* argv[])
         // Now set the execution context as being the current one on this thread.
         IfFailError(JsSetCurrentContext(context), L"failed to set current context.");
 
+<<<<<<< HEAD
         IfFailError(RedirectConsoleToDebugger(debugProtocolHandler.get()), L"Failed to redirect to debugger's console");
+=======
+        if (arguments.enableConsoleRedirect)
+        {
+            IfFailError(RedirectConsoleToDebugger(debugProtocolHandler.get()), L"Failed to redirect to debugger's console");
+        }
+>>>>>>> Address review comment
 
         if (debugProtocolHandler && arguments.breakOnNextLine)
         {
