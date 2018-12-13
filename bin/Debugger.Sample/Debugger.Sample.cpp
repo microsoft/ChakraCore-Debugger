@@ -12,7 +12,7 @@ public:
     bool breakOnNextLine;
     bool enableDebugging;
     bool help;
-    bool disableConsoleRedirect;
+    bool enableConsoleRedirect;
     int port;
 
     std::vector<std::wstring> scriptArgs;
@@ -21,7 +21,7 @@ public:
         : breakOnNextLine(false)
         , enableDebugging(false)
         , help(false)
-        , disableConsoleRedirect(false)
+        , enableConsoleRedirect(true)
         , port(9229)
     {
     }
@@ -55,9 +55,9 @@ public:
                         this->port = std::stoi(std::wstring(argv[index]));
                     }
                 }
-                else if (!arg.compare(L"--disableConsoleRedirect"))
+                else if (!arg.compare(L"--no-console-redirect"))
                 {
-                    this->disableConsoleRedirect = true;
+                    this->enableConsoleRedirect = false;
                 }
                 else
                 {
@@ -87,11 +87,11 @@ public:
             L"Usage: ChakraCore.Debugger.Sample.exe [host-options] <script> [script-arguments]\n"
             L"\n"
             L"Options: \n"
-            L"      --inspect          Enable debugging\n"
-            L"      --inspect-brk      Enable debugging and break\n"
-            L"  -p, --port <number>    Specify the port number\n"
-            L"      --disableConsoleRedirect    Disable console's messages to debugger's console\n"
-            L"  -?  --help             Show this help info\n"
+            L"      --inspect              Enable debugging\n"
+            L"      --inspect-brk          Enable debugging and break\n"
+            L"  -p, --port <number>        Specify the port number\n"
+            L"      --no-console-redirect  Do not send console output to the debugger\n"
+            L"  -?  --help                 Show this help info\n"
             L"\n");
     }
 };
@@ -498,7 +498,7 @@ int _cdecl wmain(int argc, wchar_t* argv[])
         // Now set the execution context as being the current one on this thread.
         IfFailError(JsSetCurrentContext(context), L"failed to set current context.");
 
-        if (!arguments.disableConsoleRedirect)
+        if (arguments.enableConsoleRedirect)
         {
             IfFailError(RedirectConsoleToDebugger(debugProtocolHandler.get()), L"Failed to redirect to debugger's console");
         }
