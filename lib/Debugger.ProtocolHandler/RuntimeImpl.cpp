@@ -236,52 +236,53 @@ namespace JsDebug
             return nullptr;
         }
 
-        const wchar_t* typeString = nullptr;
+        std::string typeString;
+
         switch (type)
         {
         case JsValueType::JsUndefined:
-            typeString = L"undefined";
+            typeString = "undefined";
             break;
         case JsValueType::JsNull:
-            typeString = L"null";
+            typeString = "null";
             break;
         case JsValueType::JsNumber:
-            typeString = L"number";
+            typeString = "number";
             break;
         case JsValueType::JsString:
-            typeString = L"string";
+            typeString = "string";
             break;
         case JsValueType::JsBoolean:
-            typeString = L"boolean";
+            typeString = "boolean";
             break;
         case JsValueType::JsObject:
-            typeString = L"object";
+            typeString = "object";
             break;
         case JsValueType::JsFunction:
-            typeString = L"function";
+            typeString = "function";
             break;
         case JsValueType::JsError:
-            typeString = L"error";
+            typeString = "error";
             break;
         case JsValueType::JsArray:
-            typeString = L"array";
+            typeString = "array";
             break;
         case JsValueType::JsSymbol:
-            typeString = L"symbol";
+            typeString = "symbol";
             break;
         case JsValueType::JsArrayBuffer:
-            typeString = L"arraybuffer";
+            typeString = "arraybuffer";
             break;
         case JsValueType::JsTypedArray:
         case JsValueType::JsDataView:
-            typeString = L"typedarray";
+            typeString = "typedarray";
             break;
         }
 
-        if (typeString != nullptr)
+        if (typeString.length() != 0)
         {
             JsValueRef typeStringObject = JS_INVALID_REFERENCE;
-            if (JsPointerToString(typeString, wcslen(typeString), &typeStringObject) == JsNoError)
+            if (JsCreateString(typeString.c_str(), typeString.length(), &typeStringObject) == JsNoError)
             {
                 return typeStringObject;
             }
@@ -299,8 +300,10 @@ namespace JsDebug
         JsValueRef objectValue = object;
         if (type == nullptr)
         {
+            const std::string stringLiteral("string");
+
             if (JsConvertValueToString(object, &objectValue) != JsNoError
-                || JsPointerToString(L"string", 6, &type) != JsNoError)
+                || JsCreateString(stringLiteral.c_str(), stringLiteral.length(), &type) != JsNoError)
             {
                 assert(false);
                 return false;
