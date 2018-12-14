@@ -385,14 +385,14 @@ JsErrorCode RedirectConsoleToDebugger(DebugProtocolHandler *handler)
 
     std::string script = "";
 
-    script = script + "function patchConsoleObject$$1(global, hostConsole, debugConsole) {\n";
+    script = script + "function patchConsoleObject$$1(global, console, debugConsole) {\n";
     script = script + "var obj = {};\n";
-    script = script + "for (var fn in hostConsole) {\n";
-    script = script + "if (typeof hostConsole[fn] === \"function\") {\n";
+    script = script + "for (var fn in console) {\n";
+    script = script + "if (typeof console[fn] === \"function\") {\n";
     script = script + "(function(name) {\n";
     script = script + "obj[name] = function(...rest) {\n";
-    script = script + "hostConsole[name](rest);\n";
-    script = script + "if (name in debugConsole) {\n";
+    script = script + "console[name](rest);\n";
+    script = script + "if (name in debugConsole && typeof debugConsole[fn] === \"function\") {\n";
     script = script + "debugConsole[name](rest);\n";
     script = script + "}\n";
     script = script + "}\n";
@@ -597,7 +597,7 @@ int _cdecl wmain(int argc, wchar_t* argv[])
 =======
         if (arguments.enableConsoleRedirect)
         {
-            IfFailError(RedirectConsoleToDebugger(debugProtocolHandler.get()), L"Failed to redirect to debugger's console");
+            IfFailError(RedirectConsoleToDebugger(debugProtocolHandler.get()), L"Failed to redirect console to debugger.");
         }
 >>>>>>> Address review comment
 
