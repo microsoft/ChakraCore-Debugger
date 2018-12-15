@@ -51,12 +51,23 @@ namespace JsDebug
         return Maybe<DictionaryValue>();
     }
 
+    int DebuggerBreak::GetHitBreakpoint() const
+    {
+        int breakpointId = -1;
+        if (PropertyHelpers::TryGetProperty(m_breakInfo.Get(), PropertyHelpers::Names::BreakpointId, &breakpointId))
+        {
+            return breakpointId;
+        }
+
+        return -1;
+    }
+
     Maybe<Array<String>> DebuggerBreak::GetHitBreakpoints() const
     {
         auto breakpointIds = Array<String>::create();
 
-        int breakpointId = 0;
-        if (PropertyHelpers::TryGetProperty(m_breakInfo.Get(), PropertyHelpers::Names::BreakpointId, &breakpointId))
+        int breakpointId = GetHitBreakpoint();
+        if (breakpointId >= 0)
         {
             breakpointIds->addItem(String16::fromInteger(breakpointId));
         }
