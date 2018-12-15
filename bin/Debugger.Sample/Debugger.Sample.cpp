@@ -213,8 +213,8 @@ JsErrorCode RunScript(bool loadScriptUsingBuffer, const wchar_t* filename, JsVal
 
     if (loadScriptUsingBuffer)
     {
-        JsValueRef sourceUrl;
-        JsValueRef scriptValueRef;
+        JsValueRef sourceUrl = JS_INVALID_REFERENCE;
+        JsValueRef scriptValueRef = JS_INVALID_REFERENCE;
 
         // Load script from the file
         std::string script = LoadScriptUtf8(fullPath);
