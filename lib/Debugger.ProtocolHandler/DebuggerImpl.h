@@ -102,6 +102,7 @@ namespace JsDebug
         SkipPauseRequest HandleBreakEvent(const DebuggerBreak& breakInfo);
 
         bool TryResolveBreakpoint(DebuggerBreakpoint& breakpoint);
+        SkipPauseRequest EvaluateConditionOnBreakpoint(int bpId);
 
         ProtocolHandler* m_handler;
         protocol::Debugger::Frontend m_frontend;
