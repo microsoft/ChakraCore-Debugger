@@ -2,7 +2,9 @@
 // Licensed under the MIT License.
 
 #include "stdafx.h"
+#include "ChakraDebugProtocolHandler.h"
 #include "ProtocolHandler.h"
+#include <cassert>
 
 namespace JsDebug
 {
@@ -25,6 +27,7 @@ namespace JsDebug
         , m_sendResponseCallbackState(nullptr)
         , m_commandQueueCallback(nullptr)
         , m_commandQueueCallbackState(nullptr)
+        , m_consoleHandler(this)
         , m_isConnected(false)
         , m_waitingForDebugger(false)
         , m_breakOnNextLine(false)
@@ -35,6 +38,10 @@ namespace JsDebug
         }
 
         m_debugger = std::make_unique<Debugger>(this, runtime);
+#if DBG
+        m_consoleObjectCount = 0;
+#endif
+
     }
 
     ProtocolHandler::~ProtocolHandler()
@@ -132,6 +139,28 @@ namespace JsDebug
     void ProtocolHandler::RunIfWaitingForDebugger()
     {
         m_waitingForDebugger = false;
+    }
+
+    JsValueRef ProtocolHandler::CreateConsoleObject()
+    {
+        JsContextRef currentContext = JS_INVALID_REFERENCE;
+        IfJsErrorThrow(JsGetCurrentContext(&currentContext));
+        if (currentContext == JS_INVALID_REFERENCE)
+        {
+            throw JsErrorException(JsErrorNoCurrentContext);
+        }
+#if DBG
+        m_consoleObjectCount++;
+#endif
+        return m_consoleHandler.CreateConsoleObject();
+    }
+
+    void ProtocolHandler::ConsoleAPICalled(protocol::String& apiType, JsValueRef *arguments, size_t argumentCount)
+    {
+        if (m_isConnected)
+        {
+            m_runtimeAgent->consoleAPICalled(apiType, arguments, argumentCount);
+        }
     }
 
     std::unique_ptr<Array<Domain>> ProtocolHandler::GetSupportedDomains()

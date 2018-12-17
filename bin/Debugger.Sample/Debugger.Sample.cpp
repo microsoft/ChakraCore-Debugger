@@ -11,16 +11,18 @@ class CommandLineArguments
 public:
     bool breakOnNextLine;
     bool enableDebugging;
-    int port;
     bool help;
+    bool enableConsoleRedirect;
+    int port;
 
     std::vector<std::wstring> scriptArgs;
 
     CommandLineArguments()
         : breakOnNextLine(false)
         , enableDebugging(false)
-        , port(9229)
         , help(false)
+        , enableConsoleRedirect(true)
+        , port(9229)
     {
     }
 
@@ -53,6 +55,10 @@ public:
                         this->port = std::stoi(std::wstring(argv[index]));
                     }
                 }
+                else if (!arg.compare(L"--no-console-redirect"))
+                {
+                    this->enableConsoleRedirect = false;
+                }
                 else
                 {
                     // Handle everything else including `-?` and `--help`
@@ -81,10 +87,11 @@ public:
             L"Usage: ChakraCore.Debugger.Sample.exe [host-options] <script> [script-arguments]\n"
             L"\n"
             L"Options: \n"
-            L"      --inspect          Enable debugging\n"
-            L"      --inspect-brk      Enable debugging and break\n"
-            L"  -p, --port <number>    Specify the port number\n"
-            L"  -?  --help             Show this help info\n"
+            L"      --inspect              Enable debugging\n"
+            L"      --inspect-brk          Enable debugging and break\n"
+            L"  -p, --port <number>        Specify the port number\n"
+            L"      --no-console-redirect  Do not send console output to the debugger\n"
+            L"  -?  --help                 Show this help info\n"
             L"\n");
     }
 };
@@ -260,6 +267,65 @@ JsErrorCode DefineHostCallback(
     return JsNoError;
 }
 
+JsErrorCode RedirectConsoleToDebugger(DebugProtocolHandler *handler)
+{
+    // Get global.console object. If that is not defined just return, otherwise get the debugger.console and patch with global.console object
+
+    JsValueRef globalObject = JS_INVALID_REFERENCE;
+    IfFailRet(JsGetGlobalObject(&globalObject));
+
+    JsPropertyIdRef consolePropertyId = JS_INVALID_REFERENCE;
+    IfFailRet(JsGetPropertyIdFromName(L"console", &consolePropertyId));
+
+    JsValueRef consoleObject = JS_INVALID_REFERENCE;
+    IfFailRet(JsGetProperty(globalObject, consolePropertyId, &consoleObject));
+
+    JsValueRef undefinedValue = JS_INVALID_REFERENCE;
+    IfFailRet(JsGetUndefinedValue(&undefinedValue));
+
+    if (consoleObject == JS_INVALID_REFERENCE || consoleObject == undefinedValue)
+    {
+        return JsNoError;
+    }
+
+    JsValueRef debuggerConsoleObject = JS_INVALID_REFERENCE;
+    IfFailRet(handler->GetConsoleObject(&debuggerConsoleObject));
+
+    std::string script = "";
+
+    script = script + "function patchConsoleObject$$1(global, console, debugConsole) {\n";
+    script = script + "var obj = {};\n";
+    script = script + "for (var fn in console) {\n";
+    script = script + "if (typeof console[fn] === \"function\") {\n";
+    script = script + "(function(name) {\n";
+    script = script + "obj[name] = function(...rest) {\n";
+    script = script + "console[name](rest);\n";
+    script = script + "if (name in debugConsole && typeof debugConsole[fn] === \"function\") {\n";
+    script = script + "debugConsole[name](rest);\n";
+    script = script + "}\n";
+    script = script + "}\n";
+    script = script + "})(fn);\n";
+    script = script + "}\n";
+    script = script + "}\n";
+    script = script + "global.console = obj;\n";
+    script = script + "}\n";
+    script = script + "patchConsoleObject$$1;\n";
+
+    JsValueRef patchFunction = JS_INVALID_REFERENCE;
+
+    JsValueRef scriptUrl = JS_INVALID_REFERENCE;
+    IfFailRet(JsCreateString("", 0, &scriptUrl));
+
+    JsValueRef scriptContentValue = JS_INVALID_REFERENCE;
+    IfFailRet(JsCreateString(script.c_str(), script.length(), &scriptContentValue));
+    IfFailRet(JsRun(scriptContentValue, JS_SOURCE_CONTEXT_NONE, scriptUrl, JsParseScriptAttributeLibraryCode, &patchFunction));
+
+    JsValueRef args[4] = { undefinedValue, globalObject, consoleObject, debuggerConsoleObject };
+    IfFailRet(JsCallFunction(patchFunction, args, _countof(args), nullptr /*no return value*/));
+
+    return JsNoError;
+}
+
 //
 // Creates a host execution context and sets up the host object in it.
 //
@@ -279,17 +345,26 @@ JsErrorCode CreateHostContext(JsRuntimeHandle runtime, std::vector<std::wstring>
     JsValueRef globalObject = JS_INVALID_REFERENCE;
     IfFailRet(JsGetGlobalObject(&globalObject));
 
+    JsValueRef consoleObject = JS_INVALID_REFERENCE;
+    IfFailRet(JsCreateObject(&consoleObject));
+
     // Get the name of the property ("host") that we're going to set on the global object.
     JsPropertyIdRef hostPropertyId = JS_INVALID_REFERENCE;
     IfFailRet(JsGetPropertyIdFromName(L"host", &hostPropertyId));
 
+    JsPropertyIdRef consolePropertyId = JS_INVALID_REFERENCE;
+    IfFailRet(JsGetPropertyIdFromName(L"console", &consolePropertyId));
+
     // Set the property.
     IfFailRet(JsSetProperty(globalObject, hostPropertyId, hostObject, true));
+    IfFailRet(JsSetProperty(globalObject, consolePropertyId, consoleObject, true));
 
     // Now create the host callbacks that we're going to expose to the script.
     IfFailRet(DefineHostCallback(hostObject, L"echo", HostEcho, nullptr));
     IfFailRet(DefineHostCallback(hostObject, L"runScript", HostRunScript, nullptr));
     IfFailRet(DefineHostCallback(hostObject, L"throw", HostThrow, nullptr));
+
+    IfFailRet(DefineHostCallback(consoleObject, L"log", HostEcho, nullptr));
 
     // Create an array for arguments.
     JsValueRef arguments = JS_INVALID_REFERENCE;
@@ -422,6 +497,11 @@ int _cdecl wmain(int argc, wchar_t* argv[])
 
         // Now set the execution context as being the current one on this thread.
         IfFailError(JsSetCurrentContext(context), L"failed to set current context.");
+
+        if (arguments.enableConsoleRedirect)
+        {
+            IfFailError(RedirectConsoleToDebugger(debugProtocolHandler.get()), L"Failed to redirect console to debugger.");
+        }
 
         if (debugProtocolHandler && arguments.breakOnNextLine)
         {
