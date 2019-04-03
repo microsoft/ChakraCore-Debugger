@@ -30,6 +30,9 @@ namespace JsDebug
         JsValueRef undefinedValue = JS_INVALID_REFERENCE;
         IfJsErrorThrow(JsGetUndefinedValue(&undefinedValue));
         return undefinedValue;
+
+        UNREFERENCED_PARAMETER(callee);
+        UNREFERENCED_PARAMETER(isConstructCall);
     }
 
     JsValueRef CALLBACK ConsoleLog(
