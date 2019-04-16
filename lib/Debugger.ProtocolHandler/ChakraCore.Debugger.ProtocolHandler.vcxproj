@@ -55,6 +55,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ConsoleHandler.h" />
     <ClInclude Include="TranslateExceptionToJsErrorCode.h" />
     <ClInclude Include="ConsoleImpl.h" />
     <ClInclude Include="Debugger.h" />
@@ -79,6 +80,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ConsoleHandler.cpp" />
     <ClCompile Include="ConsoleImpl.cpp" />
     <ClCompile Include="Debugger.cpp" />
     <ClCompile Include="DebuggerBreak.cpp" />

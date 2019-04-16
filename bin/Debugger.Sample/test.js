@@ -68,11 +68,21 @@ function testValues() {
   host.echo(negInfVal);
 }
 
+function testConsoleAPIs() {
+  let obj1 = {x:1};
+  console.log('first string')
+  console.log(100);
+  console.error('An error');
+  console.debug(obj1);
+  console.info('This is an info');
+}
+
 // Run the test scenarios.
 testScriptThrow();
 testNativeThrow();
 testScopes();
 testValues();
+testConsoleAPIs();
 
 // The exit code
 0;
