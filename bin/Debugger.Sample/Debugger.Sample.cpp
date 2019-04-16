@@ -577,7 +577,7 @@ int _cdecl wmain(int argc, wchar_t* argv[])
         // Now set the execution context as being the current one on this thread.
         IfFailError(JsSetCurrentContext(context), L"failed to set current context.");
 
-        if (arguments.enableConsoleRedirect)
+        if (arguments.enableConsoleRedirect && arguments.enableDebugging)
         {
             IfFailError(RedirectConsoleToDebugger(debugProtocolHandler.get()), L"Failed to redirect console to debugger.");
         }
