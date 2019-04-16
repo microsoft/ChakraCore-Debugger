@@ -440,6 +440,9 @@ JsErrorCode CreateHostContext(JsRuntimeHandle runtime, std::vector<std::wstring>
     IfFailRet(DefineHostCallback(hostObject, L"runScript", HostRunScript, nullptr));
     IfFailRet(DefineHostCallback(hostObject, L"throw", HostThrow, nullptr));
 
+    IfFailRet(DefineHostCallback(consoleObject, L"debug", HostEcho, nullptr));
+    IfFailRet(DefineHostCallback(consoleObject, L"error", HostEcho, nullptr));
+    IfFailRet(DefineHostCallback(consoleObject, L"info", HostEcho, nullptr));
     IfFailRet(DefineHostCallback(consoleObject, L"log", HostEcho, nullptr));
 
     // Create an array for arguments.
