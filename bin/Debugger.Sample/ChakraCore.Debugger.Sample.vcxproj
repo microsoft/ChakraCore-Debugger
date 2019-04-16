@@ -48,7 +48,7 @@
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PreprocessorDefinitions>_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)lib\Debugger.ProtocolHandler;$(SolutionDir)lib\Debugger.Service;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ChakraCoreDebuggerDir)lib\Debugger.ProtocolHandler;$(ChakraCoreDebuggerDir)lib\Debugger.Service;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

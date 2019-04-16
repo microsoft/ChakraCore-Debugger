@@ -48,7 +48,7 @@
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PreprocessorDefinitions>_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)lib\Debugger.Protocol;$(SolutionDir)lib\Debugger.Protocol\Generated;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ChakraCoreDebuggerDir)lib\Debugger.Protocol;$(ChakraCoreDebuggerDir)lib\Debugger.Protocol\Generated;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
