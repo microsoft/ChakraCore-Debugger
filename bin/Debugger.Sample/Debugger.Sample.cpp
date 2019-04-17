@@ -595,7 +595,7 @@ int _cdecl wmain(int argc, wchar_t* argv[])
         }
 
         // for each script
-        for (int index = 0; index < arguments.scripts.size(); ++index)
+        for (unsigned int index = 0; index < arguments.scripts.size(); ++index)
         {
             // Run the script.
             const std::wstring& script = arguments.scripts[index];
