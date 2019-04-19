@@ -112,6 +112,11 @@ public:
         return m_script.c_str();
     }
 
+    size_t length() const 
+    {
+        return m_script.length();
+    }
+
     static std::unique_ptr<ScriptData> Create(std::string const&& script)
     {
         return std::make_unique<ScriptData>(std::move(script));
@@ -191,10 +196,13 @@ JsErrorCode RunScript(bool loadScriptUsingBuffer, const wchar_t* filename, JsVal
             return JsErrorInvalidArgument;
         }
         auto scriptData = ScriptData::Create(std::move(script));
+        char* data = const_cast<char*>(scriptData->c_str());
+        unsigned int dataLength = static_cast<unsigned int>(scriptData->length());
+        JsFinalizeCallback callback = ScriptData::Finalize;
+        ScriptData* callbackState = scriptData.release();
 
+        IfFailRet(JsCreateExternalArrayBuffer(data, dataLength, callback, callbackState, &scriptValueRef));
         IfFailRet(JsPointerToString(fullPath, wcslen(fullPath), &sourceUrl));
-        IfFailRet(JsCreateExternalArrayBuffer(const_cast<char*>(scriptData->c_str()), static_cast<unsigned int>(script.length()), 
-            ScriptData::Finalize, scriptData.release(), &scriptValueRef));
         IfFailRet(JsRun(scriptValueRef, GetNextSourceContext(), sourceUrl, JsParseScriptAttributeNone, result));
     }
     else
@@ -410,6 +418,9 @@ JsErrorCode CreateHostContext(JsRuntimeHandle runtime, std::vector<std::wstring>
     IfFailRet(JsGetPropertyIdFromName(L"global", &globalPropertyId));
     IfFailRet(JsSetProperty(globalObject, globalPropertyId, globalObject, true));
 
+    JsValueRef consoleObject = JS_INVALID_REFERENCE;
+    IfFailRet(JsCreateObject(&consoleObject));
+
     // Get the name of the property ("host") that we're going to set on the global object.
     JsPropertyIdRef hostPropertyId = JS_INVALID_REFERENCE;
     IfFailRet(JsGetPropertyIdFromName(L"host", &hostPropertyId));
@@ -563,18 +574,12 @@ int _cdecl wmain(int argc, wchar_t* argv[])
         // Now set the execution context as being the current one on this thread.
         IfFailError(JsSetCurrentContext(context), L"failed to set current context.");
 
-<<<<<<< HEAD
-<<<<<<< HEAD
         IfFailError(RedirectConsoleToDebugger(debugProtocolHandler.get()), L"Failed to redirect to debugger's console");
-=======
-        if (arguments.enableConsoleRedirect)
-=======
+
         if (arguments.enableConsoleRedirect && arguments.enableDebugging)
->>>>>>> Avoid crash - don't redirect console when not debugging
         {
             IfFailError(RedirectConsoleToDebugger(debugProtocolHandler.get()), L"Failed to redirect console to debugger.");
         }
->>>>>>> Address review comment
 
         if (debugProtocolHandler && arguments.breakOnNextLine)
         {
