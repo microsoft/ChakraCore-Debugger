@@ -128,6 +128,11 @@ public:
         return m_script.c_str();
     }
 
+    size_t length() const 
+    {
+        return m_script.length();
+    }
+
     static std::unique_ptr<ScriptData> Create(std::string const&& script)
     {
         return std::make_unique<ScriptData>(std::move(script));
@@ -207,10 +212,13 @@ JsErrorCode RunScript(bool loadScriptUsingBuffer, const wchar_t* filename, JsVal
             return JsErrorInvalidArgument;
         }
         auto scriptData = ScriptData::Create(std::move(script));
+        char* data = const_cast<char*>(scriptData->c_str());
+        unsigned int dataLength = static_cast<unsigned int>(scriptData->length());
+        JsFinalizeCallback callback = ScriptData::Finalize;
+        ScriptData* callbackState = scriptData.release();
 
+        IfFailRet(JsCreateExternalArrayBuffer(data, dataLength, callback, callbackState, &scriptValueRef));
         IfFailRet(JsPointerToString(fullPath, wcslen(fullPath), &sourceUrl));
-        IfFailRet(JsCreateExternalArrayBuffer(const_cast<char*>(scriptData->c_str()), static_cast<unsigned int>(script.length()), 
-            ScriptData::Finalize, scriptData.release(), &scriptValueRef));
         IfFailRet(JsRun(scriptValueRef, GetNextSourceContext(), sourceUrl, JsParseScriptAttributeNone, result));
     }
     else
@@ -420,6 +428,11 @@ JsErrorCode CreateHostContext(JsRuntimeHandle runtime, std::vector<std::wstring>
     // Get the global object
     JsValueRef globalObject = JS_INVALID_REFERENCE;
     IfFailRet(JsGetGlobalObject(&globalObject));
+
+    // Set the global object property name
+    JsPropertyIdRef globalPropertyId = JS_INVALID_REFERENCE;
+    IfFailRet(JsGetPropertyIdFromName(L"global", &globalPropertyId));
+    IfFailRet(JsSetProperty(globalObject, globalPropertyId, globalObject, true));
 
     JsValueRef consoleObject = JS_INVALID_REFERENCE;
     IfFailRet(JsCreateObject(&consoleObject));
