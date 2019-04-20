@@ -457,6 +457,7 @@ JsErrorCode CreateHostContext(JsRuntimeHandle runtime, std::vector<std::wstring>
     IfFailRet(DefineHostCallback(consoleObject, L"error", HostEcho, nullptr));
     IfFailRet(DefineHostCallback(consoleObject, L"info", HostEcho, nullptr));
     IfFailRet(DefineHostCallback(consoleObject, L"log", HostEcho, nullptr));
+    IfFailRet(DefineHostCallback(consoleObject, L"warn", HostEcho, nullptr));
 
     // Create an array for arguments.
     JsValueRef arguments = JS_INVALID_REFERENCE;

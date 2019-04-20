@@ -75,6 +75,7 @@ function testConsoleAPIs() {
   console.error('An error');
   console.debug(obj1);
   console.info('This is an info');
+  console.warn('This is a warn');
 }
 
 // Run the test scenarios.
