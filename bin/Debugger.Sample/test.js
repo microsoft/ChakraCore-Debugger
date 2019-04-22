@@ -72,10 +72,10 @@ function testConsoleAPIs() {
   let obj1 = {x:1};
   console.log('first string')
   console.log(100);
-  console.error('An error');
+  console.error('This is an error.');
   console.debug(obj1);
-  console.info('This is an info');
-  console.warn('This is a warn');
+  console.info('This is an info.');
+  console.warn('This is a warning.');
 }
 
 // Run the test scenarios.
