@@ -384,7 +384,7 @@ JsErrorCode RedirectConsoleToDebugger(DebugProtocolHandler *handler)
     script = script + "(function(name) {\n";
     script = script + "obj[name] = function(...rest) {\n";
     script = script + "console[name](rest);\n";
-    script = script + "if (name in debugConsole && typeof debugConsole[fn] === \"function\") {\n";
+    script = script + "if (name in debugConsole && typeof debugConsole[name] === \"function\") {\n";
     script = script + "debugConsole[name](rest);\n";
     script = script + "}\n";
     script = script + "}\n";
