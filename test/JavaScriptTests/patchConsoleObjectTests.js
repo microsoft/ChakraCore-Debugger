@@ -73,6 +73,7 @@ describe("patchConsoleObjectTests", function() {
     it("case where console object only has log method", function() {
         patchConsoleObject(global, consoleLogOnly, consoleDebugger);
         global.console.log("log test");
+        assert.strictEqual(consoleOutput.trim().split("\n").length, 2);
         assert.strictEqual(consoleOutput.split("\n")[0], "CONSOLE LOG: log test");
         assert.strictEqual(consoleOutput.split("\n")[1], "DEBUGGER LOG: log test");
     });
@@ -83,6 +84,7 @@ describe("patchConsoleObjectTests", function() {
         global.console.warn("warn test");
         global.console.error("error test");
         global.console.debug("debug test");
+        assert.strictEqual(consoleOutput.trim().split("\n").length, 10);
         assert.strictEqual(consoleOutput.split("\n")[0], "CONSOLE LOG: log test");
         assert.strictEqual(consoleOutput.split("\n")[1], "DEBUGGER LOG: log test");
         assert.strictEqual(consoleOutput.split("\n")[2], "CONSOLE INFO: info test");
