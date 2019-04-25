@@ -1,32 +1,23 @@
 var assert = require('assert');
 var patchConsoleObject = require("../../bin/Debugger.Sample/PatchConsoleObject.js")
 
-var dConsoleDebug = "";
-var dConsoleError = "";
-var dConsoleWarn = "";
-var dConsoleLog = "";
-var dConsoleInfo = "";
-var consoleDebug = "";
-var consoleError = "";
-var consoleWarn = "";
-var consoleLog = "";
-var consoleInfo = "";
+var consoleOutput = "";
 
 var consoleDebugger = {
     log(msg){
-        dConsoleLog += msg;
+        consoleOutput += "DEBUGGER LOG: "+ msg + "\n";
     },
     error(msg){
-        dConsoleError += msg;
+        consoleOutput += "DEBUGGER ERROR: "+ msg + "\n";
     },
     warn(msg){
-        dConsoleWarn += msg;
+        consoleOutput += "DEBUGGER WARN: "+ msg + "\n";
     },
     debug(msg){
-        dConsoleDebug += msg;
+        consoleOutput += "DEBUGGER DEBUG: "+ msg + "\n";
     },
     info(msg){
-        dConsoleInfo += msg;
+        consoleOutput += "DEBUGGER INFO: "+ msg + "\n";
     }
 };
 
@@ -36,31 +27,31 @@ var consoleObjectEmpty = {
 
 var consoleLogOnly = {
     log(msg){
-        consoleLog += msg;
+        consoleOutput += "CONSOLE LOG: "+ msg + "\n";
     }
 };
 
 var consoleObjectWithNoLoggingMethods = {
     noLog(msg){
-        consoleLog += msg;
+        consoleOutput += "CONSOLE NOLOG: "+ msg + "\n";
     }
 };
 
 var consoleObjectCompelete = {
     log(msg){
-        consoleLog += msg;
+        consoleOutput += "CONSOLE LOG: "+ msg + "\n";
     },
     error(msg){
-        consoleError += msg;
+        consoleOutput += "CONSOLE ERROR: "+ msg + "\n";
     },
     warn(msg){
-        consoleWarn += msg;
+        consoleOutput += "CONSOLE WARN: "+ msg + "\n";
     },
     debug(msg){
-        consoleDebug += msg;
+        consoleOutput += "CONSOLE DEBUG: "+ msg + "\n";
     },
     info(msg){
-        consoleInfo += msg;
+        consoleOutput += "CONSOLE INFO: "+ msg + "\n";
     }
 };
 
@@ -68,18 +59,7 @@ describe("patchConsoleObjectTests", function() {
     var global = {};
     beforeEach(function() {
         global = {};
-        consoleLog = "";
-        consoleDebug = "";
-        consoleError = "";
-        consoleWarn = "";
-        consoleLog = "";
-        consoleInfo = "";
-        dConsoleLog = "";
-        dConsoleDebug = "";
-        dConsoleError = "";
-        dConsoleWarn = "";
-        dConsoleLog = "";
-        dConsoleInfo = "";
+        consoleOutput = "";
     });
     it("case with empty console object", function() {
         patchConsoleObject(global, consoleObjectEmpty, consoleDebugger);
@@ -93,16 +73,8 @@ describe("patchConsoleObjectTests", function() {
     it("case where console object only has log method", function() {
         patchConsoleObject(global, consoleLogOnly, consoleDebugger);
         global.console.log("log test");
-        assert.strictEqual(dConsoleLog, "log test");
-        assert.strictEqual(dConsoleError, "");
-        assert.strictEqual(dConsoleWarn, "");
-        assert.strictEqual(dConsoleDebug, "");
-        assert.strictEqual(dConsoleInfo, "");
-        assert.strictEqual(consoleLog,"log test");
-        assert.strictEqual(consoleError, "");
-        assert.strictEqual(consoleWarn, "");
-        assert.strictEqual(consoleDebug, "");
-        assert.strictEqual(consoleInfo, "");
+        assert.strictEqual(consoleOutput.split("\n")[0], "CONSOLE LOG: log test");
+        assert.strictEqual(consoleOutput.split("\n")[1], "DEBUGGER LOG: log test");
     });
     it("case with compelete console object", function() {
         patchConsoleObject(global, consoleObjectCompelete, consoleDebugger);
@@ -111,15 +83,15 @@ describe("patchConsoleObjectTests", function() {
         global.console.warn("warn test");
         global.console.error("error test");
         global.console.debug("debug test");
-        assert.strictEqual(dConsoleLog, "log test");
-        assert.strictEqual(dConsoleError, "error test");
-        assert.strictEqual(dConsoleWarn, "warn test");
-        assert.strictEqual(dConsoleDebug, "debug test");
-        assert.strictEqual(dConsoleInfo, "info test");
-        assert.strictEqual(consoleLog,"log test");
-        assert.strictEqual(consoleError, "error test");
-        assert.strictEqual(consoleWarn, "warn test");
-        assert.strictEqual(consoleDebug, "debug test");
-        assert.strictEqual(consoleInfo, "info test");
+        assert.strictEqual(consoleOutput.split("\n")[0], "CONSOLE LOG: log test");
+        assert.strictEqual(consoleOutput.split("\n")[1], "DEBUGGER LOG: log test");
+        assert.strictEqual(consoleOutput.split("\n")[2], "CONSOLE INFO: info test");
+        assert.strictEqual(consoleOutput.split("\n")[3], "DEBUGGER INFO: info test");
+        assert.strictEqual(consoleOutput.split("\n")[4], "CONSOLE WARN: warn test");
+        assert.strictEqual(consoleOutput.split("\n")[5], "DEBUGGER WARN: warn test");
+        assert.strictEqual(consoleOutput.split("\n")[6], "CONSOLE ERROR: error test");
+        assert.strictEqual(consoleOutput.split("\n")[7], "DEBUGGER ERROR: error test");
+        assert.strictEqual(consoleOutput.split("\n")[8], "CONSOLE DEBUG: debug test");
+        assert.strictEqual(consoleOutput.split("\n")[9], "DEBUGGER DEBUG: debug test");
     });
 });
