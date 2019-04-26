@@ -77,7 +77,7 @@ describe("patchConsoleObjectTests", function() {
         assert.strictEqual(consoleOutput.split("\n")[0], "CONSOLE LOG: log test");
         assert.strictEqual(consoleOutput.split("\n")[1], "DEBUGGER LOG: log test");
     });
-    it("case with compelete console object", function() {
+    it("case with complete console object", function() {
         patchConsoleObject(global, consoleObjectCompelete, consoleDebugger);
         global.console.log("log test");
         global.console.info("info test");
