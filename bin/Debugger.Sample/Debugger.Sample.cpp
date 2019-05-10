@@ -106,6 +106,7 @@ public:
             L"  -?  --help                 Show this help info\n"
             L"      --inspect              Enable debugging\n"
             L"      --inspect-brk          Enable debugging and break\n"
+            L"      --no-console-redirect  Disable console redirection\n"
             L"  -p, --port <number>        Specify the port number\n"
             L"      --script <script>      Additional script to load\n"
             L"\n");
@@ -354,7 +355,7 @@ JsErrorCode DefineHostCallback(
 JsErrorCode RedirectConsoleToDebugger(DebugProtocolHandler *handler)
 {
     // Get global.console object. If that is not defined just return, otherwise get the debugger.console and patch with global.console object
-
+    fprintf(stdout, "saasa");
     JsValueRef globalObject = JS_INVALID_REFERENCE;
     IfFailRet(JsGetGlobalObject(&globalObject));
 
