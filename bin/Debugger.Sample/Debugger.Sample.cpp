@@ -339,7 +339,6 @@ JsErrorCode DefineHostCallback(
 JsErrorCode RedirectConsoleToDebugger(DebugProtocolHandler *handler)
 {
     // Get global.console object. If that is not defined just return, otherwise get the debugger.console and patch with global.console object
-    fprintf(stdout, "saasa");
     JsValueRef globalObject = JS_INVALID_REFERENCE;
     IfFailRet(JsGetGlobalObject(&globalObject));
 
