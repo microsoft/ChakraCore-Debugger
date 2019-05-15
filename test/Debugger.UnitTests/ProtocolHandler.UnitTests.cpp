@@ -359,7 +359,7 @@ TEST_CASE_METHOD(JsrtDebugTestFixture, "CreateConsoleObject without Runtime.enab
     REQUIRE(JsDebugProtocolHandlerProcessCommandQueue(this->GetProtocolHandler()) == JsNoError);
 }
 
-TEST_CASE_METHOD(JsrtDebugTestFixture, "CreateConsoleObject testing object visualisation")
+TEST_CASE_METHOD(JsrtDebugTestFixture, "CreateConsoleObject testing object visualization")
 {
     std::vector<std::string> expectedResponses
     {
