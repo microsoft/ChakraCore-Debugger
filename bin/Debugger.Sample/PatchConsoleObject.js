@@ -4,9 +4,9 @@ function patchConsoleObject$$1(global, console, debugConsole) {
         if (typeof console[fn] === "function") {
             (function(name) {
                 obj[name] = function(...rest) {
-                    console[name](rest);
+                    console[name](...rest);
                     if (name in debugConsole && typeof debugConsole[name] === "function") {
-                        debugConsole[name](rest);
+                        debugConsole[name](...rest);
                     }
                 }
             })(fn);

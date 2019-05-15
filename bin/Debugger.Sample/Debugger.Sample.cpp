@@ -375,25 +375,24 @@ JsErrorCode RedirectConsoleToDebugger(DebugProtocolHandler *handler)
     JsValueRef debuggerConsoleObject = JS_INVALID_REFERENCE;
     IfFailRet(handler->GetConsoleObject(&debuggerConsoleObject));
 
-    std::string script = "";
-
-    script = script + "function patchConsoleObject$$1(global, console, debugConsole) {\n";
-    script = script + "var obj = {};\n";
-    script = script + "for (var fn in console) {\n";
-    script = script + "if (typeof console[fn] === \"function\") {\n";
-    script = script + "(function(name) {\n";
-    script = script + "obj[name] = function(...rest) {\n";
-    script = script + "console[name](rest);\n";
-    script = script + "if (name in debugConsole && typeof debugConsole[name] === \"function\") {\n";
-    script = script + "debugConsole[name](rest);\n";
-    script = script + "}\n";
-    script = script + "}\n";
-    script = script + "})(fn);\n";
-    script = script + "}\n";
-    script = script + "}\n";
-    script = script + "global.console = obj;\n";
-    script = script + "}\n";
-    script = script + "patchConsoleObject$$1;\n";
+    const char* script = 
+    "function patchConsoleObject$$1(global, console, debugConsole) {\n"
+      "var obj = {};\n"
+      "for (var fn in console) {\n"
+        "if (typeof console[fn] === \"function\") {\n"
+          "(function(name) {\n"
+             "obj[name] = function(...rest) {\n"
+               "console[name](rest);\n"
+               "if (name in debugConsole && typeof debugConsole[name] === \"function\") {\n"
+                 "debugConsole[name](rest);\n"
+               "}\n"
+             "}\n"
+           "})(fn);\n"
+         "}\n"
+       "}\n"
+     "global.console = obj;\n"
+    "}\n"
+    "patchConsoleObject$$1;\n";
 
     JsValueRef patchFunction = JS_INVALID_REFERENCE;
 
@@ -401,7 +400,7 @@ JsErrorCode RedirectConsoleToDebugger(DebugProtocolHandler *handler)
     IfFailRet(JsCreateString("", 0, &scriptUrl));
 
     JsValueRef scriptContentValue = JS_INVALID_REFERENCE;
-    IfFailRet(JsCreateString(script.c_str(), script.length(), &scriptContentValue));
+    IfFailRet(JsCreateString(script, strlen(script), &scriptContentValue));
     IfFailRet(JsRun(scriptContentValue, JS_SOURCE_CONTEXT_NONE, scriptUrl, JsParseScriptAttributeLibraryCode, &patchFunction));
 
     JsValueRef args[4] = { undefinedValue, globalObject, consoleObject, debuggerConsoleObject };

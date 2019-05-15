@@ -2,6 +2,8 @@ var assert = require('assert');
 var patchConsoleObject = require("../../bin/Debugger.Sample/PatchConsoleObject.js")
 
 var consoleOutput = "";
+var consoleArgType = "";
+var debuggerArgType = "";
 
 var consoleDebugger = {
     log(msg){
@@ -55,6 +57,18 @@ var consoleObjectCompelete = {
     }
 };
 
+var consoleObjectTypeVerification = {
+    log(msg){
+        consoleArgType = typeof msg;
+    },
+}
+
+var consoleDebuggerTypeVerification = {
+    log(msg){
+        debuggerArgType = typeof msg;
+    },
+}
+
 describe("patchConsoleObjectTests", function() {
     var global = {};
     beforeEach(function() {
@@ -95,5 +109,17 @@ describe("patchConsoleObjectTests", function() {
         assert.strictEqual(consoleOutput.split("\n")[7], "DEBUGGER ERROR: error test");
         assert.strictEqual(consoleOutput.split("\n")[8], "CONSOLE DEBUG: debug test");
         assert.strictEqual(consoleOutput.split("\n")[9], "DEBUGGER DEBUG: debug test");
+    });
+    it("type verification case", function() {
+        patchConsoleObject(global, consoleObjectTypeVerification, consoleDebuggerTypeVerification);
+        global.console.log(1);
+        assert.strictEqual(consoleArgType, "number");
+        assert.strictEqual(debuggerArgType, "number");
+        global.console.log("");
+        assert.strictEqual(consoleArgType, "string");
+        assert.strictEqual(debuggerArgType, "string");
+        global.console.log({});
+        assert.strictEqual(consoleArgType, "object");
+        assert.strictEqual(debuggerArgType, "object");
     });
 });
