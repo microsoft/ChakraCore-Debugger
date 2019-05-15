@@ -291,6 +291,7 @@ namespace JsDebug
         return nullptr;
     }
 
+
     bool RuntimeImpl::GetTypeStringAndValue(JsValueRef object, JsValueRef *typeString, JsValueRef *value)
     {
         assert(typeString != nullptr);
@@ -298,6 +299,7 @@ namespace JsDebug
 
         JsValueRef type = GetTypeString(object);
         JsValueRef objectValue = object;
+
         if (type == nullptr)
         {
             const std::string stringLiteral("string");
@@ -313,6 +315,45 @@ namespace JsDebug
         *typeString = type;
         *value = objectValue;
         return true;
+    }
+
+    JsValueRef JsObjectToString(JsValueRef value, JsValueRef* error)
+    {
+        JsValueRef globalObject;
+        JsGetGlobalObject(&globalObject);
+
+        JsPropertyIdRef propertyId;
+        if (JsGetPropertyIdFromName(L"JSON", &propertyId) != JsNoError)
+        {
+            return nullptr;
+        }
+        JsValueRef jsonObject;
+        if (JsGetProperty(globalObject, propertyId, &jsonObject) != JsNoError)
+        {
+            return nullptr;
+        }
+
+        if (JsGetPropertyIdFromName(L"stringify", &propertyId) != JsNoError)
+        {
+            JsGetAndClearException(error);
+            return nullptr;
+        }
+        JsValueRef stringifyFunction;
+        if (JsGetProperty(jsonObject, propertyId, &stringifyFunction) != JsNoError)
+        {
+            JsGetAndClearException(error);
+            return nullptr;
+        }
+
+        JsValueRef returnValue;
+        JsValueRef args[2] = { jsonObject, value };
+        if (JsCallFunction(stringifyFunction, args, _countof(args), &returnValue) != JsNoError)
+        {
+            JsGetAndClearException(error);
+            return nullptr;
+        }
+
+        return returnValue;
     }
 
     void RuntimeImpl::consoleAPICalled(protocol::String type, JsValueRef *arguments, size_t argumentCount)
@@ -336,6 +377,13 @@ namespace JsDebug
 
                 if (GetTypeStringAndValue(arguments[i], &typeString, &objectValue))
                 {
+                    JsValueType valueType;
+                    JsGetValueType(objectValue, &valueType);
+                    if (valueType == JsValueType::JsObject) {
+                        JsValueRef error;
+                        objectValue = JsObjectToString(objectValue, &error);
+                    }
+
                     PropertyHelpers::SetProperty(remoteObject, PropertyHelpers::Names::Type, typeString);
                     PropertyHelpers::SetProperty(remoteObject, PropertyHelpers::Names::Value, objectValue);
 
