@@ -3,10 +3,10 @@ function patchConsoleObject$$1(global, console, debugConsole) {
     for (var fn in console) {
         if (typeof console[fn] === "function") {
             (function(name) {
-                obj[name] = function(...rest) {
-                    console[name](...rest);
+                obj[name] = function(...args) {
+                    console[name](...args);
                     if (name in debugConsole && typeof debugConsole[name] === "function") {
-                        debugConsole[name](...rest);
+                        debugConsole[name](...args);
                     }
                 }
             })(fn);
