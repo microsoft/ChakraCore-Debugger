@@ -316,7 +316,7 @@ namespace JsDebug
         return true;
     }
 
-    JsValueRef JsObjectToString(JsValueRef value, JsValueRef* error)
+    JsValueRef JsJSONStringfyObject(JsValueRef value, JsValueRef* error)
     {
         JsValueRef globalObject;
         JsValueRef stringfiedObject = nullptr;
@@ -373,7 +373,7 @@ namespace JsDebug
                     JsGetValueType(objectValue, &valueType);
                     if (valueType == JsValueType::JsObject) {
                         JsValueRef error;
-                        JsValueRef stringifiedObject = JsObjectToString(objectValue, &error);
+                        JsValueRef stringifiedObject = JsJSONStringfyObject(objectValue, &error);
                         if (stringifiedObject != nullptr) {
                             objectValue = stringifiedObject;
                         }
