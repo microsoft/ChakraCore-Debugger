@@ -291,7 +291,6 @@ namespace JsDebug
         return nullptr;
     }
 
-
     bool RuntimeImpl::GetTypeStringAndValue(JsValueRef object, JsValueRef *typeString, JsValueRef *value)
     {
         assert(typeString != nullptr);
@@ -320,40 +319,33 @@ namespace JsDebug
     JsValueRef JsObjectToString(JsValueRef value, JsValueRef* error)
     {
         JsValueRef globalObject;
-        JsGetGlobalObject(&globalObject);
-
-        JsPropertyIdRef propertyId;
-        if (JsGetPropertyIdFromName(L"JSON", &propertyId) != JsNoError)
+        JsValueRef stringfiedObject = nullptr;
+        if (JsGetGlobalObject(&globalObject) == JsNoError)
         {
-            return nullptr;
+            JsPropertyIdRef propertyId;
+            if (JsGetPropertyIdFromName(L"JSON", &propertyId) == JsNoError)
+            {
+                JsValueRef jsonObject;
+                if (JsGetProperty(globalObject, propertyId, &jsonObject) == JsNoError)
+                {
+                    if (JsGetPropertyIdFromName(L"stringify", &propertyId) == JsNoError)
+                    {
+                        JsValueRef stringifyFunction;
+                        if (JsGetProperty(jsonObject, propertyId, &stringifyFunction) == JsNoError)
+                        {
+                            JsValueRef args[2] = { jsonObject, value };
+                            JsValueRef returnValue;
+                            if (JsCallFunction(stringifyFunction, args, _countof(args), &returnValue) == JsNoError)
+                            {
+                                stringfiedObject = returnValue;
+                            }
+                        }
+                    }
+                }
+            }
         }
-        JsValueRef jsonObject;
-        if (JsGetProperty(globalObject, propertyId, &jsonObject) != JsNoError)
-        {
-            return nullptr;
-        }
-
-        if (JsGetPropertyIdFromName(L"stringify", &propertyId) != JsNoError)
-        {
-            JsGetAndClearException(error);
-            return nullptr;
-        }
-        JsValueRef stringifyFunction;
-        if (JsGetProperty(jsonObject, propertyId, &stringifyFunction) != JsNoError)
-        {
-            JsGetAndClearException(error);
-            return nullptr;
-        }
-
-        JsValueRef returnValue;
-        JsValueRef args[2] = { jsonObject, value };
-        if (JsCallFunction(stringifyFunction, args, _countof(args), &returnValue) != JsNoError)
-        {
-            JsGetAndClearException(error);
-            return nullptr;
-        }
-
-        return returnValue;
+        JsGetAndClearException(error);
+        return stringfiedObject;
     }
 
     void RuntimeImpl::consoleAPICalled(protocol::String type, JsValueRef *arguments, size_t argumentCount)
@@ -381,7 +373,10 @@ namespace JsDebug
                     JsGetValueType(objectValue, &valueType);
                     if (valueType == JsValueType::JsObject) {
                         JsValueRef error;
-                        objectValue = JsObjectToString(objectValue, &error);
+                        JsValueRef stringifiedObject = JsObjectToString(objectValue, &error);
+                        if (stringifiedObject != nullptr) {
+                            objectValue = stringifiedObject;
+                        }
                     }
 
                     PropertyHelpers::SetProperty(remoteObject, PropertyHelpers::Names::Type, typeString);
