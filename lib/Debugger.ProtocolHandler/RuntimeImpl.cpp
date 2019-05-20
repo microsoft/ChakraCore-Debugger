@@ -316,10 +316,10 @@ namespace JsDebug
         return true;
     }
 
-    JsValueRef JsJSONStringfyObject(JsValueRef value, JsValueRef* error)
+    JsValueRef JsObjectToJson(JsValueRef value, JsValueRef* error)
     {
         JsValueRef globalObject;
-        JsValueRef stringfiedObject = nullptr;
+        JsValueRef objectJson = nullptr;
         if (JsGetGlobalObject(&globalObject) == JsNoError)
         {
             JsPropertyIdRef propertyId;
@@ -337,7 +337,7 @@ namespace JsDebug
                             JsValueRef returnValue;
                             if (JsCallFunction(stringifyFunction, args, _countof(args), &returnValue) == JsNoError)
                             {
-                                stringfiedObject = returnValue;
+                                objectJson = returnValue;
                             }
                         }
                     }
@@ -345,7 +345,7 @@ namespace JsDebug
             }
         }
         JsGetAndClearException(error);
-        return stringfiedObject;
+        return objectJson;
     }
 
     void RuntimeImpl::consoleAPICalled(protocol::String type, JsValueRef *arguments, size_t argumentCount)
@@ -373,9 +373,9 @@ namespace JsDebug
                     JsGetValueType(objectValue, &valueType);
                     if (valueType == JsValueType::JsObject) {
                         JsValueRef error;
-                        JsValueRef stringifiedObject = JsJSONStringfyObject(objectValue, &error);
-                        if (stringifiedObject != nullptr) {
-                            objectValue = stringifiedObject;
+                        JsValueRef objectJson = JsObjectToJson(objectValue, &error);
+                        if (objectJson != nullptr) {
+                            objectValue = objectJson;
                         }
                     }
 
