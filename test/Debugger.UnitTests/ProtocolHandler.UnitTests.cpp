@@ -345,15 +345,59 @@ TEST_CASE_METHOD(JsrtDebugTestFixture, "CreateConsoleObject without Runtime.enab
     {
         "{\"id\":0,\"result\":{}}",
         "{\"method\":\"Debugger.scriptParsed\",\"params\":{\"scriptId\":\"2\",\"url\":\"test.js\",\"startLine\":0,\"startColumn\":0,\"endLine\":1,\"endColumn\":0,\"executionContextId\":0,\"hash\":\"\",\"isLiveEdit\":false,\"sourceMapURL\":\"\",\"hasSourceURL\":false}}",
-        "{\"method\":\"Runtime.consoleAPICalled\",\"params\":{\"type\":\"log\",\"args\":[{\"type\":\"string\",\"description\":\"this is log\"}],\"executionContextId\":1,\"timestamp\":1}}",
-        "{\"method\":\"Runtime.consoleAPICalled\",\"params\":{\"type\":\"error\",\"args\":[{\"type\":\"object\",\"description\":\"[object Object]\"}],\"executionContextId\":1,\"timestamp\":2}}"
+        "{\"method\":\"Runtime.consoleAPICalled\",\"params\":{\"type\":\"log\",\"args\":[{\"type\":\"string\",\"description\":\"this is log\"}],\"executionContextId\":1,\"timestamp\":1}}"
     };
 
     REQUIRE(JsDebugProtocolHandlerSendCommand(this->GetProtocolHandler(), "{\"id\":0,\"method\":\"Runtime.enable\"}") == JsNoError);
 
-    REQUIRE(this->RunScript("test1.js", "console.log('this is log'); console.error({});", &result) == JsNoError);
+    REQUIRE(this->RunScript("test1.js", "console.log('this is log');", &result) == JsNoError);
 
     ValidateResponses(expectedResponses1, actualResponses);
+
+    REQUIRE(JsDebugProtocolHandlerSetCommandQueueCallback(this->GetProtocolHandler(), nullptr, nullptr) == JsNoError);
+    REQUIRE(JsDebugProtocolHandlerDisconnect(this->GetProtocolHandler()) == JsNoError);
+    REQUIRE(JsDebugProtocolHandlerProcessCommandQueue(this->GetProtocolHandler()) == JsNoError);
+}
+
+TEST_CASE_METHOD(JsrtDebugTestFixture, "CreateConsoleObject testing object visualization")
+{
+    std::vector<std::string> expectedResponses
+    {
+        "{\"id\":0,\"result\":{}}",
+        "{\"id\":1,\"result\":{}}",
+        "{\"method\":\"Debugger.scriptParsed\",\"params\":{\"scriptId\":\"1\",\"url\":\"test.js\",\"startLine\":0,\"startColumn\":0,\"endLine\":1,\"endColumn\":0,\"executionContextId\":0,\"hash\":\"\",\"isLiveEdit\":false,\"sourceMapURL\":\"\",\"hasSourceURL\":false}}",
+        "{\"method\":\"Runtime.consoleAPICalled\",\"params\":{\"type\":\"log\",\"args\":[{\"type\":\"object\",\"description\":\"{\\\"key_one\\\":\\\"value_one\\\",\\\"key_two\\\":{\\\"key_three\\\":3},\\\"key_four\\\":null}\"}],\"executionContextId\":1,\"timestamp\":1}}"
+    };
+
+    std::vector<std::string> actualResponses;
+    auto sendResponseCallback = [](const char* response, void* callbackState)
+    {
+        auto responses = static_cast<std::vector<std::string>*>(callbackState);
+        responses->emplace_back(response);
+    };
+
+    REQUIRE(JsDebugProtocolHandlerConnect(this->GetProtocolHandler(), false, sendResponseCallback, &actualResponses) == JsNoError);
+
+    auto commandQueueCallback = [](void* callbackState)
+    {
+        auto fixture = static_cast<JsrtDebugTestFixture*>(callbackState);
+        JsDebugProtocolHandlerProcessCommandQueue(fixture->GetProtocolHandler());
+    };
+
+    // Parameter validation
+    REQUIRE(JsDebugProtocolHandlerSetCommandQueueCallback(nullptr, commandQueueCallback, nullptr) == JsErrorInvalidArgument);
+    REQUIRE(JsDebugProtocolHandlerSetCommandQueueCallback(this->GetProtocolHandler(), nullptr, this) == JsErrorInvalidArgument);
+
+    REQUIRE(JsDebugProtocolHandlerSetCommandQueueCallback(this->GetProtocolHandler(), commandQueueCallback, this) == JsNoError);
+
+    REQUIRE(JsDebugProtocolHandlerSendCommand(this->GetProtocolHandler(), "{\"id\":0,\"method\":\"Debugger.enable\"}") == JsNoError);
+    REQUIRE(JsDebugProtocolHandlerSendCommand(this->GetProtocolHandler(), "{\"id\":1,\"method\":\"Runtime.enable\"}") == JsNoError);
+    this->AddConsoleObject();
+
+    JsValueRef result = JS_INVALID_REFERENCE;
+    REQUIRE(this->RunScript("test.js", "var obj = { key_one : \"value_one\", key_two : { key_three : 3 }, key_four : NaN }; console.log(obj);", &result) == JsNoError);
+
+    ValidateResponses(expectedResponses, actualResponses);
 
     REQUIRE(JsDebugProtocolHandlerSetCommandQueueCallback(this->GetProtocolHandler(), nullptr, nullptr) == JsNoError);
     REQUIRE(JsDebugProtocolHandlerDisconnect(this->GetProtocolHandler()) == JsNoError);
