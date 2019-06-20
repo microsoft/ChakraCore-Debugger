@@ -1,3 +1,0 @@
-DIRS = \
-    Generated \
-    win32{!droidarm,!droidx86} \
