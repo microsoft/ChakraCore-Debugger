@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  Sample usage:
+  nuget.exe pack Microsoft.ChakraCore.Debugger.nuspec -Properties "id=some_id" -Version "some_version"
+-->
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
-    <id>Microsoft.ChakraCore.Debugger</id>
+    <id>$id$</id>
     <version>$version$</version>
     <description>Debugging companion library for the ChakraCore JavaScript engine.</description>
     <authors>Microsoft</authors>
     <projectUrl>https://github.com/Microsoft/ChakraCore-Debugger</projectUrl>
     <licenseUrl>https://github.com/Microsoft/ChakraCore-Debugger/blob/master/LICENSE</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <copyright>Copyright © 2018 Microsoft</copyright>
+    <copyright>Copyright © 2019 Microsoft</copyright>
   </metadata>
 
   <files>
@@ -22,6 +27,6 @@
     <file src="..\build\bin\ARM\Debug\*" target="lib\ARM\Debug" exclude="**\*.ilk;**\*ChakraCore.dll;**\*ChakraCore.pdb" />
     <file src="..\build\bin\ARM\Release\*" target="lib\ARM\Release" exclude="**\*.ilk;**\*ChakraCore.dll;**\*ChakraCore.pdb" />
 
-    <file src="Microsoft.ChakraCore.Debugger.targets" target="build\native\" />
+    <file src="Microsoft.ChakraCore.Debugger.targets" target="build\native\$id$.targets" />
   </files>
 </package>
