@@ -10,8 +10,8 @@
     <version>$version$</version>
     <description>Debugging companion library for the ChakraCore JavaScript engine.</description>
     <authors>Microsoft</authors>
-    <projectUrl>https://github.com/Microsoft/ChakraCore-Debugger</projectUrl>
-    <licenseUrl>https://github.com/Microsoft/ChakraCore-Debugger/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/microsoft/ChakraCore-Debugger</projectUrl>
+    <licenseUrl>https://github.com/microsoft/ChakraCore-Debugger/blob/master/LICENSE</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <copyright>Copyright © 2019 Microsoft</copyright>
   </metadata>
@@ -22,8 +22,8 @@
 
     <file src="..\build\bin\x64\Debug\*" target="lib\x64\Debug" exclude="**\*.ilk;**\*ChakraCore.dll;**\*ChakraCore.pdb" />
     <file src="..\build\bin\x64\Release\*" target="lib\x64\Release" exclude="**\*.ilk;**\*ChakraCore.dll;**\*ChakraCore.pdb" />
-    <file src="..\build\bin\Win32\Debug\*" target="lib\x86\Debug" exclude="**\*.ilk;**\*ChakraCore.dll;**\*ChakraCore.pdb" />
-    <file src="..\build\bin\Win32\Release\*" target="lib\x86\Release" exclude="**\*.ilk;**\*ChakraCore.dll;**\*ChakraCore.pdb" />
+    <file src="..\build\bin\x86\Debug\*" target="lib\x86\Debug" exclude="**\*.ilk;**\*ChakraCore.dll;**\*ChakraCore.pdb" />
+    <file src="..\build\bin\x86\Release\*" target="lib\x86\Release" exclude="**\*.ilk;**\*ChakraCore.dll;**\*ChakraCore.pdb" />
     <file src="..\build\bin\ARM\Debug\*" target="lib\ARM\Debug" exclude="**\*.ilk;**\*ChakraCore.dll;**\*ChakraCore.pdb" />
     <file src="..\build\bin\ARM\Release\*" target="lib\ARM\Release" exclude="**\*.ilk;**\*ChakraCore.dll;**\*ChakraCore.pdb" />
 
