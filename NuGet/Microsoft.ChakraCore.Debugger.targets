@@ -13,7 +13,12 @@
       <AdditionalLibraryDirectories Condition="'$(Platform)' == 'Win32'">
         $(MSBuildThisFileDirectory)..\..\lib\x86\$(Configuration);%(AdditionalLibraryDirectories)
       </AdditionalLibraryDirectories>
-      <AdditionalDependencies>ChakraCore.Debugger.Protocol.lib;ChakraCore.Debugger.ProtocolHandler.lib;ChakraCore.Debugger.Service.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>
+        ChakraCore.Debugger.Protocol.lib;
+        ChakraCore.Debugger.ProtocolHandler.lib;
+        ChakraCore.Debugger.Service.lib;
+        %(AdditionalDependencies)
+      </AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
 

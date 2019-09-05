@@ -4,7 +4,20 @@
     <WindowsSDKDesktopARMSupport Condition="'$(Platform)'=='ARM'">true</WindowsSDKDesktopARMSupport>
     <ChakraCoreDebuggerDir>$(MSBuildThisFileDirectory)</ChakraCoreDebuggerDir>
     <ChakraCoreDebuggerDepsDir>$(MSBuildThisFileDirectory)deps\</ChakraCoreDebuggerDepsDir>
-    <OutDir>$(MSBuildThisFileDirectory)build\bin\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>$(MSBuildThisFileDirectory)build\obj\$(Platform)\$(Configuration)\$(MSBuildProjectName)\</IntDir>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Configuration">
+    <ProjectName Condition="'$(ProjectName)'==''">$(MSBuildProjectName)</ProjectName>
+
+    <!-- Visual Studio forces using 'Win32' for the 'x86' platform. -->
+    <BaseIntDir Condition="'$(Platform)' != 'Win32'">$(MSBuildThisFileDirectory)build\obj\$(Platform)\$(Configuration)</BaseIntDir>
+    <BaseIntDir Condition="'$(Platform)' == 'Win32'">$(MSBuildThisFileDirectory)build\obj\x86\$(Configuration)</BaseIntDir>
+    <BaseOutDir Condition="'$(Platform)' != 'Win32'">$(MSBuildThisFileDirectory)build\bin\$(Platform)\$(Configuration)</BaseOutDir>
+    <BaseOutDir Condition="'$(Platform)' == 'Win32'">$(MSBuildThisFileDirectory)build\bin\x86\$(Configuration)</BaseOutDir>
+
+    <IntDir>$(BaseIntDir)\$(ProjectName)\</IntDir>
+    <OutDir>$(BaseOutDir)\</OutDir>
+
+    <GeneratedFilesDir>$(IntDir)Generated Files\</GeneratedFilesDir>
   </PropertyGroup>
 </Project>
