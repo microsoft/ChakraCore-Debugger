@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+
+  <!-- For build debugging purposes. -->
+  <Target Name="Vars">
+    <Message Text="General" />
+    <Message Text="=> ApplicationType         [$(ApplicationType)]" />
+    <Message Text="=> Configuration           [$(Configuration)]" />
+    <Message Text="=> Platform                [$(Platform)]" />
+    <Message Text="=> PlatformTarget          [$(PlatformTarget)]" />
+    <Message Text="=> PlatformName            [$(PlatformName)]" />
+    <Message Text="=> DefaultPlatformToolset  [$(DefaultPlatformToolset)]" />
+    <Message Text="=> BaseIntDir              [$(BaseIntDir)]" />
+    <Message Text="=> BaseOutDir              [$(BaseOutDir)]" />
+    <Message Text="=> IntDir                  [$(IntDir)]" />
+    <Message Text="=> OutDir                  [$(OutDir)]" />
+    <Message Text="=> TargetDir               [$(TargetDir)]" />
+    <Message Text="=> TargetPath              [$(TargetPath)]" />
+    <Message Text="=> TLogLocation            [$(TLogLocation)]" />
+    <Message Text="=> LastBuildUnsuccessful   [$(LastBuildUnsuccessful)]" />
+    <Message Text="=> LastBuildState          [$(LastBuildState)]" />
+    <Message Text="=> GeneratedFilesDir       [$(GeneratedFilesDir)]" />
+
+    <Message Text="%0A" />
+    <Message Text="=> UnmergedWinmdDirectory  [$(UnmergedWinmdDirectory)]" />
+    <Message Text="=> MergedWinmdDirectory    [$(MergedWinmdDirectory)]" />
+    <Message Text="=> ProjectHome             [$(ProjectHome)]" />
+    <Message Text="=> UserRootDir             [$(UserRootDir)]" />
+    <Message Text="=> MSBuildExtensionsPath   [$(MSBuildExtensionsPath)]" />
+    <Message Text="=> MSBuildExtensionsPath32 [$(MSBuildExtensionsPath32)]" />
+    <Message Text="=> MSBuildExtensionsPath64 [$(MSBuildExtensionsPath64)]" />
+    <Message Text="=> VCTargetsPath           [$(VCTargetsPath)]" />
+  </Target>
+
+</Project>
