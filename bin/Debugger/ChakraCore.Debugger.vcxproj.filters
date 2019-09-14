@@ -10,4 +10,8 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="ChakraCore.Debugger.def" />
+  </ItemGroup>
 </Project>
