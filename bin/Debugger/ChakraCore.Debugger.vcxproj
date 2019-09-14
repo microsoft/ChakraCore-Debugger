@@ -46,7 +46,6 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <TargetName>ChakraCore.Debug</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
