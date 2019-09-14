@@ -1,25 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-
-  <PropertyGroup>
-    <IncludePath>$(MSBuildThisFileDirectory)..\..\include;$(IncludePath)</IncludePath>
-  </PropertyGroup>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <Link>
       <AdditionalLibraryDirectories Condition="'$(Platform)' != 'Win32'">
-        $(MSBuildThisFileDirectory)..\..\lib\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)
+        $(MSBuildThisFileDirectory)..\..\lib\native\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)
       </AdditionalLibraryDirectories>
       <AdditionalLibraryDirectories Condition="'$(Platform)' == 'Win32'">
-        $(MSBuildThisFileDirectory)..\..\lib\x86\$(Configuration);%(AdditionalLibraryDirectories)
+        $(MSBuildThisFileDirectory)..\..\lib\native\x86\$(Configuration);%(AdditionalLibraryDirectories)
       </AdditionalLibraryDirectories>
       <AdditionalDependencies>
-        ChakraCore.Debugger.Protocol.lib;
-        ChakraCore.Debugger.ProtocolHandler.lib;
-        ChakraCore.Debugger.Service.lib;
+        ChakraCore.Debugger.lib;
         %(AdditionalDependencies)
       </AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
+
+  <ItemGroup Condition="'$(Platform)' != 'Win32'">
+    <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)..\..\lib\native\$(Platform)\$(Configuration)\ChakraCore.Debugger.dll" />
+    <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)..\..\lib\native\$(Platform)\$(Configuration)\ChakraCore.Debugger.pdb" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Platform)' == 'Win32'">
+    <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)..\..\lib\native\x86\$(Configuration)\ChakraCore.Debugger.dll" />
+    <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)..\..\lib\native\x86\$(Configuration)\ChakraCore.Debugger.pdb" />
+  </ItemGroup>
 
 </Project>

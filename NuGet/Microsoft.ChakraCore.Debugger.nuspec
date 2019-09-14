@@ -17,15 +17,15 @@
   </metadata>
 
   <files>
-    <file src="..\lib\Debugger.Service\ChakraDebugService.h" target="include" />
-    <file src="..\lib\Debugger.ProtocolHandler\ChakraDebugProtocolHandler.h" target="include" />
+    <file src="..\lib\Debugger.Service\ChakraDebugService.h" target="build\native\include" />
+    <file src="..\lib\Debugger.ProtocolHandler\ChakraDebugProtocolHandler.h" target="build\native\include" />
 
-    <file src="..\build\bin\x64\Debug\*" target="lib\x64\Debug" exclude="**\*.ilk;**\*ChakraCore.dll;**\*ChakraCore.pdb" />
-    <file src="..\build\bin\x64\Release\*" target="lib\x64\Release" exclude="**\*.ilk;**\*ChakraCore.dll;**\*ChakraCore.pdb" />
-    <file src="..\build\bin\x86\Debug\*" target="lib\x86\Debug" exclude="**\*.ilk;**\*ChakraCore.dll;**\*ChakraCore.pdb" />
-    <file src="..\build\bin\x86\Release\*" target="lib\x86\Release" exclude="**\*.ilk;**\*ChakraCore.dll;**\*ChakraCore.pdb" />
-    <file src="..\build\bin\ARM\Debug\*" target="lib\ARM\Debug" exclude="**\*.ilk;**\*ChakraCore.dll;**\*ChakraCore.pdb" />
-    <file src="..\build\bin\ARM\Release\*" target="lib\ARM\Release" exclude="**\*.ilk;**\*ChakraCore.dll;**\*ChakraCore.pdb" />
+    <file src="..\build\bin\x64\Debug\ChakraCore.Debugger.???" target="lib\native\x64\Debug" exclude="**\*.ilk;**\*.exp" />
+    <file src="..\build\bin\x64\Release\ChakraCore.Debugger.???" target="lib\native\x64\Release" exclude="**\*.ilk;**\*.exp" />
+    <file src="..\build\bin\x86\Debug\ChakraCore.Debugger.???" target="lib\native\x86\Debug" exclude="**\*.ilk;**\*.exp" />
+    <file src="..\build\bin\x86\Release\ChakraCore.Debugger.???" target="lib\native\x86\Release" exclude="**\*.ilk;**\*.exp" />
+    <file src="..\build\bin\ARM\Debug\ChakraCore.Debugger.???" target="lib\native\ARM\Debug" exclude="**\*.ilk;**\*.exp" />
+    <file src="..\build\bin\ARM\Release\ChakraCore.Debugger.???" target="lib\native\ARM\Release" exclude="**\*.ilk;**\*.exp" />
 
     <file src="Microsoft.ChakraCore.Debugger.targets" target="build\native\$id$.targets" />
   </files>
