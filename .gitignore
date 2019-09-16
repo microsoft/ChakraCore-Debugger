@@ -17,6 +17,10 @@
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
+arm/
+ARM/
+arm64/
+ARM64/
 x64/
 x86/
 bld/
