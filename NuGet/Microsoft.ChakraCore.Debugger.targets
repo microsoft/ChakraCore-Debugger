@@ -10,7 +10,7 @@
       <AdditionalLibraryDirectories Condition="'$(Platform)' != 'Win32'">
         $(MSBuildThisFileDirectory)..\..\lib\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)
       </AdditionalLibraryDirectories>
-      <AdditionalLibraryDirectories Condition="'$(Platform)' == 'Win32'">
+      <AdditionalLibraryDirectories Condition="'$(Platform)' == 'Win32' OR '$(Platform)' == 'ARM64'">
         $(MSBuildThisFileDirectory)..\..\lib\x86\$(Configuration);%(AdditionalLibraryDirectories)
       </AdditionalLibraryDirectories>
       <AdditionalDependencies>
