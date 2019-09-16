@@ -6,11 +6,8 @@
       <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories Condition="'$(Platform)' != 'Win32'">
-        $(MSBuildThisFileDirectory)..\..\lib\native\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)
-      </AdditionalLibraryDirectories>
-      <AdditionalLibraryDirectories Condition="'$(Platform)' == 'Win32'">
-        $(MSBuildThisFileDirectory)..\..\lib\native\x86\$(Configuration);%(AdditionalLibraryDirectories)
+      <AdditionalLibraryDirectories>
+        $(MSBuildThisFileDirectory)..\..\lib\native\$(PlatformTarget)\$(Configuration);%(AdditionalLibraryDirectories)
       </AdditionalLibraryDirectories>
       <AdditionalDependencies>
         ChakraCore.Debugger.lib;
@@ -19,13 +16,9 @@
     </Link>
   </ItemDefinitionGroup>
 
-  <ItemGroup Condition="'$(Platform)' != 'Win32'">
-    <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)..\..\lib\native\$(Platform)\$(Configuration)\ChakraCore.Debugger.dll" />
-    <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)..\..\lib\native\$(Platform)\$(Configuration)\ChakraCore.Debugger.pdb" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(Platform)' == 'Win32'">
-    <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)..\..\lib\native\x86\$(Configuration)\ChakraCore.Debugger.dll" />
-    <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)..\..\lib\native\x86\$(Configuration)\ChakraCore.Debugger.pdb" />
+  <ItemGroup>
+    <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)..\..\lib\native\$(PlatformTarget)\$(Configuration)\ChakraCore.Debugger.dll" />
+    <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)..\..\lib\native\$(PlatformTarget)\$(Configuration)\ChakraCore.Debugger.pdb" />
   </ItemGroup>
 
 </Project>
