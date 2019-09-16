@@ -1,0 +1,20 @@
+EXPORTS
+
+; Protocol Handler
+JsDebugProtocolHandlerConnect
+JsDebugProtocolHandlerCreate
+JsDebugProtocolHandlerCreateConsoleObject
+JsDebugProtocolHandlerDestroy
+JsDebugProtocolHandlerDisconnect
+JsDebugProtocolHandlerProcessCommandQueue
+JsDebugProtocolHandlerSendCommand
+JsDebugProtocolHandlerSetCommandQueueCallback
+JsDebugProtocolHandlerWaitForDebugger
+
+; Service
+JsDebugServiceClose
+JsDebugServiceCreate
+JsDebugServiceDestroy
+JsDebugServiceListen
+JsDebugServiceRegisterHandler
+JsDebugServiceUnregisterHandler
