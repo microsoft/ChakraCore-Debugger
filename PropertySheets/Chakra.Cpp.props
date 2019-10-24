@@ -35,7 +35,7 @@
       <CallingConvention Condition="'$(CallingConvention)' != ''">$(CallingConvention)</CallingConvention>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
 
