@@ -11,12 +11,15 @@
     <description>Debugging companion library for the ChakraCore JavaScript engine.</description>
     <authors>Microsoft</authors>
     <projectUrl>https://github.com/microsoft/ChakraCore-Debugger</projectUrl>
-    <licenseUrl>https://github.com/microsoft/ChakraCore-Debugger/blob/master/LICENSE</licenseUrl>
+    <repository type="git" url="$repoUrl$" branch="$repoBranch$" commit="$repoCommit$" />
+    <license type="file">LICENSE</license>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <copyright>Copyright © 2019 Microsoft</copyright>
   </metadata>
 
   <files>
+    <file src="..\LICENSE" target="" />
+
     <file src="..\lib\Debugger.Service\ChakraDebugService.h" target="build\native\include" />
     <file src="..\lib\Debugger.ProtocolHandler\ChakraDebugProtocolHandler.h" target="build\native\include" />
 
@@ -26,6 +29,8 @@
     <file src="..\build\bin\x86\Release\ChakraCore.Debugger.???" target="lib\native\x86\Release" exclude="**\*.ilk;**\*.exp" />
     <file src="..\build\bin\ARM\Debug\ChakraCore.Debugger.???" target="lib\native\ARM\Debug" exclude="**\*.ilk;**\*.exp" />
     <file src="..\build\bin\ARM\Release\ChakraCore.Debugger.???" target="lib\native\ARM\Release" exclude="**\*.ilk;**\*.exp" />
+    <file src="..\build\bin\ARM64\Debug\ChakraCore.Debugger.???" target="lib\native\ARM64\Debug" exclude="**\*.ilk;**\*.exp" />
+    <file src="..\build\bin\ARM64\Release\ChakraCore.Debugger.???" target="lib\native\ARM64\Release" exclude="**\*.ilk;**\*.exp" />
 
     <file src="Microsoft.ChakraCore.Debugger.targets" target="build\native\$id$.targets" />
   </files>
