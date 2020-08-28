@@ -15,16 +15,16 @@
     <authors>Microsoft</authors>
     <projectUrl>https://github.com/microsoft/ChakraCore-Debugger</projectUrl>
     <repository type="git" url="$repoUrl$" branch="$repoBranch$" commit="$repoCommit$" />
-    <!-- <license type="file">LICENSE</license> -->
+    <license type="file">LICENSE.txt</license>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <copyright>Copyright © 2019 Microsoft</copyright>
+    <copyright>Copyright &#169; 2019 Microsoft</copyright>
     <dependencies>
       <group targetFramework="native" />
     </dependencies>
   </metadata>
 
   <files>
-    <!-- <file src="..\LICENSE" target="" /> -->
+    <file src="..\LICENSE.txt" target="" />
 
     <file src="..\lib\Debugger.Service\ChakraDebugService.h" target="build\native\include" />
     <file src="..\lib\Debugger.ProtocolHandler\ChakraDebugProtocolHandler.h" target="build\native\include" />
