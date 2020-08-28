@@ -98,7 +98,7 @@
     <Import Project="..\..\packages\boost.1.68.0.0\build\boost.targets" Condition="Exists('..\..\packages\boost.1.68.0.0\build\boost.targets')" />
     <Import Project="..\..\packages\boost_date_time-vc141.1.68.0.0\build\boost_date_time-vc141.targets" Condition="Exists('..\..\packages\boost_date_time-vc141.1.68.0.0\build\boost_date_time-vc141.targets')" />
     <Import Project="..\..\packages\Microsoft.ChakraCore.vc140.1.11.20\build\native\Microsoft.ChakraCore.vc140.targets" Condition="Exists('..\..\packages\Microsoft.ChakraCore.vc140.1.11.20\build\native\Microsoft.ChakraCore.vc140.targets')" />
-    <Import Project="..\..\packages\ReactWindows.ChakraCore.ARM64.1.11.20-dev1\build\native\ReactWindows.ChakraCore.ARM64.targets" Condition="'$(Platform)' == 'ARM64' AND Exists('..\..\packages\ReactWindows.ChakraCore.ARM64.1.11.20-dev1\build\native\ReactWindows.ChakraCore.ARM64.targets')" />
+    <Import Project="..\..\packages\ReactWindows.ChakraCore.ARM64.1.11.20\build\native\ReactWindows.ChakraCore.ARM64.targets" Condition="'$(Platform)' == 'ARM64' AND Exists('..\..\packages\ReactWindows.ChakraCore.ARM64.1.11.20\build\native\ReactWindows.ChakraCore.ARM64.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -107,6 +107,6 @@
     <Error Condition="!Exists('..\..\packages\boost.1.68.0.0\build\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\boost.1.68.0.0\build\boost.targets'))" />
     <Error Condition="!Exists('..\..\packages\boost_date_time-vc141.1.68.0.0\build\boost_date_time-vc141.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\boost_date_time-vc141.1.68.0.0\build\boost_date_time-vc141.targets'))" />
     <Error Condition="!Exists('..\..\packages\Microsoft.ChakraCore.vc140.1.11.20\build\native\Microsoft.ChakraCore.vc140.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.ChakraCore.vc140.1.11.20\build\native\Microsoft.ChakraCore.vc140.targets'))" />
-    <Error Condition="'$(Platform)' == 'ARM64' AND !Exists('..\..\packages\ReactWindows.ChakraCore.ARM64.1.11.20-dev1\build\native\ReactWindows.ChakraCore.ARM64.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\ReactWindows.ChakraCore.ARM64.1.11.20-dev1\build\native\ReactWindows.ChakraCore.ARM64.targets'))" />
+    <Error Condition="'$(Platform)' == 'ARM64' AND !Exists('..\..\packages\ReactWindows.ChakraCore.ARM64.1.11.20\build\native\ReactWindows.ChakraCore.ARM64.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\ReactWindows.ChakraCore.ARM64.1.11.20\build\native\ReactWindows.ChakraCore.ARM64.targets'))" />
   </Target>
 </Project>
