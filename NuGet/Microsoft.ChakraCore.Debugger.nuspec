@@ -2,7 +2,10 @@
 
 <!--
   Sample usage:
-  nuget.exe pack Microsoft.ChakraCore.Debugger.nuspec -Properties "id=some_id" -Version "some_version"
+
+  nuget.exe pack Microsoft.ChakraCore.Debugger.nuspec `
+    -Properties "id=ChakraCore.Debugger;repoUrl=https://github.com/microsoft/ChakraCore;repoBranch=master;repoCommit=$(git rev-parse HEAD)" `
+    -Version 1.2.3.4
 -->
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
@@ -12,7 +15,7 @@
     <authors>Microsoft</authors>
     <projectUrl>https://github.com/microsoft/ChakraCore-Debugger</projectUrl>
     <repository type="git" url="$repoUrl$" branch="$repoBranch$" commit="$repoCommit$" />
-    <license type="file">LICENSE</license>
+    <!-- <license type="file">LICENSE</license> -->
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <copyright>Copyright © 2019 Microsoft</copyright>
     <dependencies>
@@ -21,7 +24,7 @@
   </metadata>
 
   <files>
-    <file src="..\LICENSE" target="" />
+    <!-- <file src="..\LICENSE" target="" /> -->
 
     <file src="..\lib\Debugger.Service\ChakraDebugService.h" target="build\native\include" />
     <file src="..\lib\Debugger.ProtocolHandler\ChakraDebugProtocolHandler.h" target="build\native\include" />
