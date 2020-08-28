@@ -2,7 +2,10 @@
 
 <!--
   Sample usage:
-  nuget.exe pack Microsoft.ChakraCore.Debugger.nuspec -Properties "id=some_id" -Version "some_version"
+
+  nuget.exe pack Microsoft.ChakraCore.Debugger.nuspec `
+    -Properties "id=ChakraCore.Debugger;repoUrl=https://github.com/microsoft/ChakraCore;repoBranch=master;repoCommit=$(git rev-parse HEAD)" `
+    -Version 1.2.3.4
 -->
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
@@ -11,12 +14,18 @@
     <description>Debugging companion library for the ChakraCore JavaScript engine.</description>
     <authors>Microsoft</authors>
     <projectUrl>https://github.com/microsoft/ChakraCore-Debugger</projectUrl>
-    <licenseUrl>https://github.com/microsoft/ChakraCore-Debugger/blob/master/LICENSE</licenseUrl>
+    <repository type="git" url="$repoUrl$" branch="$repoBranch$" commit="$repoCommit$" />
+    <license type="file">LICENSE.txt</license>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <copyright>Copyright © 2019 Microsoft</copyright>
+    <copyright>Copyright &#169; 2019 Microsoft</copyright>
+    <dependencies>
+      <group targetFramework="native" />
+    </dependencies>
   </metadata>
 
   <files>
+    <file src="..\LICENSE.txt" target="" />
+
     <file src="..\lib\Debugger.Service\ChakraDebugService.h" target="build\native\include" />
     <file src="..\lib\Debugger.ProtocolHandler\ChakraDebugProtocolHandler.h" target="build\native\include" />
 
@@ -26,6 +35,8 @@
     <file src="..\build\bin\x86\Release\ChakraCore.Debugger.???" target="lib\native\x86\Release" exclude="**\*.ilk;**\*.exp" />
     <file src="..\build\bin\ARM\Debug\ChakraCore.Debugger.???" target="lib\native\ARM\Debug" exclude="**\*.ilk;**\*.exp" />
     <file src="..\build\bin\ARM\Release\ChakraCore.Debugger.???" target="lib\native\ARM\Release" exclude="**\*.ilk;**\*.exp" />
+    <file src="..\build\bin\ARM64\Debug\ChakraCore.Debugger.???" target="lib\native\ARM64\Debug" exclude="**\*.ilk;**\*.exp" />
+    <file src="..\build\bin\ARM64\Release\ChakraCore.Debugger.???" target="lib\native\ARM64\Release" exclude="**\*.ilk;**\*.exp" />
 
     <file src="Microsoft.ChakraCore.Debugger.targets" target="build\native\$id$.targets" />
   </files>
